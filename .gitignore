@@ -1,0 +1,253 @@
+# .NET
+## Binaries
+bin/
+obj/
+
+## User-specific files
+*.user
+*.suo
+
+## IDE
+.vscode/
+.vs/
+
+## NuGet
+packages/
+*.nupkg
+
+## Logs
+*.log
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Environment files
+.env
+.env.local
+.env.*.local
+
+## Temporary files
+*.tmp
+*.temp
+
+## Rider
+.idea/
+
+## ReSharper
+_ReSharper*
+
+## Visual Studio Code
+.vscode/
+
+## Windows
+[Tt]humbs.db
+*.stackdump
+
+## macOS
+.DS_Store
+Icon
+
+## Linux
+*~
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+## NuGet
+.nuget/
+
+## JetBrains Rider
+.idea/
+
+## Visual Studio
+*.swp
+*.swo
+*~
+
+## Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+## NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+## MightyMoose
+*.mm.*
+AutoTest.Net/
+
+## Web workbench
+.sass-cache/
+
+## Installshield output folder
+[Ee]xpress/
+
+## DocProject is a documentation generator add-in
+DocProject/buildhelp/
+DocProject/Help/*.HxT
+DocProject/Help/*.HxC
+DocProject/Help/*.hhc
+DocProject/Help/*.hhk
+DocProject/Help/*.hhp
+DocProject/Help/*.HtmlHelp
+DocProject/Help/*.hh
+DocProject/Help/*.ewp
+DocProject/Help/*.hxf
+
+## Click-Once directory
+publish/
+
+## Publish Web Output
+*.[Pp]ublish.xml
+*.azurePubxml
+## TODO: Comment the next line if you want to checkin your web deploy settings
+*.pubxml
+*.publishproj
+
+## Microsoft Azure Web App publish settings. Comment the next line if you want to checkin your Azure Web App publish settings
+*.PublishSettings
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+
+## Microsoft Azure Emulator
+ecf/
+rcf/
+
+## Windows Store app package directories and files
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+
+## Visual Studio cache files
+# files ending in .cache can be ignored
+*.cache
+# but keep track of directories ending in .cache
+!*cache*/
+
+## Others
+ClientBin/
+~$*
+*~
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+*.sln.docstates
+*.tlog
+*.vsidx
+*.vspscc
+*.vssscc
+*.suo
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+## Visual Studio Code
+.vscode/*
+
+## Local History for Visual Studio Code
+.history/
+
+## Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+## JetBrains Rider
+.idea/
+
+## ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## TeamCity is a build add-in
+_TeamCity*
+
+## DotCover is a Code Coverage Tool
+*.dotCover
+
+## AxoCover is a Code Coverage Tool
+.axoCover/*
+!.axoCover/settings.json
+
+## Visual Studio code coverage results
+*.coverage
+*.coveragexml
+
+## NDepend
+NDependOut/
+
+## StyleCop
+StyleCopReport.xml
+
+## OpenCover UI analysis results
+OpenCover/
+
+## Azure Stream Analytics local run output
+ASALocalRun/
+
+## MSBuild Binary and Structured Log
+*.binlog
+
+## NVidia Nsight GPU debugger configuration file
+*.nvuser
+
+## MFractors (Xamarin productivity tool) working folder
+.iOS/
+
+## Local History for Visual Studio
+.localhistory/
+
+## Visual Studio 2015/2017/2019
+.vs/
+
+## Temporary folders
+tmp/
+temp/
+
+## WebStorm
+.idea/
+
+## Rider
+.idea/
+
+## VS Code
+.vscode/
+
+## OS
+Thumbs.db
+.DS_Store
+
+## Project specific
+# Add any project-specific ignores here
