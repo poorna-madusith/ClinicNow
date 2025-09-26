@@ -1,5 +1,5 @@
 
-namespace ClinicNow.DTOs;
+namespace backend.DTOs;
 
 using System.ComponentModel.DataAnnotations;
 

@@ -3,11 +3,10 @@ using System.Security.Claims;
 using System.Text;
 using backend.DTOs;
 using backend.Models;
-using ClinicNow.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ClinicNow.Services;
+namespace backend.Services;
 
 
 public class AuthService
@@ -46,7 +45,7 @@ public class AuthService
     }
 
 
-    public async Task<String> Login(UserLoginDto loginnDto)
+    public async Task<string> Login(UserLoginDto loginnDto)
     {
         var user = await _userManager.FindByEmailAsync(loginnDto.Email);
         if (user == null)
@@ -58,28 +57,30 @@ public class AuthService
         {
             throw new Exception("Invalid password");
         }
-        
+
         return GenerateJwtToken(user);
     }
 
     private string GenerateJwtToken(ApplicationUser user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var keyString = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
 
         var claims = new[] {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? throw new InvalidOperationException("User email is null")),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
 
+        var durationString = _config["Jwt:DurationInMinutes"] ?? throw new InvalidOperationException("JWT Duration is not configured");
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(_config["Jwt:DurationInMinutes"])),
+            expires: DateTime.UtcNow.AddMinutes(double.Parse(durationString)),
             signingCredentials: creds
         );
 
