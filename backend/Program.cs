@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen();
 
 //postgresql connection(AIVEN)
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DBConnection"))
 );
 
 //sets up identity
