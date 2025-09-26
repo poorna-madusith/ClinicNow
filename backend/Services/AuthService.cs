@@ -20,9 +20,31 @@ public class AuthService
         _config = config;
     }
 
+    public async Task<string> UserRegister(UserRegisterDto userRegisterDto)
+    {
+        var user = new ApplicationUser
+        {
+            FirstName = userRegisterDto.FirstName,
+            LastName = userRegisterDto.LastName,
+            Email = userRegisterDto.Email,
+            Role = RoleEnum.Patient,
+            Age = userRegisterDto.Age,
+            Gender = userRegisterDto.Gender,
+            Town = userRegisterDto.Town,
+            Address = userRegisterDto.Address
+        };
+
+        var result = await _userManager.CreateAsync(user, userRegisterDto.Password);
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        await _userManager.AddToRoleAsync(user, user.Role.ToString());
+        return GenerateJwtToken(user);
+    }
+
     
-
-
     private string GenerateJwtToken(ApplicationUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
