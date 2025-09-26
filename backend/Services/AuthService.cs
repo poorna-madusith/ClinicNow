@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using backend.DTOs;
 using backend.Models;
+using ClinicNow.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -44,7 +45,23 @@ public class AuthService
         return GenerateJwtToken(user);
     }
 
-    
+
+    public async Task<String> Login(UserLoginDto loginnDto)
+    {
+        var user = await _userManager.FindByEmailAsync(loginnDto.Email);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+        var isValidPassword = await _userManager.CheckPasswordAsync(user, loginnDto.Password);
+        if (!isValidPassword)
+        {
+            throw new Exception("Invalid password");
+        }
+        
+        return GenerateJwtToken(user);
+    }
+
     private string GenerateJwtToken(ApplicationUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
