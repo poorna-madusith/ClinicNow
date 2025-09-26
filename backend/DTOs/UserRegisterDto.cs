@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using backend.Models;
 
@@ -12,9 +13,13 @@ public class UserRegisterDto
     [Required(ErrorMessage = "Last Name is required")]
     public string LastName { get; set; } = null!;
 
-    [Required(ErrorMessage = "Role is required")]
-    [EnumDataType(typeof(RoleEnum), ErrorMessage = "Invalid Role")]
-    public RoleEnum Role { get; set; }
+
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid Email Address")]
+    public string Email { get; set; } = null!;
+
+    [Required(ErrorMessage = "Password is required")]
+    public string Password { get; set; } = null!;
 
     [Required(ErrorMessage = "Age is required")]
     [Range(0, 120, ErrorMessage = "Age must be between 0 and 120")]
