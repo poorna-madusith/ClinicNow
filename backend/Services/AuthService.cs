@@ -3,12 +3,14 @@ using System.Security.Claims;
 using System.Text;
 using backend.DTOs;
 using backend.Models;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services;
 
 
+//normal signup
 public class AuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -34,16 +36,19 @@ public class AuthService
             Address = userRegisterDto.Address
         };
 
+
         var result = await _userManager.CreateAsync(user, userRegisterDto.Password);
         if (!result.Succeeded)
         {
             throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        await _userManager.AddToRoleAsync(user, user.Role.ToString());
-        return GenerateJwtToken(user);
+        await _userManager.AddToRoleAsync(user, user.Role.ToString());//set the user role
+        return GenerateJwtToken(user);// return generated token
     }
 
+
+    //normal email password login
 
     public async Task<string> Login(UserLoginDto loginnDto)
     {
@@ -61,6 +66,38 @@ public class AuthService
         return GenerateJwtToken(user);
     }
 
+    //google login
+    public async Task<string> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
+    {
+        var payload = await GoogleJsonWebSignature.ValidateAsync(googleLoginDto.IdToken);
+        var user = await _userManager.FindByEmailAsync(payload.Email);
+        if (user == null)
+        {
+            user = new ApplicationUser
+            {
+                FirstName = payload.GivenName ?? "ClinicUser",
+                LastName = payload.FamilyName ?? "ClinicUser",
+                Email = payload.Email,
+                Role = RoleEnum.Patient,
+                Age = null,
+                Gender = null,
+                Town = null,
+                Address = null
+            };
+
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+
+            await _userManager.AddToRoleAsync(user, user.Role.ToString());//set the user role
+        }
+        return GenerateJwtToken(user);// return generated token
+    }
+
+
+    //generate jwt token 
     private string GenerateJwtToken(ApplicationUser user)
     {
         var keyString = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured");
@@ -86,6 +123,6 @@ public class AuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-    
+
 
 }

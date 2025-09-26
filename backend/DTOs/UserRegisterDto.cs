@@ -21,18 +21,14 @@ public class UserRegisterDto
     [Required(ErrorMessage = "Password is required")]
     public string Password { get; set; } = null!;
 
-    [Required(ErrorMessage = "Age is required")]
     [Range(0, 120, ErrorMessage = "Age must be between 0 and 120")]
-    public int Age { get; set; }
+    public int? Age { get; set; }
 
-    [Required(ErrorMessage = "Gender is required")]
     [EnumDataType(typeof(GenderEnum), ErrorMessage = "Invalid Gender")]
-    public GenderEnum Gender { get; set; }
-    
-    [Required(ErrorMessage = "Town is required")]
-    public string Town { get; set; } = null!;
+    public GenderEnum? Gender { get; set; }
 
-    [Required(ErrorMessage = "Address is required")]
+    public string? Town { get; set; }
+
     public string? Address { get; set; }
     
 }

@@ -29,11 +29,11 @@ public class ApplicationUser : IdentityUser
 
     public RoleEnum Role { get; set; }
 
-    public int Age { get; set; }
+    public int? Age { get; set; }
 
-    public GenderEnum Gender { get; set; }
+    public GenderEnum? Gender { get; set; }
 
-    public string Town { get; set; } = null!;
+    public string? Town { get; set; } = null!;
 
     public string? Address { get; set; }
 
