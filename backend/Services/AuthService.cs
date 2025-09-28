@@ -36,7 +36,11 @@ public class AuthService
             Address = userRegisterDto.Address
         };
 
-
+        var existingUser = await _userManager.FindByEmailAsync(user.Email);
+        if (existingUser != null)
+        {
+            throw new Exception("User already exists");
+        }
         var result = await _userManager.CreateAsync(user, userRegisterDto.Password);
         if (!result.Succeeded)
         {

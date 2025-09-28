@@ -20,6 +20,11 @@ public class AuthController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+            { 
+                return BadRequest(ModelState);
+            }
+            
             var token = await _authService.UserRegister(userRegisterDto);
             return Ok(new { Token = token });
 
