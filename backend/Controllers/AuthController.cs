@@ -15,22 +15,44 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+
+    //user registration only for patients
     [HttpPost("userregister")]
     public async Task<IActionResult> UserRegister(UserRegisterDto userRegisterDto)
     {
         try
         {
             if (!ModelState.IsValid)
-            { 
+            {
                 return BadRequest(ModelState);
             }
-            
+
             var token = await _authService.UserRegister(userRegisterDto);
             return Ok(new { Token = token });
 
         }
         catch (Exception ex)
-        { 
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    //all login 
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(UserLoginDto loginDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var token = await _authService.Login(loginDto);
+            return Ok(new { Token = token });
+        }
+        catch (Exception ex)
+        {
             return BadRequest(new { Message = ex.Message });
         }
     }
