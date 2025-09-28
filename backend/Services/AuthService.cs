@@ -35,6 +35,7 @@ public class AuthService
             Town = userRegisterDto.Town,
             Address = userRegisterDto.Address
         };
+        user.UserName = userRegisterDto.Email;
 
         var existingUser = await _userManager.FindByEmailAsync(user.Email);
         if (existingUser != null)
@@ -54,14 +55,14 @@ public class AuthService
 
     //normal email password login
 
-    public async Task<string> Login(UserLoginDto loginnDto)
+    public async Task<string> Login(UserLoginDto loginDto)
     {
-        var user = await _userManager.FindByEmailAsync(loginnDto.Email);
+        var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null)
         {
             throw new Exception("User not found");
         }
-        var isValidPassword = await _userManager.CheckPasswordAsync(user, loginnDto.Password);
+        var isValidPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
         if (!isValidPassword)
         {
             throw new Exception("Invalid password");

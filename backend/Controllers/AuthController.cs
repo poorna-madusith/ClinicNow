@@ -18,7 +18,7 @@ public class AuthController : ControllerBase
 
     //user registration only for patients
     [HttpPost("userregister")]
-    public async Task<IActionResult> UserRegister(UserRegisterDto userRegisterDto)
+    public async Task<IActionResult> UserRegister([FromBody] UserRegisterDto userRegisterDto)
     {
         try
         {
