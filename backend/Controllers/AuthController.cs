@@ -56,4 +56,19 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    //google login singup oAuth
+    [HttpPost("googlelogin")]
+    public async Task<IActionResult> GoogleLogin(GoogleLoginDto googleLoginDto)
+    {
+        try
+        {
+            var token = await _authService.GoogleSignupSignin(googleLoginDto);
+            return Ok(new { Token = token });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }
