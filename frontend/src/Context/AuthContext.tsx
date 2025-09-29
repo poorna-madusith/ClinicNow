@@ -1,4 +1,6 @@
-import { Children, createContext, ReactNode, useContext, useState } from "react";
+'use client'
+
+import { createContext, ReactNode, useContext, useState } from "react";
 
 
 interface AuthContextType {
