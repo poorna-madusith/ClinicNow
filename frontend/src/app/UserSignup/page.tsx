@@ -4,6 +4,8 @@ import { User } from "@/types/User";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { useAuth } from '@/Context/AuthContext';
 
 
 
@@ -24,6 +26,7 @@ export default function UserSignupPage() {
     });
     const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
+    const { setAccessToken } = useAuth();
 
     const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -65,6 +68,19 @@ export default function UserSignupPage() {
             setLoading(false);
         }
     }
+
+    // Add this function to handle Google login success
+    const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+        try {
+            const res = await axios.post(`${API}/auth/googlelogin`, {
+                IdToken: credentialResponse.credential
+            });
+            setAccessToken(res.data.AccessToken);
+            router.push('/');  // Redirect to home or dashboard after successful signup/login
+        } catch (err) {
+            console.error("Google login failed", err);
+        }
+    };
 
 
 
@@ -216,6 +232,14 @@ export default function UserSignupPage() {
                         </button>
                     </div>
                 </form>
+                {/* Add Google sign-in option */}
+                <div className="mt-4 text-center">
+                    <p className="text-gray-600 mb-2">Or sign up with</p>
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => console.log('Google Login Failed')}
+                    />
+                </div>
             </div>
         </div>                
     );
