@@ -94,8 +94,17 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var token = await _authService.GoogleSignupSignin(googleLoginDto);
-            return Ok(new { Token = token });
+            var (access, refresh) = await _authService.GoogleSignupSignin(googleLoginDto);
+
+            Response.Cookies.Append("refreshToken", refresh, new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            });
+
+            return Ok(new { AccessToken = access });
         }
         catch (Exception ex)
         {

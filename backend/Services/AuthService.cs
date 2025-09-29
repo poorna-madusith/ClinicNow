@@ -120,7 +120,7 @@ public class AuthService
     }
 
     //google login
-    public async Task<string> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
+    public async Task<(string accessToken, string refreshToken)> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(googleLoginDto.IdToken);
         var user = await _userManager.FindByEmailAsync(payload.Email);
@@ -147,7 +147,28 @@ public class AuthService
 
             await _userManager.AddToRoleAsync(user, user.Role.ToString());//set the user role
         }
-        return GenerateJwtToken(user);// return generated token
+
+        var accessToken = GenerateJwtToken(user);
+
+        // Revoke all previous refresh tokens for this user
+        var oldTokens = _context.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked && t.Expires > DateTime.UtcNow);
+        foreach (var oldToken in oldTokens)
+        {
+            oldToken.IsRevoked = true;
+        }
+
+        var refreshToken = new RefreshToken
+        {
+            Token = Guid.NewGuid().ToString(),
+            UserId = user.Id,
+            Expires = DateTime.UtcNow.AddDays(7), // Refresh token valid for 7 days
+            IsRevoked = false
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return (accessToken, refreshToken.Token);
     }
 
 
@@ -158,13 +179,11 @@ public class AuthService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? throw new InvalidOperationException("User email is null")),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
-
 
         var durationString = _config["Jwt:DurationInMinutes"];
         if (string.IsNullOrWhiteSpace(durationString) || !double.TryParse(durationString, out var durationMinutes))
