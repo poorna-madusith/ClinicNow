@@ -37,9 +37,10 @@ public class AuthController : ControllerBase
         }
     }
 
-    //all login 
+
+    //login: returns access token, sets refresh token in cookie
     [HttpPost("login")]
-    public async Task<IActionResult> Login(UserLoginDto loginDto)
+    public async Task<IActionResult> Login([FromBody] UserLoginDto loginDto)
     {
         try
         {
@@ -48,14 +49,44 @@ public class AuthController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var token = await _authService.Login(loginDto);
-            return Ok(new { Token = token });
+            var (access, refresh) = await _authService.Login(loginDto);
+
+            Response.Cookies.Append("refreshToken", refresh, new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            });
+
+            return Ok(new { AccessToken = access });
         }
         catch (Exception ex)
         {
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+
+    //refrsh token
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken()
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
+        if (refreshToken == null)
+        {
+            return Unauthorized("No refresh token provided");
+        }
+
+        var token = await _authService.RefreshAccessToken(refreshToken);
+        if (token == null)
+        {
+            return Unauthorized("Invalid refresh token");
+        }
+
+        return Ok(new { AccessToken  = token });
+    }
+
 
     //google login singup oAuth
     [HttpPost("googlelogin")]

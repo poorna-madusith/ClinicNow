@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using backend.Data;
 using backend.DTOs;
 using backend.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services;
@@ -14,11 +16,13 @@ namespace backend.Services;
 public class AuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApplicationDBContext _context;
     private readonly IConfiguration _config;
 
-    public AuthService(UserManager<ApplicationUser> userManager, IConfiguration config)
+    public AuthService(UserManager<ApplicationUser> userManager, ApplicationDBContext context, IConfiguration config)
     {
         _userManager = userManager;
+        _context = context;
         _config = config;
     }
 
@@ -55,7 +59,7 @@ public class AuthService
 
     //normal email password login
 
-    public async Task<string> Login(UserLoginDto loginDto)
+    public async Task<(string accessToken, string RefreshToken)> Login(UserLoginDto loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null)
@@ -68,6 +72,50 @@ public class AuthService
             throw new Exception("Invalid password");
         }
 
+        var accessToken = GenerateJwtToken(user);
+
+        // Revoke all previous refresh tokens for this user
+        var oldTokens = _context.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked && t.Expires > DateTime.UtcNow);
+        foreach (var oldToken in oldTokens)
+        {
+            oldToken.IsRevoked = true;
+        }
+
+        var refreshToken = new RefreshToken
+        {
+            Token = Guid.NewGuid().ToString(),
+            UserId = user.Id,
+            Expires = DateTime.UtcNow.AddDays(7), // Refresh token valid for 7 days
+            IsRevoked = false
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return (accessToken, refreshToken.Token);
+
+    }
+
+    //refresh token
+    public async Task<string?> RefreshAccessToken(string refreshToken)
+    {
+        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(
+            t => t.Token == refreshToken && !t.IsRevoked
+        );
+
+        if (storedToken == null || storedToken.Expires < DateTime.UtcNow)
+        {
+            return null;
+        }
+
+        // Revoke the used refresh token
+        storedToken.IsRevoked = true;
+        await _context.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(storedToken.UserId);
+        if (user == null) return null;
+
+        // Optionally, generate a new refresh token here and return it if you want rotation
         return GenerateJwtToken(user);
     }
 
@@ -83,6 +131,7 @@ public class AuthService
                 FirstName = payload.GivenName ?? "ClinicUser",
                 LastName = payload.FamilyName ?? "ClinicUser",
                 Email = payload.Email,
+                UserName = payload.Email, // Set UserName for Identity
                 Role = RoleEnum.Patient,
                 Age = null,
                 Gender = null,
@@ -117,12 +166,16 @@ public class AuthService
         };
 
 
-        var durationString = _config["Jwt:DurationInMinutes"] ?? throw new InvalidOperationException("JWT Duration is not configured");
+        var durationString = _config["Jwt:DurationInMinutes"];
+        if (string.IsNullOrWhiteSpace(durationString) || !double.TryParse(durationString, out var durationMinutes))
+        {
+            throw new InvalidOperationException("JWT Duration is not configured or invalid");
+        }
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(durationString)),
+            expires: DateTime.UtcNow.AddMinutes(durationMinutes),
             signingCredentials: creds
         );
 
