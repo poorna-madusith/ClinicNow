@@ -99,7 +99,10 @@ export default function LoginPage() {
       });
       setAccessToken(res.data.AccessToken);
       console.log("Google login successful");
-      router.push("/UserDashboard"); // Redirect to home or dashboard after successful signup/login
+      console.log(res.data.role === "Patient");
+      if (res.data.role === "Patient") {
+        router.push("/UserDashboard"); // Redirect to home or dashboard after successful signup/login
+      }
     } catch (err) {
       console.error("Google login failed", err);
     }

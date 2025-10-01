@@ -94,7 +94,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var (access, refresh) = await _authService.GoogleSignupSignin(googleLoginDto);
+            var (access, refresh,role) = await _authService.GoogleSignupSignin(googleLoginDto);
 
             Response.Cookies.Append("refreshToken", refresh, new CookieOptions
             {
@@ -104,7 +104,7 @@ public class AuthController : ControllerBase
                 SameSite = SameSiteMode.Strict
             });
 
-            return Ok(new { AccessToken = access });
+            return Ok(new { AccessToken = access, Role = role});
         }
         catch (Exception ex)
         {

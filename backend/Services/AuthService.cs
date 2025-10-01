@@ -120,7 +120,7 @@ public class AuthService
     }
 
     //google login
-    public async Task<(string accessToken, string refreshToken)> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
+    public async Task<(string accessToken, string refreshToken, string role)> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(googleLoginDto.IdToken);
         var user = await _userManager.FindByEmailAsync(payload.Email);
@@ -168,7 +168,7 @@ public class AuthService
         _context.RefreshTokens.Add(refreshToken);
         await _context.SaveChangesAsync();
 
-        return (accessToken, refreshToken.Token);
+        return (accessToken, refreshToken.Token, user.Role.ToString());
     }
 
 
