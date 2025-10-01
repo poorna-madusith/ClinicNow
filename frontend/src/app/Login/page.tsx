@@ -53,7 +53,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!validateForm()) return;
+    if (!validateForm()) return;
     setLoading(true);
 
     try {
@@ -73,6 +73,9 @@ export default function LoginPage() {
       const data = res.data;
       setAccessToken(data.accessToken);
       console.log("Login successful");
+      if (data.Role === "Patient") {
+        router.push("/UserDashboard"); // Redirect to home or dashboard after successful login
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         console.error("Login failed", err.response?.data);
@@ -105,7 +108,7 @@ export default function LoginPage() {
         <h1 className="text-3xl font-bold text-center text-teal-700 mb-6">
           Login
         </h1>
-        <form onSubmit={handleSubmit} noValidate  className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label
               htmlFor="email"
@@ -120,7 +123,9 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
           <div>
             <label
@@ -136,7 +141,9 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
           </div>
           <button
             type="submit"
@@ -151,6 +158,14 @@ export default function LoginPage() {
               onSuccess={handleGoogleSuccess}
               onError={() => console.log("Google Login Failed")}
             />
+          </div>
+          <div>
+            <p className="mt-4 text-center text-gray-600">
+              Don&#39;t have an account?{" "}
+              <a href="/UserSignup" className="text-teal-600 hover:underline">
+                Sign up here
+              </a>
+            </p>
           </div>
         </form>
       </div>

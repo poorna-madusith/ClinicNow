@@ -16,6 +16,7 @@ export default function UserSignupPage() {
         LastName: '',
         Email: '',
         Password: '',
+        ConfirmPassword: '',
         Role: '',
         Age: 0,
         Gender: '',
@@ -25,10 +26,71 @@ export default function UserSignupPage() {
         
     });
     const [loading, setLoading] = useState<boolean>(false);
+    const [errors, setErrors] = useState<{ [key: string]: string}>({});
     const router = useRouter();
     const { setAccessToken } = useAuth();
 
     const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+
+    const validateForm = () => {
+        const newErrors: {[key: string]: string} = {};
+
+
+        if(!formData.FirstName){
+            newErrors.FirstName = "First Name is required";
+        }else if(!formData.LastName){
+            newErrors.LastName = "Last Name is required";
+        }
+
+        if(!formData.Email){
+            newErrors.Email = "Email is required";
+        } else if(!/\S+@\S+\.\S+/.test(formData.Email)){
+            newErrors.Email = "Invalid email address";
+        }
+
+        if(!formData.Password){
+            newErrors.Password = "Password is required";
+        } else if(formData.Password.length < 6){
+            newErrors.Password = "Password must be at least 6 characters";
+        } else if(formData.Password.length > 20){
+            newErrors.Password = "Password must be less than 20 characters";
+        } else if(formData.Password.includes(" ")){
+            newErrors.Password = "Password must not contain spaces";
+        } else if(!/[A-Z]/.test(formData.Password)){
+            newErrors.Password = "Password must contain at least one uppercase letter";
+        } else if(!/[a-z]/.test(formData.Password)){
+            newErrors.Password = "Password must contain at least one lowercase letter";
+        } else if(!/[0-9]/.test(formData.Password)){
+            newErrors.Password = "Password must contain at least one number";
+        } else if(!/[!@#$%^&*]/.test(formData.Password)){
+            newErrors.Password = "Password must contain at least one special character";
+        }
+
+        if(formData.Password !== formData.ConfirmPassword){
+            newErrors.ConfirmPassword = "Passwords do not match";
+        }
+
+        if(!formData.Age || formData.Age <= 0){
+            newErrors.Age = "Valid Age is required";
+        }
+
+        if(!formData.Gender){
+            newErrors.Gender = "Gender is required";
+        }
+
+        if(!formData.Address){
+            newErrors.Address = "Address is required";
+        }
+
+        if(!formData.Town){
+            newErrors.Town = "Town is required";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name , value} = e.target;
@@ -48,6 +110,8 @@ export default function UserSignupPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if(!validateForm()) return;
         setLoading(true);
         try{
             const res = await axios.post(`${API}/auth/userregister`, formData, {
@@ -88,7 +152,7 @@ export default function UserSignupPage() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
                 <h1 className="text-3xl font-bold text-center text-teal-700 mb-6">User Signup</h1>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} noValidate className="space-y-4">
                     <div>
                         <label htmlFor="FirstName" className="block text-sm font-medium text-gray-700 mb-1">
                             First Name:
@@ -102,6 +166,7 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.FirstName && <p className="text-red-500 text-sm mt-1">{errors.FirstName}</p>}
                     </div>
                     <div>
                         <label htmlFor="LastName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -116,6 +181,7 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.LastName && <p className="text-red-500 text-sm mt-1">{errors.LastName}</p>}
                     </div>
                     <div>
                         <label htmlFor="Email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -130,6 +196,7 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.Email && <p className="text-red-500 text-sm mt-1">{errors.Email}</p>}
                     </div>
                     <div>
                         <label htmlFor="Password" className="block text-sm font-medium text-gray-700 mb-1">
@@ -144,6 +211,22 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.Password && <p className="text-red-500 text-sm mt-1">{errors.Password}</p>}
+                    </div>
+                    <div>
+                        <label htmlFor="Password" className="block text-sm font-medium text-gray-700 mb-1">
+                            Confirm Password:
+                        </label>
+                        <input
+                            id="ConfirmPassword"
+                            name="ConfirmPassword"
+                            type="password"
+                            value={formData.ConfirmPassword}
+                            onChange={handleChange}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                            required
+                        />
+                        {errors.ConfirmPassword && <p className="text-red-500 text-sm mt-1">{errors.ConfirmPassword}</p>}
                     </div>
                     <div>
                         <label htmlFor="Age" className="block text-sm font-medium text-gray-700 mb-1">
@@ -158,6 +241,7 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.Age && <p className="text-red-500 text-sm mt-1">{errors.Age}</p>}
                     </div>
                     <div>
                         <label htmlFor="Gender" className="block text-sm font-medium text-gray-700 mb-1">
@@ -176,6 +260,7 @@ export default function UserSignupPage() {
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
                         </select>
+                        {errors.Gender && <p className="text-red-500 text-sm mt-1">{errors.Gender}</p>}
                     </div>
                     <div>
                         <label htmlFor="Address" className="block text-sm font-medium text-gray-700 mb-1">
@@ -190,6 +275,7 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.Address && <p className="text-red-500 text-sm mt-1">{errors.Address}</p>}
                     </div>
                     <div>
                         <label htmlFor="Town" className="block text-sm font-medium text-gray-700 mb-1">
@@ -204,6 +290,7 @@ export default function UserSignupPage() {
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                             required
                         />
+                        {errors.Town && <p className="text-red-500 text-sm mt-1">{errors.Town}</p>}
                     </div>
                     <div>
                         <label htmlFor="ContactNumbers" className="block text-sm font-medium text-gray-700 mb-1">
@@ -221,6 +308,7 @@ export default function UserSignupPage() {
                                 }))
                             }
                         />
+                        {errors.ContactNumbers && <p className="text-red-500 text-sm mt-1">{errors.ContactNumbers}</p>}
                     </div>
                     <div>
                         <button
@@ -239,6 +327,9 @@ export default function UserSignupPage() {
                         onSuccess={handleGoogleSuccess}
                         onError={() => console.log('Google Login Failed')}
                     />
+                </div>
+                <div className="mt-4 text-center">
+                    Already have an account? <a href="/Login" className="text-teal-600 hover:underline">Login here</a>
                 </div>
             </div>
         </div>                
