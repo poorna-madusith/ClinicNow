@@ -1,30 +1,67 @@
 'use client'
 
 import { createContext, ReactNode, useContext, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
+interface DecodedToken {
+  sub: string;   // usually userId
+  role?: string;
+  exp?: number;  // expiration timestamp
+  [key: string]: unknown;
+}
 
 interface AuthContextType {
-    accessToken : string | null;
-    setAccessToken: (token: string | null) => void;
+  accessToken: string | null;
+  decodedToken: DecodedToken | null;
+  setAccessToken: (token: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [decodedToken, setDecodedToken] = useState<DecodedToken | null>(null);
 
-export const AuthProvider = ({children} : {children: ReactNode}) =>{
-    const [accessToken, setAccessToken] = useState<string | null>(null);
+  const setAccessToken = (token: string | null) => {
+    setAccessTokenState(token);
 
-    return(
-        <AuthContext.Provider value={{accessToken, setAccessToken}}>
-            {children}
-        </AuthContext.Provider>
-    );
+    if (token) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+
+        // Support both `role` and Microsoft claim format
+        const decodedObj = decoded as Record<string, unknown>;
+        const roleClaim =
+          decodedObj["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] as string ||
+          decodedObj.role as string ||
+          null;
+
+        const properDecoded: DecodedToken = {
+          ...decoded,
+          ...(typeof roleClaim === "string" ? { role: roleClaim } : {}),
+        };
+
+        setDecodedToken(properDecoded);
+      } catch (e) {
+        console.error("Invalid token", e);
+        setDecodedToken(null);
+      }
+    } else {
+      setDecodedToken(null);
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ accessToken, decodedToken, setAccessToken }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-    const context  = useContext(AuthContext);
-    if(!context){
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
-}
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

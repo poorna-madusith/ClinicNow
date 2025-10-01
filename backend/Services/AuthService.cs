@@ -59,7 +59,7 @@ public class AuthService
 
     //normal email password login
 
-    public async Task<(string accessToken, string RefreshToken)> Login(UserLoginDto loginDto)
+    public async Task<(string accessToken, string RefreshToken, string role)> Login(UserLoginDto loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null)
@@ -92,7 +92,7 @@ public class AuthService
         _context.RefreshTokens.Add(refreshToken);
         await _context.SaveChangesAsync();
 
-        return (accessToken, refreshToken.Token);
+        return (accessToken, refreshToken.Token, user.Role.ToString());
 
     }
 

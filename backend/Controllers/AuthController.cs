@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var (access, refresh) = await _authService.Login(loginDto);
+            var (access, refresh, role) = await _authService.Login(loginDto);
 
             Response.Cookies.Append("refreshToken", refresh, new CookieOptions
             {
@@ -59,7 +59,7 @@ public class AuthController : ControllerBase
                 SameSite = SameSiteMode.Strict
             });
 
-            return Ok(new { AccessToken = access });
+            return Ok(new { AccessToken = access, Role = role });// return access token and role
         }
         catch (Exception ex)
         {

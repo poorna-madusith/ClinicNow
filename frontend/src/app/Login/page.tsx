@@ -10,7 +10,7 @@ import type { CredentialResponse } from "@react-oauth/google";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAccessToken } = useAuth();
+  const { setAccessToken, decodedToken  } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -72,10 +72,13 @@ export default function LoginPage() {
 
       const data = res.data;
       setAccessToken(data.accessToken);
+      console.log(data.role);
+      
       console.log("Login successful");
-      if (data.Role === "Patient") {
+      if (data.role === "Patient") {
         router.push("/UserDashboard"); // Redirect to home or dashboard after successful login
       }
+      
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         console.error("Login failed", err.response?.data);
@@ -96,7 +99,7 @@ export default function LoginPage() {
       });
       setAccessToken(res.data.AccessToken);
       console.log("Google login successful");
-      router.push("/"); // Redirect to home or dashboard after successful signup/login
+      router.push("/UserDashboard"); // Redirect to home or dashboard after successful signup/login
     } catch (err) {
       console.error("Google login failed", err);
     }
