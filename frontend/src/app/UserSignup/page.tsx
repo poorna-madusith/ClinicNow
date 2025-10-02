@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '@/Context/AuthContext';
+import toast from "react-hot-toast";
 
 
 
@@ -120,12 +121,21 @@ export default function UserSignupPage() {
                 },
             });
             console.log("User registered successfully", res.data);
+            toast.success("Registration successful! Please login.");
             router.push('/Login');
             
         } catch (err: unknown) {
             if(axios.isAxiosError(err)){
-                console.error("User registration failed", err.response?.data);
-            } else {
+                if(err.response?.status === 400){
+                    toast.error("Email already in use");
+                    console.log("Email already in use", err.response?.data);
+                }else if(err.response?.status === 500){
+                    toast.error("Server error. Please try again later.");
+                    console.log("Server error", err.response?.data);
+                }else{
+                    console.error("User registration failed", err.response?.data);
+                }
+            }else{
                 console.error("User registration failed", err);
             }
         } finally {

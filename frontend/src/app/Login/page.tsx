@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -72,7 +73,8 @@ export default function LoginPage() {
 
       const data = res.data;
       setAccessToken(data.accessToken);
-      console.log(data.role);
+      
+      toast.success("Login successful!");
       
       console.log("Login successful");
       if (data.role === "Patient") {
@@ -81,9 +83,16 @@ export default function LoginPage() {
       
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        console.error("Login failed", err.response?.data);
+        if(err.response?.status === 400) {
+          toast.error("Invalid email or password");
+          console.log("Invalid email or password");
+        }else if(err.response?.status === 500) {
+          toast.error("Server error. Please try again later.");
+          console.log("Server error", err);
+        }
       } else {
-        console.error("Login failed", err);
+        toast.error("Login failed. Please try again.");
+        console.log("Login failed", err);
       }
     } finally {
       setLoading(false);
@@ -98,12 +107,14 @@ export default function LoginPage() {
         IdToken: credentialResponse.credential,
       });
       setAccessToken(res.data.AccessToken);
+      toast.success("Google login successful!");
       console.log("Google login successful");
       console.log(res.data.role === "Patient");
       if (res.data.role === "Patient") {
         router.push("/UserDashboard"); // Redirect to home or dashboard after successful signup/login
       }
     } catch (err) {
+      toast.error("Google login failed. Please try again.");
       console.error("Google login failed", err);
     }
   };
