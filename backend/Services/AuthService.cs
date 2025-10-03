@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using backend.Data;
 using backend.DTOs;
 using backend.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services;
@@ -14,11 +16,13 @@ namespace backend.Services;
 public class AuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApplicationDBContext _context;
     private readonly IConfiguration _config;
 
-    public AuthService(UserManager<ApplicationUser> userManager, IConfiguration config)
+    public AuthService(UserManager<ApplicationUser> userManager, ApplicationDBContext context, IConfiguration config)
     {
         _userManager = userManager;
+        _context = context;
         _config = config;
     }
 
@@ -35,8 +39,13 @@ public class AuthService
             Town = userRegisterDto.Town,
             Address = userRegisterDto.Address
         };
+        user.UserName = userRegisterDto.Email;
 
-
+        var existingUser = await _userManager.FindByEmailAsync(user.Email);
+        if (existingUser != null)
+        {
+            throw new Exception("User already exists");
+        }
         var result = await _userManager.CreateAsync(user, userRegisterDto.Password);
         if (!result.Succeeded)
         {
@@ -50,24 +59,68 @@ public class AuthService
 
     //normal email password login
 
-    public async Task<string> Login(UserLoginDto loginnDto)
+    public async Task<(string accessToken, string RefreshToken, string role)> Login(UserLoginDto loginDto)
     {
-        var user = await _userManager.FindByEmailAsync(loginnDto.Email);
+        var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null)
         {
             throw new Exception("User not found");
         }
-        var isValidPassword = await _userManager.CheckPasswordAsync(user, loginnDto.Password);
+        var isValidPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
         if (!isValidPassword)
         {
             throw new Exception("Invalid password");
         }
 
+        var accessToken = GenerateJwtToken(user);
+
+        // Revoke all previous refresh tokens for this user
+        var oldTokens = _context.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked && t.Expires > DateTime.UtcNow);
+        foreach (var oldToken in oldTokens)
+        {
+            oldToken.IsRevoked = true;
+        }
+
+        var refreshToken = new RefreshToken
+        {
+            Token = Guid.NewGuid().ToString(),
+            UserId = user.Id,
+            Expires = DateTime.UtcNow.AddDays(7), // Refresh token valid for 7 days
+            IsRevoked = false
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return (accessToken, refreshToken.Token, user.Role.ToString());
+
+    }
+
+    //refresh token
+    public async Task<string?> RefreshAccessToken(string refreshToken)
+    {
+        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(
+            t => t.Token == refreshToken && !t.IsRevoked
+        );
+
+        if (storedToken == null || storedToken.Expires < DateTime.UtcNow)
+        {
+            return null;
+        }
+
+        // Revoke the used refresh token
+        storedToken.IsRevoked = true;
+        await _context.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(storedToken.UserId);
+        if (user == null) return null;
+
+        // Optionally, generate a new refresh token here and return it if you want rotation
         return GenerateJwtToken(user);
     }
 
     //google login
-    public async Task<string> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
+    public async Task<(string accessToken, string refreshToken, string role)> GoogleSignupSignin(GoogleLoginDto googleLoginDto)
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(googleLoginDto.IdToken);
         var user = await _userManager.FindByEmailAsync(payload.Email);
@@ -78,6 +131,7 @@ public class AuthService
                 FirstName = payload.GivenName ?? "ClinicUser",
                 LastName = payload.FamilyName ?? "ClinicUser",
                 Email = payload.Email,
+                UserName = payload.Email, // Set UserName for Identity
                 Role = RoleEnum.Patient,
                 Age = null,
                 Gender = null,
@@ -93,7 +147,28 @@ public class AuthService
 
             await _userManager.AddToRoleAsync(user, user.Role.ToString());//set the user role
         }
-        return GenerateJwtToken(user);// return generated token
+
+        var accessToken = GenerateJwtToken(user);
+
+        // Revoke all previous refresh tokens for this user
+        var oldTokens = _context.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked && t.Expires > DateTime.UtcNow);
+        foreach (var oldToken in oldTokens)
+        {
+            oldToken.IsRevoked = true;
+        }
+
+        var refreshToken = new RefreshToken
+        {
+            Token = Guid.NewGuid().ToString(),
+            UserId = user.Id,
+            Expires = DateTime.UtcNow.AddDays(7), // Refresh token valid for 7 days
+            IsRevoked = false
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return (accessToken, refreshToken.Token, user.Role.ToString());
     }
 
 
@@ -104,20 +179,22 @@ public class AuthService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? throw new InvalidOperationException("User email is null")),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-
-        var durationString = _config["Jwt:DurationInMinutes"] ?? throw new InvalidOperationException("JWT Duration is not configured");
+        var durationString = _config["Jwt:DurationInMinutes"];
+        if (string.IsNullOrWhiteSpace(durationString) || !double.TryParse(durationString, out var durationMinutes))
+        {
+            throw new InvalidOperationException("JWT Duration is not configured or invalid");
+        }
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(durationString)),
+            expires: DateTime.UtcNow.AddMinutes(durationMinutes),
             signingCredentials: creds
         );
 
