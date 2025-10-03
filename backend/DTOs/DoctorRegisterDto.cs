@@ -41,7 +41,7 @@ public class DoctorRegisterDto
 
     [Required(ErrorMessage = "At least one Contact Number is required")]
     [MinLength(1, ErrorMessage = "At least one Contact Number is required")]
-    public int[]? ContactNumbers { get; set; }
+    public string[]? ContactNumbers { get; set; }
 
     [Required(ErrorMessage = "Address is required")]
     public string? Address { get; set; }

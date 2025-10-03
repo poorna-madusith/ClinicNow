@@ -43,7 +43,7 @@ public class ApplicationUser : IdentityUser
     public string? DocDescription { get; set; }
     public string? ProfileImageUrl { get; set; }
     public string? ContactEmail { get; set; }
-    public int[]? ContactNumbers { get; set; }
+    public string[]? ContactNumbers { get; set; }
 
 
 }

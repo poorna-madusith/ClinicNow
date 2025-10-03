@@ -16,6 +16,20 @@ public class AuthController : ControllerBase
     }
 
 
+    [HttpPost("addadmin")]
+    public async Task<IActionResult> AddAdmin()
+    {
+        try
+        { 
+            await _authService.AddAdmin();
+            return Ok(new { Message = "Admin user added successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
     //user registration only for patients
     [HttpPost("userregister")]
     public async Task<IActionResult> UserRegister([FromBody] UserRegisterDto userRegisterDto)
