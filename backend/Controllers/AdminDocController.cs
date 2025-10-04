@@ -17,6 +17,8 @@ public class AdminDocController : ControllerBase
         _adminDocServices = adminDocServices;
     }
 
+
+    //create doctor
     [HttpPost("doctorregister")]
     public async Task<IActionResult> DoctorRegister([FromBody] DoctorRegisterDto doctorRegisterDto)
     {
@@ -37,5 +39,22 @@ public class AdminDocController : ControllerBase
 
         }
     }
+
+
+    //get all doctors
+    [HttpGet("getalldoctors")]
+    public async Task<IActionResult> GetAllDoctors()
+    {
+        try
+        {
+            var doctors = await _adminDocServices.GetAllDoctors();
+            return Ok(doctors);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 
 }

@@ -4,6 +4,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
@@ -53,7 +54,19 @@ public class AdminDocServices
         }
         await _userManager.AddToRoleAsync(doctor, doctor.Role.ToString());
         return new OkObjectResult("Doctor created successfully");
-        
+
+    }
+
+
+    //get all doctors
+    public async Task<IActionResult> GetAllDoctors()
+    {
+        var doctors = await _context.Users.Where(u => u.Role == RoleEnum.Doctor).ToArrayAsync();
+        if (doctors.Length == 0)
+        {
+            return new OkObjectResult("No doctors found");
+        }
+        return new OkObjectResult(doctors);
     }
     
 }
