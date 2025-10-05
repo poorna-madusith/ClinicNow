@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using backend.Models;
 
-namespace backend.Models;
+namespace backend.DTOs;
 
 
-public class Session
-{   
-    [Required(ErrorMessage = "Session ID is required")]
-    public string Id { get; set; } = null!;
+public class SessionDto
+{
 
     [Required(ErrorMessage = "Doctor is required")]
     public ApplicationUser Doctor { get; set; } = null!;
@@ -30,5 +29,4 @@ public class Session
     public string? Description { get; set; }
     [Required(ErrorMessage = "Scheduled status is required")]
     public bool Scheduled { get; set; } = true;
-    public ICollection<ApplicationUser> Patients { get; set; } = new List<ApplicationUser>();
 }
