@@ -3,6 +3,7 @@ using backend.DTOs;
 using backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
@@ -37,7 +38,7 @@ public class SessionServices
             Scheduled = sessionDto.Scheduled,
             Capacity = sessionDto.Capacity,
         };
-        
+
         await _context.Sessions.AddAsync(session);
         var result = await _context.SaveChangesAsync();
 
@@ -49,5 +50,20 @@ public class SessionServices
         {
             throw new Exception("Failed to add session");
         }
+    }
+
+
+    //get all sessions for a doctor
+    public async Task<List<Session>> GetAllSessionsForDoctor(string doctorId)
+    {
+        var doctorexsisting = await _userManager.FindByIdAsync(doctorId);
+        if (doctorexsisting == null || doctorexsisting.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Invalid doctor ID");
+        }
+
+        var sessions = await _context.Sessions.Where(s => s.Doctor.Id == doctorId).ToListAsync();
+        
+        return sessions;
     }
 }

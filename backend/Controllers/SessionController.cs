@@ -33,4 +33,25 @@ public class SessionController : ControllerBase
         }
     }
 
+
+    //get all sessions for a logged in doctor
+    [HttpGet("getallsessions")]
+    public async Task<IActionResult> GetAllSessionsForDoctor()
+    {
+        try
+        {
+            var doctorId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return Unauthorized(new { Message = "User ID not found in token." });
+            }
+            var sessions = await _sessionServices.GetAllSessionsForDoctor(doctorId);
+            return Ok(sessions);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 }
