@@ -14,10 +14,10 @@ public class SessionDto
     public int Capacity { get; set; } = 0;
 
     [Required(ErrorMessage = "Start Time is required")]
-    public double StartTime { get; set; } = 0.0;
+    public string StartTime { get; set; } = null!;
 
     [Required(ErrorMessage = "End Time is required")]
-    public double EndTime { get; set; } = 0.0;
+    public string EndTime { get; set; } = null!;
 
     [Required(ErrorMessage = "Date is required")]
     public DateTime Date { get; set; } = DateTime.MinValue;

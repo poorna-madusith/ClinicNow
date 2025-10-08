@@ -15,6 +15,7 @@ public class SessionController : ControllerBase
         _sessionServices = sessionServices;
     }
 
+    [HttpPost("addsession")]
     public async Task<IActionResult> AddSession([FromBody] SessionDto sessionDto)
     {
         try

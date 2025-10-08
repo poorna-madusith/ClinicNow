@@ -75,12 +75,15 @@ export default function LoginPage() {
 
       const data = res.data;
       setAccessToken(data.accessToken);
+      console.log(data.accessToken);
       
       toast.success("Login successful!");
       
       console.log("Login successful");
       if (data.role === "Patient") {
         router.push("/UserDashboard"); // Redirect to home or dashboard after successful login
+      }else if(data.role === "Doctor"){
+        router.push("/DocotorDashboard");
       }
       
     } catch (err: unknown) {
@@ -114,6 +117,8 @@ export default function LoginPage() {
       console.log(res.data.role === "Patient");
       if (res.data.role === "Patient") {
         router.push("/UserDashboard"); // Redirect to home or dashboard after successful signup/login
+      }else if(res.data.role === "Doctor"){
+        router.push("/DoctorDashboard");
       }
     } catch (err) {
       toast.error("Google login failed. Please try again.");
