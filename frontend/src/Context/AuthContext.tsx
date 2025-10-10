@@ -7,12 +7,14 @@ interface DecodedToken {
   sub: string;   // usually userId
   role?: string;
   exp?: number;  // expiration timestamp
+  id?: string;   // extracted user id
   [key: string]: unknown;
 }
 
 interface AuthContextType {
   accessToken: string | null;
   decodedToken: DecodedToken | null;
+  userId: string | null;
   setAccessToken: (token: string | null) => void;
 }
 
@@ -21,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
   const [decodedToken, setDecodedToken] = useState<DecodedToken | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const setAccessToken = (token: string | null) => {
     setAccessTokenState(token);
@@ -36,23 +39,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           decodedObj.role as string ||
           null;
 
+        // Extract user id from 'sub' or 'id' claim
+        const idClaim = decodedObj.id as string || decodedObj.sub as string || null;
+
         const properDecoded: DecodedToken = {
           ...decoded,
           ...(typeof roleClaim === "string" ? { role: roleClaim } : {}),
+          ...(typeof idClaim === "string" ? { id: idClaim } : {}),
         };
 
         setDecodedToken(properDecoded);
+        setUserId(idClaim);
       } catch (e) {
         console.error("Invalid token", e);
         setDecodedToken(null);
+        setUserId(null);
       }
     } else {
       setDecodedToken(null);
+      setUserId(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ accessToken, decodedToken, setAccessToken }}>
+    <AuthContext.Provider value={{ accessToken, decodedToken, userId, setAccessToken }}>
       {children}
     </AuthContext.Provider>
   );

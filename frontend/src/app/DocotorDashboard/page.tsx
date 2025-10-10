@@ -2,12 +2,12 @@
 
 import { useAuth } from "@/Context/AuthContext";
 import axios from "axios";
-import { Session } from "@/types/Session";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function DoctorDashboard() {
   const [formData, setFormData] = useState({
+    DoctorId: "",
     Capacity: 0,
     StartTime: "",
     EndTime: "",
@@ -17,21 +17,33 @@ export default function DoctorDashboard() {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const { accessToken, decodedToken } = useAuth();
+  const { accessToken,decodedToken,userId} = useAuth();
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+
+  useEffect(()=>{
+    console.log("token" + accessToken);
+    console.log(userId);
+  },[accessToken, decodedToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-          console.log("token" + accessToken);
 
     try {
-      const res = await axios.post(`${API}/session/addsession`, formData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+      const res = await axios.post(
+        `${API}/session/addsession`,
+        {
+          ...formData,
+          DoctorId: userId,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       console.log("Session created:", res.data);
       toast.success("Session created successfully");

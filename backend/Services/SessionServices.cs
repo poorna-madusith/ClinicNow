@@ -20,22 +20,32 @@ public class SessionServices
 
     public async Task<IActionResult> AddSession(SessionDto sessionDto)
     {
-        var Doc = await _userManager.FindByIdAsync(sessionDto.Doctor.Id);
+        // Validate doctor
+        var Doc = await _userManager.FindByIdAsync(sessionDto.DoctorId);
         if (Doc == null || Doc.Role != RoleEnum.Doctor)
         {
             throw new Exception("Invalid doctor ID");
         }
 
+        // Validate time range
+        if (sessionDto.EndTime <= sessionDto.StartTime)
+        {
+            throw new Exception("End time must be after start time");
+        }
+
+        
+
         var session = new Session
         {
-            Id = Guid.NewGuid().ToString(),
+            DoctorId = sessionDto.DoctorId,
             Doctor = Doc,
-            Date = sessionDto.Date,
+            Date = sessionDto.Date.Kind == DateTimeKind.Unspecified 
+                ? DateTime.SpecifyKind(sessionDto.Date, DateTimeKind.Utc) 
+                : sessionDto.Date.ToUniversalTime(),
             StartTime = sessionDto.StartTime,
             EndTime = sessionDto.EndTime,
             SessionFee = sessionDto.SessionFee,
             Description = sessionDto.Description,
-            Scheduled = sessionDto.Scheduled,
             Capacity = sessionDto.Capacity,
         };
 
@@ -62,8 +72,12 @@ public class SessionServices
             throw new Exception("Invalid doctor ID");
         }
 
-        var sessions = await _context.Sessions.Where(s => s.Doctor.Id == doctorId).ToListAsync();
-        
+        var sessions = await _context.Sessions
+            .Where(s => s.DoctorId == doctorId)
+            .Include(s => s.Patients)
+            .OrderBy(s => s.Date)
+            .ThenBy(s => s.StartTime)
+            .ToListAsync();
         return sessions;
     }
 }

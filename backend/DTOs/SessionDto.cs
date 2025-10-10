@@ -1,32 +1,33 @@
+using System;
 using System.ComponentModel.DataAnnotations;
-using backend.Models;
 
-namespace backend.DTOs;
-
-
-public class SessionDto
+namespace backend.DTOs
 {
+    public class SessionDto
+    {
 
-    [Required(ErrorMessage = "Doctor is required")]
-    public ApplicationUser Doctor { get; set; } = null!;
+        [Required(ErrorMessage = "Doctor ID is required")]
+        public string DoctorId { get; set; } = null!;  // Only send ID from frontend, not full user object
 
-    [Required(ErrorMessage = "Capacity is required")]
-    public int Capacity { get; set; } = 0;
+        [Required(ErrorMessage = "Capacity is required")]
+        [Range(1, 500, ErrorMessage = "Capacity must be between 1 and 500")]
+        public int Capacity { get; set; }
 
-    [Required(ErrorMessage = "Start Time is required")]
-    public string StartTime { get; set; } = null!;
+        [Required(ErrorMessage = "Start Time is required")]
+        public TimeSpan StartTime { get; set; }
 
-    [Required(ErrorMessage = "End Time is required")]
-    public string EndTime { get; set; } = null!;
+        [Required(ErrorMessage = "End Time is required")]
+        public TimeSpan EndTime { get; set; }
 
-    [Required(ErrorMessage = "Date is required")]
-    public DateTime Date { get; set; } = DateTime.MinValue;
+        [Required(ErrorMessage = "Date is required")]
+        public DateTime Date { get; set; }
 
-    [Required(ErrorMessage = "Session Fee is required")]
-    public double SessionFee { get; set; } = 0.0;
+        [Required(ErrorMessage = "Session Fee is required")]
+        [Range(0, double.MaxValue, ErrorMessage = "Session Fee must be positive")]
+        public double SessionFee { get; set; }
 
-    [Required(ErrorMessage = "Description is required")]
-    public string? Description { get; set; }
-    [Required(ErrorMessage = "Scheduled status is required")]
-    public bool Scheduled { get; set; } = true;
+        [Required(ErrorMessage = "Description is required")]
+        public string Description { get; set; } = string.Empty;
+
+    }
 }

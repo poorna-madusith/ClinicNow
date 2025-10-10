@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class addsessionstable : Migration
+    public partial class AddSessionsTableOnly : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,15 +16,15 @@ namespace backend.Migrations
                 name: "Sessions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DoctorId = table.Column<string>(type: "text", nullable: false),
-                    Capacity = table.Column<int>(type: "integer", nullable: false),
-                    StartTime = table.Column<string>(type: "text", nullable: false),
-                    EndTime = table.Column<string>(type: "text", nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    EndTime = table.Column<TimeSpan>(type: "interval", nullable: false),
                     SessionFee = table.Column<double>(type: "double precision", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    Scheduled = table.Column<bool>(type: "boolean", nullable: false)
+                    Capacity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -41,7 +42,7 @@ namespace backend.Migrations
                 columns: table => new
                 {
                     PatientsId = table.Column<string>(type: "text", nullable: false),
-                    SessionId = table.Column<string>(type: "text", nullable: false)
+                    SessionId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -76,7 +76,7 @@ export default function LoginPage() {
       const data = res.data;
       setAccessToken(data.accessToken);
       console.log(data.accessToken);
-      
+      console.log(data.role);      
       toast.success("Login successful!");
       
       console.log("Login successful");

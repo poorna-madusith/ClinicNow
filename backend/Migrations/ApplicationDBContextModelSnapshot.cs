@@ -27,8 +27,8 @@ namespace backend.Migrations
                     b.Property<string>("PatientsId")
                         .HasColumnType("text");
 
-                    b.Property<string>("SessionId")
-                        .HasColumnType("text");
+                    b.Property<int>("SessionId")
+                        .HasColumnType("integer");
 
                     b.HasKey("PatientsId", "SessionId");
 
@@ -300,8 +300,11 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Session", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Capacity")
                         .HasColumnType("integer");
@@ -317,19 +320,14 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("EndTime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("Scheduled")
-                        .HasColumnType("boolean");
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("interval");
 
                     b.Property<double>("SessionFee")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("StartTime")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("interval");
 
                     b.HasKey("Id");
 

@@ -1,34 +1,36 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace backend.Models;
+namespace backend.Models
+{
+    public class Session
+    {
+        [Key]
+        public int Id { get; set; }
 
+        [Required]
+        public string DoctorId { get; set; } = null!;
+        public ApplicationUser Doctor { get; set; } = null!;
 
-public class Session
-{   
-    [Required(ErrorMessage = "Session ID is required")]
-    public string Id { get; set; } = null!;
+        [Required]
+        public DateTime Date { get; set; }
 
-    [Required(ErrorMessage = "Doctor is required")]
-    public ApplicationUser Doctor { get; set; } = null!;
+        [Required]
+        public TimeSpan StartTime { get; set; }
 
-    [Required(ErrorMessage = "Capacity is required")]
-    public int Capacity { get; set; } = 0;
+        [Required]
+        public TimeSpan EndTime { get; set; }
 
-    [Required(ErrorMessage = "Start Time is required")]
-    public string StartTime { get; set; } = null!;
+        [Required]
+        public double SessionFee { get; set; }
 
-    [Required(ErrorMessage = "End Time is required")]
-    public string EndTime { get; set; } = null!;
+        [Required]
+        public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Date is required")]
-    public DateTime Date { get; set; } = DateTime.MinValue;
+        [Required]
+        public int Capacity { get; set; }
 
-    [Required(ErrorMessage = "Session Fee is required")]
-    public double SessionFee { get; set; } = 0.0;
-
-    [Required(ErrorMessage = "Description is required")]
-    public string? Description { get; set; }
-    [Required(ErrorMessage = "Scheduled status is required")]
-    public bool Scheduled { get; set; } = true;
-    public ICollection<ApplicationUser> Patients { get; set; } = new List<ApplicationUser>();
+        public ICollection<ApplicationUser> Patients { get; set; } = new List<ApplicationUser>();
+    }
 }
