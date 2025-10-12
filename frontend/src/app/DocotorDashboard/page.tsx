@@ -68,85 +68,111 @@ export default function DoctorDashboard() {
             <button className="close-modal-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
             <h2 className="modal-title">Create Session</h2>
             <form className="session-form" onSubmit={handleSubmit}>
-              <label htmlFor="Capacity">Capacity:</label>
-              <input
-                type="number"
-                id="Capacity"
-                name="Capacity"
-                value={formData?.Capacity || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    Capacity: parseInt(e.target.value),
-                  })
-                }
-                min={1}
-                required
-              />
-              <label htmlFor="StartTime">Start Time:</label>
-              <input
-                type="time"
-                id="StartTime"
-                name="StartTime"
-                value={formData?.StartTime || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    StartTime: e.target.value,
-                  })
-                }
-                required
-              />
-              <label htmlFor="EndTime">End Time:</label>
-              <input
-                type="time"
-                id="EndTime"
-                name="EndTime"
-                value={formData?.EndTime || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    EndTime: e.target.value,
-                  })
-                }
-                required
-              />
-              <label htmlFor="Date">Date:</label>
-              <input
-                type="date"
-                id="Date"
-                name="Date"
-                value={formData?.Date || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, Date: e.target.value })
-                }
-                required
-              />
-              <label htmlFor="SessionFee">Session Fee:</label>
-              <input
-                type="number"
-                id="SessionFee"
-                name="SessionFee"
-                value={formData?.SessionFee || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, SessionFee: parseInt(e.target.value) })
-                }
-                min={0}
-                required
-              />
-              <label htmlFor="Description">Description:</label>
-              <textarea
-                id="Description"
-                name="Description"
-                value={formData?.Description || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, Description: e.target.value })
-                }
-                rows={3}
-                required
-              />
+              {/* Row 1: Date and Session Fee */}
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="Date">Date:</label>
+                  <input
+                    type="date"
+                    id="Date"
+                    name="Date"
+                    value={formData?.Date || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, Date: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="SessionFee">Session Fee:</label>
+                  <input
+                    type="number"
+                    id="SessionFee"
+                    name="SessionFee"
+                    value={formData?.SessionFee || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, SessionFee: parseInt(e.target.value) })
+                    }
+                    min={0}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Start Time and End Time */}
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="StartTime">Start Time:</label>
+                  <input
+                    type="time"
+                    id="StartTime"
+                    name="StartTime"
+                    value={formData?.StartTime || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        StartTime: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="EndTime">End Time:</label>
+                  <input
+                    type="time"
+                    id="EndTime"
+                    name="EndTime"
+                    value={formData?.EndTime || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        EndTime: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Row 3: Capacity */}
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="Capacity">Capacity:</label>
+                  <input
+                    type="number"
+                    id="Capacity"
+                    name="Capacity"
+                    value={formData?.Capacity || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        Capacity: parseInt(e.target.value),
+                      })
+                    }
+                    min={1}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Full Width: Description */}
+              <div className="form-field full-width">
+                <label htmlFor="Description">Description:</label>
+                <textarea
+                  id="Description"
+                  name="Description"
+                  value={formData?.Description || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, Description: e.target.value })
+                  }
+                  rows={3}
+                  required
+                />
+              </div>
+
               <button className="submit-btn" type="submit" disabled={loading}>
-                {loading ? "Loading..." : "Create Session"}
+                {loading ? "Creating..." : "Create Session"}
               </button>
             </form>
           </div>
@@ -157,7 +183,7 @@ export default function DoctorDashboard() {
       <style jsx>{`
         .doctor-dashboard-container {
           min-height: 100vh;
-          background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+          background: linear-gradient(135deg, #e6fffa 0%, #f0fdfa 100%);
           padding: 40px 0;
           display: flex;
           flex-direction: column;
@@ -166,12 +192,12 @@ export default function DoctorDashboard() {
         .dashboard-title {
           font-size: 2.5rem;
           font-weight: 700;
-          color: #1e293b;
+          color: #134e4a;
           margin-bottom: 32px;
           letter-spacing: 1px;
         }
         .open-modal-btn {
-          background: #6366f1;
+          background: #14b8a6;
           color: #fff;
           border: none;
           padding: 12px 32px;
@@ -179,11 +205,11 @@ export default function DoctorDashboard() {
           font-size: 1.1rem;
           font-weight: 600;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+          box-shadow: 0 2px 8px rgba(20, 184, 166, 0.08);
           transition: background 0.2s;
         }
         .open-modal-btn:hover {
-          background: #4f46e5;
+          background: #0d9488;
         }
         .modal {
           position: fixed;
@@ -191,7 +217,7 @@ export default function DoctorDashboard() {
           left: 0;
           width: 100vw;
           height: 100vh;
-          background: rgba(30, 41, 59, 0.25);
+          background: rgba(19, 78, 74, 0.18);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -199,10 +225,10 @@ export default function DoctorDashboard() {
         }
         .modal-content {
           background: #fff;
-          border-radius: 16px;
-          box-shadow: 0 8px 32px rgba(30, 41, 59, 0.18);
-          padding: 36px 32px 28px 32px;
-          min-width: 340px;
+          border-radius: 18px;
+          box-shadow: 0 8px 32px rgba(20, 184, 166, 0.18);
+          padding: 38px 34px 30px 34px;
+          min-width: 500px;
           max-width: 95vw;
           position: relative;
           animation: fadeIn 0.3s;
@@ -214,64 +240,91 @@ export default function DoctorDashboard() {
           background: none;
           border: none;
           font-size: 1.7rem;
-          color: #64748b;
+          color: #0d9488;
           cursor: pointer;
           transition: color 0.2s;
         }
         .close-modal-btn:hover {
-          color: #ef4444;
+          color: #f43f5e;
         }
         .modal-title {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #334155;
-          margin-bottom: 18px;
+          font-size: 1.7rem;
+          font-weight: 700;
+          color: #134e4a;
+          margin-bottom: 20px;
           text-align: center;
         }
         .session-form {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 20px;
+        }
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        .form-field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .form-field.full-width {
+          grid-column: 1 / -1;
         }
         .session-form label {
-          font-size: 1rem;
-          color: #475569;
+          font-size: 0.95rem;
+          color: #0f766e;
           font-weight: 500;
+          margin-bottom: 2px;
         }
         .session-form input,
         .session-form textarea {
-          padding: 8px 12px;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
+          padding: 10px 14px;
+          border: 1px solid #5eead4;
+          border-radius: 8px;
           font-size: 1rem;
-          background: #f1f5f9;
-          color: #1e293b;
+          background: #f0fdfa;
+          color: #134e4a;
           outline: none;
-          transition: border 0.2s;
+          transition: border 0.2s, box-shadow 0.2s;
+          width: 100%;
+          box-sizing: border-box;
         }
         .session-form input:focus,
         .session-form textarea:focus {
-          border: 1.5px solid #6366f1;
+          border: 2px solid #14b8a6;
+          box-shadow: 0 0 0 2px #5eead4;
+        }
+        @media (max-width: 640px) {
+          .form-row {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          .modal-content {
+            min-width: 300px;
+            padding: 28px 20px 24px 20px;
+          }
         }
         .submit-btn {
-          margin-top: 10px;
-          background: #6366f1;
+          margin-top: 12px;
+          background: linear-gradient(90deg, #14b8a6 0%, #0d9488 100%);
           color: #fff;
           border: none;
-          padding: 10px 0;
+          padding: 12px 0;
           border-radius: 8px;
           font-size: 1.1rem;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+          box-shadow: 0 2px 8px rgba(20, 184, 166, 0.08);
           transition: background 0.2s;
         }
         .submit-btn:disabled {
-          background: #a5b4fc;
+          background: #99f6e4;
           cursor: not-allowed;
         }
         .submit-btn:hover:not(:disabled) {
-          background: #4f46e5;
+          background: #0d9488;
         }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-16px); }
