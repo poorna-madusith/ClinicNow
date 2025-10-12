@@ -70,6 +70,7 @@ export default function LoginPage() {
           headers: {
             "Content-Type": "application/json",
           },
+          withCredentials: true, // This is crucial for cookies to be set and sent
         }
       );
 
@@ -110,6 +111,8 @@ export default function LoginPage() {
     try {
       const res = await axios.post(`${API}/auth/googlelogin`, {
         IdToken: credentialResponse.credential,
+      }, {
+        withCredentials: true
       });
       setAccessToken(res.data.AccessToken);
       toast.success("Google login successful!");
@@ -188,17 +191,19 @@ export default function LoginPage() {
           >
             {loading ? "Loading..." : "Login"}
           </button>
-          <div className="mt-4 text-center">
-            <p className="text-gray-600 mb-2">Or sign up with</p>
-            <div className="flex justify-center">
-              <div className="[&_button]:!gap-2 [&_button]:!px-3">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => console.log("Google Login Failed")}
-                />
+          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+            <div className="mt-4 text-center">
+              <p className="text-gray-600 mb-2">Or sign up with</p>
+              <div className="flex justify-center">
+                <div className="[&_button]:!gap-2 [&_button]:!px-3">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => console.log("Google Login Failed")}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <div>
             <p className="mt-4 text-center text-gray-600">
               Don&#39;t have an account?{" "}

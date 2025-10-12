@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const parseToken = (token: string) => {
+  const parseToken = useCallback((token: string) => {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
       const decodedObj = decoded as Record<string, unknown>;
@@ -57,23 +57,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(null);
       setIsAuthenticated(false);
     }
-  };
+  }, []);
 
-  const setAccessToken = (token: string | null) => {
+  const setAccessToken = useCallback((token: string | null) => {
     setAccessTokenState(token);
     
     if (token) {
       parseToken(token);
+      // Store token in localStorage as fallback for development
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', token);
+      }
     } else {
       setDecodedToken(null);
       setUserId(null);
       setUserRole(null);
       setIsAuthenticated(false);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+      }
     }
-  };
+  }, [parseToken]);
 
   // Check authentication status with server using refresh token
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/auth/verify`, {
         withCredentials: true // This sends HTTP-only cookies
@@ -89,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Auth check failed:", error);
       setAccessToken(null);
     }
-  };
+  }, [API, parseToken, setAccessToken]);
 
   const logout = async () => {
     try {
@@ -105,8 +112,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Initialize authentication check
   useEffect(() => {
-    checkAuth().finally(() => setIsInitialized(true));
-  }, []);
+    const pathname = window.location.pathname;
+    const publicPaths = ['/Login', '/UserSignup', '/'];
+    
+    // Try to restore token from localStorage first
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (storedToken) {
+      try {
+        parseToken(storedToken);
+        setAccessTokenState(storedToken);
+        setIsInitialized(true);
+        return;
+      } catch {
+        // Invalid token, remove it
+        localStorage.removeItem('accessToken');
+      }
+    }
+    
+    // Skip auth check on public pages to avoid unnecessary 401 errors
+    if (publicPaths.includes(pathname)) {
+      setIsInitialized(true);
+    } else {
+      checkAuth().finally(() => setIsInitialized(true));
+    }
+  }, [checkAuth, parseToken]);
 
   if (!isInitialized) {
     return <div>Loading...</div>;

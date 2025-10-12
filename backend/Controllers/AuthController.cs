@@ -70,8 +70,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = true,
-                SameSite = SameSiteMode.Strict
+                Secure = false, // Set to false for development over HTTP  
+                SameSite = SameSiteMode.None // None allows cross-site cookies for localhost
             });
 
             return Ok(new { AccessToken = access, Role = role });// return access token and role
@@ -115,8 +115,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = true,
-                SameSite = SameSiteMode.Strict
+                Secure = false, // Set to false for development over HTTP  
+                SameSite = SameSiteMode.None // None allows cross-site cookies for localhost
             });
 
             return Ok(new { AccessToken = access, Role = role });
@@ -131,7 +131,7 @@ public class AuthController : ControllerBase
 
     //logout
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
         Response.Cookies.Delete("refreshToken");
         return Ok(new { Message = "Logged out successfully" });
@@ -144,7 +144,7 @@ public class AuthController : ControllerBase
         var refreshToken = Request.Cookies["refreshToken"];
         if (refreshToken == null)
         {
-            return Unauthorized(new { success = false, message = "No refresh token found" });
+            return Unauthorized("No refresh token provided");
         }
 
         try
