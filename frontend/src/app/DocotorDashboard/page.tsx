@@ -18,6 +18,7 @@ export default function DoctorDashboard() {
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { accessToken,decodedToken,userId} = useAuth();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 
@@ -26,9 +27,51 @@ export default function DoctorDashboard() {
     console.log(userId);
   },[accessToken, decodedToken]);
 
+
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if(!formData.Date) {
+      newErrors.Date = "Date is required";
+    }
+    if(!formData.SessionFee) {
+      newErrors.SessionFee = "Session fee is required";
+    }
+    if(!formData.StartTime) {
+      newErrors.StartTime = "Start time is required";
+    }
+    if(!formData.EndTime) {
+      newErrors.EndTime = "End time is required";
+    }
+    if(!formData.Capacity){
+      newErrors.Capacity = "Capacity is required";
+    }
+    if(!formData.Capacity || formData.Capacity <= 0) {
+      newErrors.Capacity = "Capacity must be greater than 0";
+    }
+    if(!formData.Description) {
+      newErrors.Description = "Description is required";
+    }
+
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+
+
+
+
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if(!validateForm()) {
+      setLoading(false);
+      toast.error("Please fill in all required fields correctly");
+      return;
+    }
 
     try {
       const res = await axios.post(
@@ -102,8 +145,9 @@ export default function DoctorDashboard() {
                     onChange={(e) =>
                       setFormData({ ...formData, Date: e.target.value })
                     }
-                    required
+                    
                   />
+                  {errors.Date && (<p className="text-red-500 text-sm mt-1">{errors.Date}</p>)}
                 </div>
                 <div className="form-field">
                   <label htmlFor="SessionFee">Session Fee:</label>
@@ -116,8 +160,9 @@ export default function DoctorDashboard() {
                       setFormData({ ...formData, SessionFee: parseInt(e.target.value) })
                     }
                     min={0}
-                    required
+                    
                   />
+                  {errors.SessionFee && (<p className="text-red-500 text-sm mt-1">{errors.SessionFee}</p>)}
                 </div>
               </div>
 
@@ -136,8 +181,9 @@ export default function DoctorDashboard() {
                         StartTime: e.target.value,
                       })
                     }
-                    required
                   />
+                  {errors.StartTime && (<p className="text-red-500 text-sm mt-1">{errors.StartTime}</p>)}
+                  
                 </div>
                 <div className="form-field">
                   <label htmlFor="EndTime">End Time:</label>
@@ -152,8 +198,9 @@ export default function DoctorDashboard() {
                         EndTime: e.target.value,
                       })
                     }
-                    required
+                    
                   />
+                  {errors.EndTime && (<p className="text-red-500 text-sm mt-1">{errors.EndTime}</p>)}
                 </div>
               </div>
 
@@ -173,8 +220,9 @@ export default function DoctorDashboard() {
                       })
                     }
                     min={1}
-                    required
+                    
                   />
+                  {errors.Capacity && (<p className="text-red-500 text-sm mt-1">{errors.Capacity}</p>)}
                 </div>
               </div>
 
@@ -189,8 +237,9 @@ export default function DoctorDashboard() {
                     setFormData({ ...formData, Description: e.target.value })
                   }
                   rows={3}
-                  required
+                  
                 />
+                {errors.Description && (<p className="text-red-500 text-sm mt-1">{errors.Description}</p>)}
               </div>
 
               <button className="submit-btn" type="submit" disabled={loading}>
