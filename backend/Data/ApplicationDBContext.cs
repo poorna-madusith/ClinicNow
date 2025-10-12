@@ -13,4 +13,22 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+    public DbSet<Session> Sessions { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<Session>()
+            .HasOne(s => s.Doctor)
+            .WithMany()
+            .HasForeignKey("DoctorId")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Session>()
+            .HasMany(s => s.Patients)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("SessionPatients"));
+    }
+
  }

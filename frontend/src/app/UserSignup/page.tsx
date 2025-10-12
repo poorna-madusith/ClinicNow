@@ -151,6 +151,8 @@ export default function UserSignupPage() {
         try {
             const res = await axios.post(`${API}/auth/googlelogin`, {
                 IdToken: credentialResponse.credential
+            }, {
+                withCredentials: true
             });
             setAccessToken(res.data.AccessToken);
             router.push('/');  // Redirect to home or dashboard after successful signup/login
@@ -379,17 +381,19 @@ export default function UserSignupPage() {
                     </div>
                 </form>
                 {/* Add Google sign-in option */}
-                <div className="mt-4 text-center">
-                    <p className="text-gray-600 mb-2">Or sign up with</p>
-                    <div className="flex justify-center">
-                        <div className="[&_button]:!gap-2 [&_button]:!px-3">
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => console.log('Google Login Failed')}
-                            />
+                {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+                    <div className="mt-4 text-center">
+                        <p className="text-gray-600 mb-2">Or sign up with</p>
+                        <div className="flex justify-center">
+                            <div className="[&_button]:!gap-2 [&_button]:!px-3">
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={() => console.log('Google Login Failed')}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
                 <div className="mt-4 text-center text-gray-600">
                     Already have an account? <a href="/Login" className="text-teal-600 hover:underline">Login here</a>
                 </div>

@@ -1,3 +1,4 @@
+using System.Net;
 using backend.DTOs;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,20 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+
+    [HttpPost("addadmin")]
+    public async Task<IActionResult> AddAdmin()
+    {
+        try
+        {
+            await _authService.AddAdmin();
+            return Ok(new { Message = "Admin user added successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 
     //user registration only for patients
     [HttpPost("userregister")]
@@ -55,8 +70,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = true,
-                SameSite = SameSiteMode.Strict
+                Secure = false, // Set to false for development over HTTP  
+                SameSite = SameSiteMode.None // None allows cross-site cookies for localhost
             });
 
             return Ok(new { AccessToken = access, Role = role });// return access token and role
@@ -84,7 +99,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid refresh token");
         }
 
-        return Ok(new { AccessToken  = token });
+        return Ok(new { AccessToken = token });
     }
 
 
@@ -94,21 +109,59 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var (access, refresh,role) = await _authService.GoogleSignupSignin(googleLoginDto);
+            var (access, refresh, role) = await _authService.GoogleSignupSignin(googleLoginDto);
 
             Response.Cookies.Append("refreshToken", refresh, new CookieOptions
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = true,
-                SameSite = SameSiteMode.Strict
+                Secure = false, // Set to false for development over HTTP  
+                SameSite = SameSiteMode.None // None allows cross-site cookies for localhost
             });
 
-            return Ok(new { AccessToken = access, Role = role});
+            return Ok(new { AccessToken = access, Role = role });
         }
         catch (Exception ex)
         {
             return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
+
+    //logout
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("refreshToken");
+        return Ok(new { Message = "Logged out successfully" });
+    }
+
+
+    [HttpGet("verify")]
+    public async Task<IActionResult> VerifyToken()
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
+        if (refreshToken == null)
+        {
+            return Unauthorized("No refresh token provided");
+        }
+
+        try
+        {
+            var accessToken = await _authService.RefreshAccessToken(refreshToken);
+            if (accessToken == null)
+            {
+                Response.Cookies.Delete("refreshToken");
+                return Unauthorized(new { success = false, message = "Invalid refresh token" });
+            }
+
+            return Ok(new { success = true, token = accessToken });
+        }
+        catch (Exception ex)
+        {
+            Response.Cookies.Delete("refreshToken");
+            return Unauthorized(new { success = false, message = ex.Message });
         }
     }
 }

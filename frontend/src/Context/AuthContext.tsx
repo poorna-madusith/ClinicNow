@@ -1,58 +1,157 @@
 'use client'
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 interface DecodedToken {
-  sub: string;   // usually userId
+  sub: string;
   role?: string;
-  exp?: number;  // expiration timestamp
+  exp?: number;
+  id?: string;
   [key: string]: unknown;
 }
 
 interface AuthContextType {
   accessToken: string | null;
+  isAuthenticated: boolean;
   decodedToken: DecodedToken | null;
+  userId: string | null;
+  userRole: string | null;
   setAccessToken: (token: string | null) => void;
+  logout: () => void;
+  checkAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [decodedToken, setDecodedToken] = useState<DecodedToken | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const setAccessToken = (token: string | null) => {
+  const parseToken = useCallback((token: string) => {
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      const decodedObj = decoded as Record<string, unknown>;
+      
+      const roleClaim =
+        decodedObj["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] as string ||
+        decodedObj.role as string ||
+        null;
+
+      const idClaim = decodedObj.id as string || decodedObj.sub as string || null;
+
+      setDecodedToken(decoded);
+      setUserId(idClaim);
+      setUserRole(roleClaim);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error("Invalid token:", error);
+      setDecodedToken(null);
+      setUserId(null);
+      setUserRole(null);
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  const setAccessToken = useCallback((token: string | null) => {
     setAccessTokenState(token);
-
+    
     if (token) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(token);
-
-        // Support both `role` and Microsoft claim format
-        const decodedObj = decoded as Record<string, unknown>;
-        const roleClaim =
-          decodedObj["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] as string ||
-          decodedObj.role as string ||
-          null;
-
-        const properDecoded: DecodedToken = {
-          ...decoded,
-          ...(typeof roleClaim === "string" ? { role: roleClaim } : {}),
-        };
-
-        setDecodedToken(properDecoded);
-      } catch (e) {
-        console.error("Invalid token", e);
-        setDecodedToken(null);
+      parseToken(token);
+      // Store token in localStorage as fallback for development
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', token);
       }
     } else {
       setDecodedToken(null);
+      setUserId(null);
+      setUserRole(null);
+      setIsAuthenticated(false);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+      }
+    }
+  }, [parseToken]);
+
+  // Check authentication status with server using refresh token
+  const checkAuth = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/auth/verify`, {
+        withCredentials: true // This sends HTTP-only cookies
+      });
+
+      if (response.data.success && response.data.token) {
+        setAccessTokenState(response.data.token);
+        parseToken(response.data.token);
+      } else {
+        setAccessToken(null);
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      setAccessToken(null);
+    }
+  }, [API, parseToken, setAccessToken]);
+
+  const logout = async () => {
+    try {
+      await axios.post(`${API}/auth/logout`, {}, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setAccessToken(null);
     }
   };
 
+  // Initialize authentication check
+  useEffect(() => {
+    const pathname = window.location.pathname;
+    const publicPaths = ['/Login', '/UserSignup', '/'];
+    
+    // Try to restore token from localStorage first
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (storedToken) {
+      try {
+        parseToken(storedToken);
+        setAccessTokenState(storedToken);
+        setIsInitialized(true);
+        return;
+      } catch {
+        // Invalid token, remove it
+        localStorage.removeItem('accessToken');
+      }
+    }
+    
+    // Skip auth check on public pages to avoid unnecessary 401 errors
+    if (publicPaths.includes(pathname)) {
+      setIsInitialized(true);
+    } else {
+      checkAuth().finally(() => setIsInitialized(true));
+    }
+  }, [checkAuth, parseToken]);
+
+  if (!isInitialized) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <AuthContext.Provider value={{ accessToken, decodedToken, setAccessToken }}>
+    <AuthContext.Provider value={{ 
+      accessToken,
+      isAuthenticated, 
+      decodedToken, 
+      userId, 
+      userRole, 
+      setAccessToken,
+      logout, 
+      checkAuth 
+    }}>
       {children}
     </AuthContext.Provider>
   );

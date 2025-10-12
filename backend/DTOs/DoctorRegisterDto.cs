@@ -4,7 +4,7 @@ using backend.Models;
 
 namespace backend.DTOs;
 
-public class UserRegisterDto
+public class DoctorRegisterDto
 {
     [Required(ErrorMessage = "First Name is required")]
 
@@ -27,10 +27,23 @@ public class UserRegisterDto
     [EnumDataType(typeof(GenderEnum), ErrorMessage = "Invalid Gender")]
     public GenderEnum? Gender { get; set; }
 
-    public string? Town { get; set; }
+    [Required(ErrorMessage = "Specialization is required")]
+    public string? Specialization { get; set; }
 
-    public string? Address { get; set; }
+    [Required(ErrorMessage = "Doctor Description is required")]
+    public string? DocDescription { get; set; }
 
+    [Required(ErrorMessage = "Profile Image URL is required")]
+    public string? ProfileImageUrl { get; set; }
+    [Required(ErrorMessage = "Contact Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid Contact Email Address")]
+    public string? ContactEmail { get; set; }
+
+    [Required(ErrorMessage = "At least one Contact Number is required")]
+    [MinLength(1, ErrorMessage = "At least one Contact Number is required")]
     public string[]? ContactNumbers { get; set; }
+
+    [Required(ErrorMessage = "Address is required")]
+    public string? Address { get; set; }
     
 }
