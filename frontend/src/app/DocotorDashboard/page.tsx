@@ -53,8 +53,30 @@ export default function DoctorDashboard() {
     } finally {
       setLoading(false);
       setIsModalOpen(false);
+      setFormData({
+        DoctorId: "",
+        Capacity: 0,
+        StartTime: "",
+        EndTime: "",
+        Date: "",
+        SessionFee: 0,
+        Description: "",
+      });
     }
   };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setFormData({
+      DoctorId: "",
+      Capacity: 0,
+      StartTime: "",
+      EndTime: "",
+      Date: "",
+      SessionFee: 0,
+      Description: "",
+    })
+  }
 
   return (
     <div className="doctor-dashboard-container">
@@ -65,7 +87,7 @@ export default function DoctorDashboard() {
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close-modal-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
+            <button className="close-modal-btn" onClick={() => handleCloseModal()}>&times;</button>
             <h2 className="modal-title">Create Session</h2>
             <form className="session-form" onSubmit={handleSubmit}>
               {/* Row 1: Date and Session Fee */}
