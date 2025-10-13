@@ -35,7 +35,7 @@ export default function DoctorDashboard() {
     if(!formData.Date) {
       newErrors.Date = "Date is required";
     }
-    if(!formData.SessionFee) {
+    if(!formData.SessionFee && formData.SessionFee !== 0) {
       newErrors.SessionFee = "Session fee is required";
     }
     if(!formData.StartTime) {
@@ -54,22 +54,33 @@ export default function DoctorDashboard() {
       newErrors.Description = "Description is required";
     }
 
+    // Time range validation: End time must be after Start time
+    if (formData.StartTime && formData.EndTime) {
+      const [sh, sm = "0"] = formData.StartTime.split(":");
+      const [eh, em = "0"] = formData.EndTime.split(":");
+      const startMinutes = parseInt(sh) * 60 + parseInt(sm);
+      const endMinutes = parseInt(eh) * 60 + parseInt(em);
+      if (!isNaN(startMinutes) && !isNaN(endMinutes) && endMinutes <= startMinutes) {
+        newErrors.EndTime = "End time must be after start time";
+      }
+    }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-
-
-
-
+    return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if(!validateForm()) {
+    const { isValid, errors: vErrors } = validateForm();
+    if(!isValid) {
       setLoading(false);
-      toast.error("Please fill in all required fields correctly");
+      if (vErrors.EndTime === "End time must be after start time") {
+        toast.error(vErrors.EndTime);
+      } else {
+        toast.error("Please fill in all required fields correctly");
+      }
       return;
     }
 
@@ -90,9 +101,14 @@ export default function DoctorDashboard() {
 
       console.log("Session created:", res.data);
       toast.success("Session created successfully");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating session:", err);
-      toast.error("Error creating session");
+      const backendMessage = err?.response?.data?.Message || err?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(String(backendMessage));
+      } else {
+        toast.error("Error creating session");
+      }
     } finally {
       setLoading(false);
       setIsModalOpen(false);
