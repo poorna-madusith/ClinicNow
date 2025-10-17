@@ -280,7 +280,7 @@ export default function DoctorDashboard() {
                       <svg className="clock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span>{session.startTime} - {session.endTime}</span>
+                      <span>{new Date(`1970-01-01T${session.startTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })} - {new Date(`1970-01-01T${session.endTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
                     </div>
 
                     <div className="session-description">
