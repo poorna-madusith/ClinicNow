@@ -80,4 +80,47 @@ public class SessionServices
             .ToListAsync();
         return sessions;
     }
+
+
+    //update session
+    public async Task<IActionResult> EditSession(int sessionId, SessionDto sessionDto)
+    {
+        var existingSession = await _context.Sessions.FindAsync(sessionId);
+        if (existingSession == null)
+        {
+            throw new Exception("Session not found");
+        }
+
+        var doctor = await _userManager.FindByIdAsync(sessionDto.DoctorId);
+        if (doctor == null || doctor.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Invalid doctor ID");
+        }
+        if (sessionDto.EndTime <= sessionDto.StartTime)
+        {
+            throw new Exception("End time must be after start time");
+        }
+        existingSession.DoctorId = sessionDto.DoctorId;
+        existingSession.Doctor = doctor;
+        existingSession.Date = sessionDto.Date.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(sessionDto.Date, DateTimeKind.Utc)
+            : sessionDto.Date.ToUniversalTime();
+        existingSession.StartTime = sessionDto.StartTime;
+        existingSession.EndTime = sessionDto.EndTime;
+        existingSession.SessionFee = sessionDto.SessionFee;
+        existingSession.Description = sessionDto.Description;
+        existingSession.Capacity = sessionDto.Capacity;
+
+        _context.Sessions.Update(existingSession);
+        var result = await _context.SaveChangesAsync();
+
+        if (result > 0)
+        {
+            return new OkObjectResult(existingSession);
+        }
+        else
+        {
+            throw new Exception("Failed to update session");
+        }
+    }
 }

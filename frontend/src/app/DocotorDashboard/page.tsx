@@ -22,6 +22,8 @@ export default function DoctorDashboard() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [editSession, setEditSession] = useState<Session | null>(null);
 
 
   const fetchSessions = async () => {
@@ -39,6 +41,76 @@ export default function DoctorDashboard() {
       setSessions(res.data);
     } catch (error) {
       console.error("Error fetching sessions:", error);
+    }
+  }
+
+  const handleEditClick = (session :Session) => {
+    setEditSession(session);
+    setEditModalOpen(true);
+
+    const date = new Date(session.date);
+    const formattedDate = date.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+
+    setFormData({
+      DoctorId: session.doctorId || "",
+      Capacity: session.capacity || 0,
+      StartTime: session.startTime || "",
+      EndTime: session.endTime || "",
+      Date: formattedDate,
+      SessionFee: session.sessionFee || 0,
+      Description: session.description || "",
+    });    
+  }
+
+  const handleEditSubmit = async (e:React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { isValid, errors: vErrors } = validateForm();
+    if(!isValid) {
+      setLoading(false);
+      if (vErrors.EndTime === "End time must be after start time") {
+        toast.error(vErrors.EndTime);
+      } else {
+        toast.error("Please fill in all required fields correctly");
+      }
+      return;
+    }
+
+    try{
+      const res = await axios.put(`${API}/session/editsession/${editSession?.id}`, {
+        ...formData,
+        DoctorId: userId,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      console.log("Session edited:", res.data);
+      toast.success("Session updated successfully");
+      fetchSessions();
+    } catch (err: any) {
+      console.error("Error editing session:", err);
+      const backendMessage = err?.response?.data?.Message || err?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(String(backendMessage));
+      } else {
+        toast.error("Error editing session");
+      }
+    } finally {
+      setLoading(false);
+      setEditModalOpen(false);
+      setFormData({
+        DoctorId: "",
+        Capacity: 0,
+        StartTime: "",
+        EndTime: "",
+        Date: "",
+        SessionFee: 0,
+        Description: "",
+      });
     }
   }
 
@@ -149,6 +221,8 @@ export default function DoctorDashboard() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditModalOpen(false);
+    setEditSession(null);
     setFormData({
       DoctorId: "",
       Capacity: 0,
@@ -241,7 +315,7 @@ export default function DoctorDashboard() {
                     <button className="view-details-btn">
                       View More
                     </button>
-                    <button className="manage-btn">
+                    <button className="manage-btn" onClick={() => handleEditClick(session)}>
                       Edit
                     </button>
                   </div>
@@ -260,12 +334,12 @@ export default function DoctorDashboard() {
         )}
       </div>
 
-      {isModalOpen && (
+      {(isModalOpen || editModalOpen) && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close-modal-btn" onClick={() => handleCloseModal()}>&times;</button>
-            <h2 className="modal-title">Create Session</h2>
-            <form className="session-form" onSubmit={handleSubmit}>
+            <button className="close-modal-btn" onClick={handleCloseModal}>&times;</button>
+            <h2 className="modal-title">{editModalOpen ? "Edit Session" : "Create Session"}</h2>
+            <form className="session-form" onSubmit={editModalOpen? handleEditSubmit : handleSubmit}>
               {/* Row 1: Date and Session Fee */}
               <div className="form-row">
                 <div className="form-field">
@@ -376,7 +450,7 @@ export default function DoctorDashboard() {
               </div>
 
               <button className="submit-btn" type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Session"}
+                {loading ? (editModalOpen ? "Updating..." : "Creating...") : (editModalOpen ? "Update Session" : "Create Session")}
               </button>
             </form>
           </div>
