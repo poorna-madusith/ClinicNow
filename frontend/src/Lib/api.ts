@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useAuth } from "@/Context/AuthContext";
-import type { AxiosRequestConfig } from "axios";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
@@ -34,8 +33,10 @@ export function useApi() {
                 try {
                     const refreshRes = await api.post("/auth/refresh-token");
                     const data = refreshRes.data;
-                    setAccessToken(data.accessToken);
-                    originalRequest.headers["Authorization"] = `Bearer ${data.accessToken}`;
+                    const newToken = data.accessToken ?? data.AccessToken ?? data.token;
+                    if (!newToken) throw new Error("No access token in refresh response");
+                    setAccessToken(newToken);
+                    originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
                     return api(originalRequest);
                 } catch (refreshError) {
                     return Promise.reject(refreshError);
@@ -45,12 +46,5 @@ export function useApi() {
         }
     );
 
-
-    async function request(url: string, options: AxiosRequestConfig = {}) {
-        // Axios uses config object, not fetch options
-        const res = await api({ url, ...options });
-        return res.data;
-    }
-
-    return { request };
+    return { api };
 }

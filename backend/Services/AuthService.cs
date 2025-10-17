@@ -136,8 +136,8 @@ public class AuthService
 
     }
 
-    //refresh token
-    public async Task<string?> RefreshAccessToken(string refreshToken)
+    //refresh token with rotation
+    public async Task<(string accessToken, string refreshToken)?> RefreshAccessToken(string refreshToken)
     {
         var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(
             t => t.Token == refreshToken && !t.IsRevoked
@@ -148,15 +148,26 @@ public class AuthService
             return null;
         }
 
-        // Revoke the used refresh token
-        storedToken.IsRevoked = true;
-        await _context.SaveChangesAsync();
-
         var user = await _userManager.FindByIdAsync(storedToken.UserId);
         if (user == null) return null;
 
-        // Optionally, generate a new refresh token here and return it if you want rotation
-        return GenerateJwtToken(user);
+        // Revoke the used refresh token
+        storedToken.IsRevoked = true;
+
+        // Issue a new refresh token (rotation)
+        var newRefreshToken = new RefreshToken
+        {
+            Token = Guid.NewGuid().ToString(),
+            UserId = storedToken.UserId,
+            Expires = DateTime.UtcNow.AddDays(7),
+            IsRevoked = false
+        };
+
+        _context.RefreshTokens.Add(newRefreshToken);
+        await _context.SaveChangesAsync();
+
+        var newAccessToken = GenerateJwtToken(user);
+        return (newAccessToken, newRefreshToken.Token);
     }
 
     //google login

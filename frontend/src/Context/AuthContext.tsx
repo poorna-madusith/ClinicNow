@@ -64,18 +64,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     if (token) {
       parseToken(token);
-      // Store token in localStorage as fallback for development
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', token);
-      }
     } else {
       setDecodedToken(null);
       setUserId(null);
       setUserRole(null);
       setIsAuthenticated(false);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('accessToken');
-      }
     }
   }, [parseToken]);
 
@@ -110,32 +103,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Initialize authentication check
+  // Initialize authentication check: skip for public pages (Login, UserSignup)
   useEffect(() => {
-    const pathname = window.location.pathname;
-    const publicPaths = ['/Login', '/UserSignup', '/'];
-    
-    // Try to restore token from localStorage first
-    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (storedToken) {
-      try {
-        parseToken(storedToken);
-        setAccessTokenState(storedToken);
-        setIsInitialized(true);
-        return;
-      } catch {
-        // Invalid token, remove it
-        localStorage.removeItem('accessToken');
-      }
-    }
-    
-    // Skip auth check on public pages to avoid unnecessary 401 errors
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const publicPaths = ['/Login', '/UserSignup'];
+
     if (publicPaths.includes(pathname)) {
       setIsInitialized(true);
     } else {
       checkAuth().finally(() => setIsInitialized(true));
     }
-  }, [checkAuth, parseToken]);
+  }, [checkAuth]);
 
   if (!isInitialized) {
     return <div>Loading...</div>;
