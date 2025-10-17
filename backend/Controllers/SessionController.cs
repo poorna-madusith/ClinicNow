@@ -55,4 +55,22 @@ public class SessionController : ControllerBase
         }
     }
 
+    [HttpPut("editsession/{sessionId}")]
+    public async Task<IActionResult> EditSession(int sessionId, [FromBody] SessionDto sessionDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var updatedSession = await _sessionServices.EditSession(sessionId, sessionDto);
+            return Ok(new { message = "Session updated successfully", updatedSession });
+        }catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 }

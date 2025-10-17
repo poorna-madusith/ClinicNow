@@ -12,7 +12,7 @@ import { Eye, EyeOff } from "lucide-react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAccessToken, decodedToken  } = useAuth();
+  const { setAccessToken  } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);

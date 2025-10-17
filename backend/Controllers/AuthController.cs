@@ -70,8 +70,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = false, // Set to false for development over HTTP  
-                SameSite = SameSiteMode.None // None allows cross-site cookies for localhost
+                Secure = false, // Dev over HTTP
+                SameSite = SameSiteMode.Lax // Lax plays nicer on localhost without HTTPS
             });
 
             return Ok(new { AccessToken = access, Role = role });// return access token and role
@@ -93,13 +93,21 @@ public class AuthController : ControllerBase
             return Unauthorized("No refresh token provided");
         }
 
-        var token = await _authService.RefreshAccessToken(refreshToken);
-        if (token == null)
+        var rotated = await _authService.RefreshAccessToken(refreshToken);
+        if (rotated == null)
         {
             return Unauthorized("Invalid refresh token");
         }
 
-        return Ok(new { AccessToken = token });
+        Response.Cookies.Append("refreshToken", rotated.Value.refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Expires = DateTimeOffset.UtcNow.AddDays(7),
+            Secure = false,
+            SameSite = SameSiteMode.Lax
+        });
+
+        return Ok(new { AccessToken = rotated.Value.accessToken });
     }
 
 
@@ -115,8 +123,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = false, // Set to false for development over HTTP  
-                SameSite = SameSiteMode.None // None allows cross-site cookies for localhost
+                Secure = false, // Dev over HTTP
+                SameSite = SameSiteMode.Lax
             });
 
             return Ok(new { AccessToken = access, Role = role });
@@ -149,14 +157,22 @@ public class AuthController : ControllerBase
 
         try
         {
-            var accessToken = await _authService.RefreshAccessToken(refreshToken);
-            if (accessToken == null)
+            var rotated = await _authService.RefreshAccessToken(refreshToken);
+            if (rotated == null)
             {
                 Response.Cookies.Delete("refreshToken");
                 return Unauthorized(new { success = false, message = "Invalid refresh token" });
             }
 
-            return Ok(new { success = true, token = accessToken });
+            Response.Cookies.Append("refreshToken", rotated.Value.refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            return Ok(new { success = true, token = rotated.Value.accessToken });
         }
         catch (Exception ex)
         {
