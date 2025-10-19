@@ -67,7 +67,31 @@ public class SessionController : ControllerBase
         {
             var updatedSession = await _sessionServices.EditSession(sessionId, sessionDto);
             return Ok(new { message = "Session updated successfully", updatedSession });
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    //cancel session
+    [HttpPatch("cancelsession/{sessionId}")]
+    public async Task<IActionResult> CancelSession(int sessionId)
+    {
+        try
+        {
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userRole = User.FindFirst("role")?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userRole))
+            {
+                return Unauthorized(new { Message = "User ID or role not found in token." });
+            }
+
+            var canceledSession = await _sessionServices.CancelSession(sessionId, userId, userRole);
+            return Ok(new { message = "Session canceled successfully", canceledSession });
+        }
+        catch (Exception ex)
         {
             return BadRequest(new { Message = ex.Message });
         }

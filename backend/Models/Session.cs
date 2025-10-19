@@ -31,6 +31,8 @@ namespace backend.Models
         [Required]
         public int Capacity { get; set; }
 
+        public bool Canceled { get; set; } = false;
+
         public ICollection<ApplicationUser> Patients { get; set; } = new List<ApplicationUser>();
     }
 }

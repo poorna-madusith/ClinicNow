@@ -123,4 +123,39 @@ public class SessionServices
             throw new Exception("Failed to update session");
         }
     }
+
+
+    //cancel a session
+    public async Task<Session> CancelSession(int sessionId, string userId, string userRole)
+    {
+        var existingSession = await _context.Sessions.FindAsync(sessionId);
+        if (existingSession == null)
+        {
+            throw new Exception("Session not found");
+        }
+
+        // Security check: Allow only the session's doctor or an admin to cancel
+        if (userRole != "Admin" && existingSession.DoctorId != userId)
+        {
+            throw new Exception("You are not authorized to cancel this session");
+        }
+
+        if (existingSession.Canceled)
+        {
+            throw new Exception("Session is already canceled");
+        }
+
+        existingSession.Canceled = true;
+        _context.Sessions.Update(existingSession);
+        var result = await _context.SaveChangesAsync();
+
+        if (result > 0)
+        {
+            return existingSession;
+        }
+        else
+        {
+            throw new Exception("Failed to cancel session");
+        }
+    }
 }
