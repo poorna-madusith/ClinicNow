@@ -80,15 +80,12 @@ public class SessionController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-            var userRole = User.FindFirst("role")?.Value;
-
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userRole))
+             var doctorId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(doctorId))
             {
-                return Unauthorized(new { Message = "User ID or role not found in token." });
+                return Unauthorized(new { Message = "User ID not found in token." });
             }
-
-            var canceledSession = await _sessionServices.CancelSession(sessionId, userId, userRole);
+            var canceledSession = await _sessionServices.CancelSession(sessionId, doctorId);
             return Ok(new { message = "Session canceled successfully", canceledSession });
         }
         catch (Exception ex)

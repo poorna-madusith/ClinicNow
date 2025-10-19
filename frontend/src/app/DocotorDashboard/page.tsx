@@ -26,6 +26,24 @@ export default function DoctorDashboard() {
   const [editSession, setEditSession] = useState<Session | null>(null);
 
 
+
+  const cancelSession = async (sessionId: string) => {
+    try{
+      const res = await axios.patch(`${API}/session/cancelsession/${sessionId}`,{},{
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      toast.success("Session canceled successfully");
+      fetchSessions();
+    } catch (error) {
+      console.error("Error canceling session:", error);
+    }
+  }
+
+
+
   const fetchSessions = async () => {
     try{
       const res = await axios.get(
@@ -38,7 +56,8 @@ export default function DoctorDashboard() {
         }
       )
       console.log("Sessions fetched:", res.data);
-      setSessions(res.data);
+      const activesessions = res.data.filter((sessions: Session)=> sessions.canceled === false);
+      setSessions(activesessions);
     } catch (error) {
       console.error("Error fetching sessions:", error);
     }
@@ -317,6 +336,8 @@ export default function DoctorDashboard() {
                     </button>
                     <button className="manage-btn" onClick={() => handleEditClick(session)}>
                       Edit
+                    </button><button className="manage-btn" onClick={() => cancelSession(session.id.toString())}>
+                      Cancel
                     </button>
                   </div>
                 </div>

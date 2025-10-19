@@ -126,7 +126,7 @@ public class SessionServices
 
 
     //cancel a session
-    public async Task<Session> CancelSession(int sessionId, string userId, string userRole)
+    public async Task<Session> CancelSession(int sessionId, string userId)
     {
         var existingSession = await _context.Sessions.FindAsync(sessionId);
         if (existingSession == null)
@@ -134,10 +134,10 @@ public class SessionServices
             throw new Exception("Session not found");
         }
 
-        // Security check: Allow only the session's doctor or an admin to cancel
-        if (userRole != "Admin" && existingSession.DoctorId != userId)
+        var doctor  = await _userManager.FindByIdAsync(userId);
+        if (doctor == null || doctor.Role != RoleEnum.Doctor || doctor.Role == RoleEnum.Patient)
         {
-            throw new Exception("You are not authorized to cancel this session");
+            throw new Exception("Only doctors can cancel sessions");
         }
 
         if (existingSession.Canceled)
