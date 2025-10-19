@@ -80,7 +80,7 @@ public class SessionController : ControllerBase
     {
         try
         {
-             var doctorId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var doctorId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
             if (string.IsNullOrEmpty(doctorId))
             {
                 return Unauthorized(new { Message = "User ID not found in token." });

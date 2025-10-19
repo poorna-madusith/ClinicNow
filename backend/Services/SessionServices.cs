@@ -92,7 +92,7 @@ public class SessionServices
         }
 
         var doctor = await _userManager.FindByIdAsync(sessionDto.DoctorId);
-        if (doctor == null || doctor.Role != RoleEnum.Doctor)
+        if (doctor == null || doctor.Role != RoleEnum.Doctor || doctor.Role == RoleEnum.Patient)
         {
             throw new Exception("Invalid doctor ID");
         }
