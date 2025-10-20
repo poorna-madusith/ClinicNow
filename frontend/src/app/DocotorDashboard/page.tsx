@@ -5,6 +5,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { Session } from "@/types/Session";
+import SessionFullView from "@/components/SessionFullView";
 
 export default function DoctorDashboard() {
   const [formData, setFormData] = useState({
@@ -24,6 +25,19 @@ export default function DoctorDashboard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [editSession, setEditSession] = useState<Session | null>(null);
+  const [openFullSessionView, setOpenFullSessionView] = useState<boolean>(false);
+  const [fullViewSession, setFullViewSession] = useState<Session | null>(null);
+
+
+  const handleOpenFullView = (session: Session) => {
+    setFullViewSession(session);
+    setOpenFullSessionView(true);
+  };
+
+  const handleCloseFullView = () => {
+    setFullViewSession(null);
+    setOpenFullSessionView(false);
+  };
 
 
 
@@ -331,7 +345,7 @@ export default function DoctorDashboard() {
                   </div>
 
                   <div className="session-footer">
-                    <button className="view-details-btn">
+                    <button className="view-details-btn" onClick={() => handleOpenFullView(session)}>
                       View More
                     </button>
                     <button className="manage-btn" onClick={() => handleEditClick(session)}>
@@ -968,6 +982,14 @@ export default function DoctorDashboard() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
+
+      {fullViewSession && (
+        <SessionFullView
+          isModalOpen={openFullSessionView}
+          isClose={() => handleCloseFullView()}
+          session={fullViewSession}
+        />
+      )}
     </div>
   );
 }
