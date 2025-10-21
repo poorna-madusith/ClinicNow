@@ -15,6 +15,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Session> Sessions { get; set; }
 
+    public DbSet<Booking> Bookings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -26,9 +28,22 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Session>()
-            .HasMany(s => s.Patients)
+            .HasMany(s => s.Bookings)
+            .WithOne(b => b.Session)
+            .HasForeignKey(b => b.SessionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Booking>()
+            .HasOne(b => b.Session)
+            .WithMany(s => s.Bookings)
+            .HasForeignKey(b => b.SessionId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.Entity<Booking>()
+            .HasOne(b => b.Patient)
             .WithMany()
-            .UsingEntity(j => j.ToTable("SessionPatients"));
+            .HasForeignKey(b => b.PatientId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
  }
