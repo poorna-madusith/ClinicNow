@@ -285,7 +285,8 @@ export default function DoctorDashboard() {
         {sessions.length > 0 ? (
           <div className="sessions-grid">
             {sessions.map((session, index) => {
-              const bookedCount = session.patients ? session.patients.length : 0;
+              // Get patients from bookings if available, otherwise use patients array for backward compatibility
+              const bookedCount = session.bookings?.length || session.patients?.length || 0;
               const availableSlots = session.capacity - bookedCount;
               const fillPercentage = (bookedCount / session.capacity) * 100;
               

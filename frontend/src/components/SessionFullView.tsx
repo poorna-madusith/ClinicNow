@@ -17,7 +17,9 @@ export default function SessionFullView({isModalOpen,isClose,session}: SessionFu
         return null;
     }
 
-    const bookedCount = session.patients ? session.patients.length : 0;
+    // Get patients from bookings if available, otherwise use patients array for backward compatibility
+    const patients = session.bookings?.map(booking => booking.patient).filter(p => p != null) || session.patients || [];
+    const bookedCount = patients.length;
     const availableSlots = session.capacity - bookedCount;
     const fillPercentage = (bookedCount / session.capacity) * 100;
 
@@ -178,15 +180,15 @@ export default function SessionFullView({isModalOpen,isClose,session}: SessionFu
                                 <span className="patient-count">{bookedCount}</span>
                             </div>
                             <div className="card-content patients-list">
-                                {session.patients && session.patients.length > 0 ? (
-                                    session.patients.map((patient, index) => (
-                                        <div key={index} className="patient-item">
+                                {patients && patients.length > 0 ? (
+                                    patients.map((patient, index) => (
+                                        <div key={patient?.id || index} className="patient-item">
                                             <div className="patient-avatar">
-                                                {patient.firstName?.charAt(0)}{patient.lastName?.charAt(0)}
+                                                {patient?.firstName?.charAt(0)}{patient?.lastName?.charAt(0)}
                                             </div>
                                             <div className="patient-info">
-                                                <p className="patient-name">{patient.firstName} {patient.lastName}</p>
-                                                <p className="patient-email">{patient.email}</p>
+                                                <p className="patient-name">{patient?.firstName} {patient?.lastName}</p>
+                                                <p className="patient-email">{patient?.email}</p>
                                             </div>
                                         </div>
                                     ))

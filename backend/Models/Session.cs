@@ -33,6 +33,6 @@ namespace backend.Models
 
         public bool Canceled { get; set; } = false;
 
-        public ICollection<ApplicationUser> Patients { get; set; } = new List<ApplicationUser>();
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

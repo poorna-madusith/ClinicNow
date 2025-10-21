@@ -1,3 +1,5 @@
+import { Booking } from './Booking';
+
 export interface Session {
     id: number;
     doctorId: string;
@@ -14,6 +16,8 @@ export interface Session {
     sessionFee: number;
     description: string;
     capacity: number;
+    bookings?: Booking[];
+    // Keep patients for backward compatibility (derived from bookings)
     patients?: Array<{
         id?: string;
         firstName?: string;

@@ -74,7 +74,8 @@ public class SessionServices
 
         var sessions = await _context.Sessions
             .Where(s => s.DoctorId == doctorId)
-            .Include(s => s.Patients)
+            .Include(s => s.Bookings)
+                .ThenInclude(b => b.Patient)
             .OrderBy(s => s.Date)
             .ThenBy(s => s.StartTime)
             .ToListAsync();
