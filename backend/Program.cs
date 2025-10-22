@@ -62,6 +62,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AdminDocServices>();
 builder.Services.AddScoped<SessionServices>();
+builder.Services.AddScoped<UserSessionServices>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
