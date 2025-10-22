@@ -33,6 +33,21 @@ public class UserSessionController : ControllerBase
         }
     }
 
+    [HttpGet("getalldoctors")]
+    public async Task<IActionResult> GetAllDoctors()
+    {
+        try
+        {
+            var doctor = await _userSessionServices.GetAllDoctors();
+            return Ok(doctor);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
 
 
 

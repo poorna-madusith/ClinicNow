@@ -38,4 +38,12 @@ public class UserSessionServices
         return sessions;
     }
 
+
+    //get ALl doctors
+    public async Task<List<ApplicationUser>> GetAllDoctors()
+    {
+        var doctors = await _userManager.GetUsersInRoleAsync(RoleEnum.Doctor.ToString());
+        return doctors.ToList();
+    }
+
 }
