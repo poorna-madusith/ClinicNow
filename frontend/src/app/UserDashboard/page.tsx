@@ -121,13 +121,6 @@ export default function UserDashboard() {
                       )}
                     </div>
 
-                    {/* Description */}
-                    {doctor.docDescription && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {doctor.docDescription}
-                      </p>
-                    )}
-
                     {/* Details Grid */}
                     <div className="space-y-3 mb-4">
                       {doctor.age && (
