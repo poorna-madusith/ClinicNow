@@ -59,14 +59,11 @@ public class AdminDocServices
 
 
     //get all doctors
-    public async Task<IActionResult> GetAllDoctors()
+     //get ALl doctors
+    public async Task<List<ApplicationUser>> GetAllDoctors()
     {
-        var doctors = await _context.Users.Where(u => u.Role == RoleEnum.Doctor).ToArrayAsync();
-        if (doctors.Length == 0)
-        {
-            return new OkObjectResult("No doctors found");
-        }
-        return new OkObjectResult(doctors);
+        var doctors = await _userManager.GetUsersInRoleAsync(RoleEnum.Doctor.ToString());
+        return doctors.ToList();
     }
     
 }
