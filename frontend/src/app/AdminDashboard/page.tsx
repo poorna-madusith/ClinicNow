@@ -29,9 +29,101 @@ export default function AdminDashboard() {
     contactNumbers: [],
     address: "",
   });
+  const [errors, setErrors] = useState<{ key: string; message: string }[]>([]);
+
+
+
+  const validateFrom = () => {
+    const newErrors: { key: string; message: string }[] = [];
+
+    // First Name validation
+    if(!formData.firstName.trim()){
+      newErrors.push({ key: "firstName", message: "First name is required" });
+    }
+
+    // Last Name validation
+    if(!formData.lastName.trim()){
+      newErrors.push({ key: "lastName", message: "Last name is required" });
+    }
+
+    // Email validation
+    if(!formData.email.trim()){
+      newErrors.push({ key: "email", message: "Email is required" });
+    }else if(!/\S+@\S+\.\S+/.test(formData.email)){
+      newErrors.push({ key: "email", message: "Email is invalid" });
+    }
+
+    // Password validation
+    if(!formData.password.trim()){
+      newErrors.push({ key: "password", message: "Password is required" });
+    }else if(formData.password.length < 6){
+      newErrors.push({ key: "password", message: "Password must be at least 6 characters long" });
+    }
+
+    // Age validation
+    if(!formData.age || formData.age <= 0){
+      newErrors.push({ key: "age", message: "Age must be greater than 0" });
+    }else if(formData.age < 18){
+      newErrors.push({ key: "age", message: "Doctor must be at least 18 years old" });
+    }else if(formData.age > 100){
+      newErrors.push({ key: "age", message: "Please enter a valid age" });
+    }
+
+    // Specialization validation
+    if(!formData.specialization.trim()){
+      newErrors.push({ key: "specialization", message: "Specialization is required" });
+    }
+
+    // Description validation
+    if(!formData.docDescription.trim()){
+      newErrors.push({ key: "docDescription", message: "Doctor description is required" });
+    }else if(formData.docDescription.trim().length < 10){
+      newErrors.push({ key: "docDescription", message: "Description must be at least 10 characters" });
+    }
+
+    // Profile Image URL validation
+    if(!formData.profileImageUrl.trim()){
+      newErrors.push({ key: "profileImageUrl", message: "Profile image URL is required" });
+    }else if(!/^https?:\/\/.+/.test(formData.profileImageUrl)){
+      newErrors.push({ key: "profileImageUrl", message: "Please enter a valid URL (http:// or https://)" });
+    }
+
+    // Contact Email validation
+    if(!formData.contactEmail.trim()){
+      newErrors.push({ key: "contactEmail", message: "Contact email is required" });
+    }else if(!/\S+@\S+\.\S+/.test(formData.contactEmail)){
+      newErrors.push({ key: "contactEmail", message: "Contact email is invalid" });
+    }
+
+    // Contact Numbers validation
+    if(formData.contactNumbers.length === 0 || formData.contactNumbers.some(num => num.trim() === "")){
+      newErrors.push({ key: "contactNumbers", message: "At least one contact number is required" });
+    }else {
+      // Validate phone number format
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      const invalidNumbers = formData.contactNumbers.filter(num => num.trim() && !phoneRegex.test(num.trim()));
+      if(invalidNumbers.length > 0){
+        newErrors.push({ key: "contactNumbers", message: "Invalid phone number format" });
+      }
+    }
+
+    // Address validation
+    if(!formData.address.trim()){
+      newErrors.push({ key: "address", message: "Address is required" });
+    }else if(formData.address.trim().length < 10){
+      newErrors.push({ key: "address", message: "Address must be at least 10 characters" });
+    }
+
+    setErrors(newErrors);
+    return newErrors.length === 0;
+  };
 
   const handleAddDoctor = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if(!validateFrom()){
+        toast.error("Please fix the errors in the form");
+        return;
+    }
     try {
       await axios.post(`${API}/admin/doctorregister`, formData, {
         headers: {
@@ -42,12 +134,36 @@ export default function AdminDashboard() {
 
       toast.success("Doctor added successfully");
       fetchDoctors();
+      resetForm();
     } catch (err) {
       console.log("Error adding doctor:", err);
       toast.error("Error adding doctor");
     } finally {
       setAddeditmodalOpen(false);
     }
+  };
+
+  const resetForm = () => {
+    setFromData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      age: 0,
+      gender: Gender.Other,
+      specialization: "",
+      profileImageUrl: "",
+      contactEmail: "",
+      docDescription: "",
+      contactNumbers: [],
+      address: "",
+    });
+    setErrors([]);
+  };
+
+  const handleCloseAddModal = () => {
+    setAddeditmodalOpen(false);
+    resetForm();
   };
 
   const fetchDoctors = useCallback(async () => {
@@ -187,7 +303,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setAddeditmodalOpen(false)}
+                  onClick={handleCloseAddModal}
                   className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-lg transition-all"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,29 +328,36 @@ export default function AdminDashboard() {
                       <input
                         type="text"
                         placeholder="Enter first name"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "firstName") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, firstName: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "firstName")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
                       <input
                         type="text"
                         placeholder="Enter last name"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "lastName") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, lastName: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "lastName")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
                       <input
                         type="number"
                         placeholder="Enter age"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "age") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, age: Number(e.target.value) })}
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "age")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
@@ -246,6 +369,7 @@ export default function AdminDashboard() {
                         <option value={Gender.Male}>Male</option>
                         <option value={Gender.Female}>Female</option>
                       </select>
+                      <p className="text-red-500 text-sm">{errors.find(error => error.key === "gender")?.message}</p>
                     </div>
                   </div>
                 </div>
@@ -262,20 +386,24 @@ export default function AdminDashboard() {
                       <input
                         type="email"
                         placeholder="doctor@example.com"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "email") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, email: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "email")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
                       <input
                         type="password"
                         placeholder="Enter secure password"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "password") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, password: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "password")?.message}</p>
                     </div>
                   </div>
                 </div>
@@ -290,9 +418,10 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Specialization *</label>
                       <select
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none bg-white text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none bg-white text-black ${
+                          errors.find(error => error.key === "specialization") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, specialization: e.target.value })}
-                        required
                       >
                         <option value="">Select Specialization</option>
                         
@@ -334,26 +463,31 @@ export default function AdminDashboard() {
                           <option value="Oncologist">Oncologist</option>
                         </optgroup>
                       </select>
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "specialization")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
                       <textarea
                         placeholder="Brief description about the doctor's expertise and experience"
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none resize-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none resize-none text-black ${
+                          errors.find(error => error.key === "docDescription") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, docDescription: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "docDescription")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Profile Image URL *</label>
                       <input
                         type="text"
                         placeholder="https://example.com/image.jpg"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "profileImageUrl") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, profileImageUrl: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "profileImageUrl")?.message}</p>
                     </div>
                   </div>
                 </div>
@@ -370,30 +504,36 @@ export default function AdminDashboard() {
                       <input
                         type="email"
                         placeholder="contact@example.com"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "contactEmail") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, contactEmail: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "contactEmail")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Contact Numbers *</label>
                       <input
                         type="text"
                         placeholder="Enter phone numbers (comma separated)"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none text-black ${
+                          errors.find(error => error.key === "contactNumbers") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, contactNumbers: e.target.value.split(",").map(n => n.trim()) })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "contactNumbers")?.message}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
                       <textarea
                         placeholder="Enter full address"
                         rows={2}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none resize-none text-black"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none resize-none text-black ${
+                          errors.find(error => error.key === "address") ? "border-red-500" : "border-gray-300"
+                        }`}
                         onChange={(e) => setFromData({ ...formData, address: e.target.value })}
-                        required
                       />
+                      <p className="text-red-500 text-sm mt-1">{errors.find(error => error.key === "address")?.message}</p>
                     </div>
                   </div>
                 </div>
@@ -403,7 +543,7 @@ export default function AdminDashboard() {
               <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
                 <button
                   type="button"
-                  onClick={() => setAddeditmodalOpen(false)}
+                  onClick={handleCloseAddModal}
                   className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
                 >
                   Cancel
