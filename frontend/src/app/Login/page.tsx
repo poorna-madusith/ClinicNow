@@ -85,6 +85,8 @@ export default function LoginPage() {
         router.push("/UserDashboard"); // Redirect to home or dashboard after successful login
       }else if(data.role === "Doctor"){
         router.push("/DocotorDashboard");
+      }else if(data.role === "Admin"){
+        router.push("/AdminDashboard");
       }
       
     } catch (err: unknown) {
