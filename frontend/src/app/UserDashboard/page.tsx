@@ -55,7 +55,7 @@ export default function UserDashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
@@ -70,7 +70,7 @@ export default function UserDashboard() {
           {/* Doctors Section */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-              <span className="bg-blue-500 w-1.5 h-8 rounded-full mr-3"></span>
+              <span className="bg-teal-500 w-1.5 h-8 rounded-full mr-3"></span>
               Available Doctors
               <span className="ml-3 text-sm font-normal text-gray-500">
                 ({doctors.length} {doctors.length === 1 ? 'doctor' : 'doctors'} available)
@@ -79,7 +79,7 @@ export default function UserDashboard() {
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
               </div>
             ) : doctors.length === 0 ? (
               <div className="bg-white rounded-xl shadow-md p-12 text-center">
@@ -92,14 +92,14 @@ export default function UserDashboard() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {doctors.map((doctor: Doctor) => (
                   <div
                     key={doctor.id}
-                    className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 flex flex-col"
+                    className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-transparent hover:border-teal-200 flex flex-col group"
                   >
                     {/* Profile Image Section */}
-                    <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="relative h-52">
                       {doctor.profileImageUrl ? (
                         <Image
                           src={doctor.profileImageUrl}
@@ -108,14 +108,14 @@ export default function UserDashboard() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-blue-500">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-100">
+                          <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center text-5xl font-bold text-teal-500 shadow-inner">
                             {doctor.firstName?.[0]}{doctor.lastName?.[0]}
                           </div>
                         </div>
                       )}
-                      <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full shadow-md">
-                        <span className="text-xs font-semibold text-blue-600">
+                      <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full shadow">
+                        <span className="text-xs font-semibold text-teal-700">
                           {doctor.gender || 'N/A'}
                         </span>
                       </div>
@@ -124,26 +124,23 @@ export default function UserDashboard() {
                     {/* Doctor Information */}
                     <div className="p-6 flex-grow flex flex-col">
                       {/* Name and Specialization */}
-                      <div className="mb-4">
+                      <div className="mb-4 text-center">
                         <h3 className="text-2xl font-bold text-gray-800 mb-1">
                           Dr. {doctor.firstName} {doctor.lastName}
                         </h3>
                         {doctor.specialization && (
-                          <p className="text-blue-600 font-semibold text-sm uppercase tracking-wide">
+                          <p className="text-teal-600 font-semibold text-sm uppercase tracking-wider">
                             {doctor.specialization}
                           </p>
                         )}
                       </div>
 
                       {/* Details Grid */}
-                      <div className="space-y-3 mb-4">
-                        
-                      
-
+                      <div className="space-y-3 mb-5 text-center">
                         {doctor.town && (
-                          <div className="flex items-center text-sm">
-                            <span className="text-gray-500 w-20">Location:</span>
-                            <span className="text-gray-700 font-medium">
+                          <div className="flex items-center justify-center text-sm">
+                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                            <span className="text-gray-600 font-medium">
                               {doctor.town}
                             </span>
                           </div>
@@ -154,11 +151,11 @@ export default function UserDashboard() {
                       <div className="flex-grow"></div>
 
                       {/* Contact and Action */}
-                      <div className="border-t pt-4 mt-4">
+                      <div className="border-t border-gray-100 pt-4 mt-auto">
                         <div className="flex justify-between items-center">
                           <button
                             onClick={() => handleViewMore(doctor)}
-                            className="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline font-semibold"
+                            className="flex items-center text-sm text-teal-600 hover:text-teal-800 font-semibold group-hover:underline"
                           >
                             <svg
                               className="w-5 h-5 mr-1.5"
@@ -179,9 +176,9 @@ export default function UserDashboard() {
                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                               />
                             </svg>
-                            View More
+                            More Info
                           </button>
-                          <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm">
+                          <button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm transform hover:scale-105">
                             Book Now
                           </button>
                         </div>
