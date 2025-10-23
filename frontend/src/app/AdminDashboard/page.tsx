@@ -53,116 +53,111 @@ export default function AdminDashboard() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
           <p className="text-gray-600">Manage and view all registered doctors</p>
+          {doctors.length > 0 && (
+            <p className="text-sm text-gray-500 mt-2">
+              Total Doctors: <span className="font-semibold text-teal-600">{doctors.length}</span>
+            </p>
+          )}
         </div>
 
-        {/* Doctors Grid */}
+        {/* Doctors Table */}
         {doctors.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {doctors.map((doctor) => (
-              <div
-                key={doctor.id}
-                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-teal-200 transform hover:-translate-y-1"
-              >
-                <div className="p-6">
-                  {/* Doctor Avatar */}
-                  <div className="flex items-center mb-4">
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-teal-100 to-cyan-100 flex-shrink-0">
-                      {doctor.profileImageUrl ? (
-                        <Image
-                          src={doctor.profileImageUrl}
-                          alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-teal-600">
-                          {doctor.firstName?.[0]}
-                          {doctor.lastName?.[0]}
-                        </div>
-                      )}
-                    </div>
-                    <div className="ml-4 flex-1 min-w-0">
-                      <h3 className="text-xl font-bold text-gray-800 truncate">
-                        Dr. {doctor.firstName} {doctor.lastName}
-                      </h3>
-                      {doctor.specialization && (
-                        <p className="text-sm text-teal-600 font-medium truncate">
-                          {doctor.specialization}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Doctor Info */}
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <span className="text-gray-600">
-                        Age: <span className="font-semibold text-gray-800">{doctor.age || "N/A"}</span>
-                      </span>
-                    </div>
-
-                    <div className="flex items-start text-sm">
-                      <svg
-                        className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0 mt-0.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <span className="text-gray-600 break-all">
-                        {doctor.contactEmail || "No email"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* View Full Button */}
-                  <button
-                    onClick={() => handleViewDoctor(doctor)}
-                    className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-medium rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+          <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Doctor</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Specialization</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Age</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Contact Email</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {doctors.map((doctor) => (
+                    <tr
+                      key={doctor.id}
+                      className="hover:bg-teal-50 transition-colors duration-150"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                    View Full Profile
-                  </button>
-                </div>
-              </div>
-            ))}
+                      {/* Doctor Info */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-teal-100 to-cyan-100 flex-shrink-0">
+                            {doctor.profileImageUrl ? (
+                              <Image
+                                src={doctor.profileImageUrl}
+                                alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-lg font-bold text-teal-600">
+                                {doctor.firstName?.[0]}
+                                {doctor.lastName?.[0]}
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-3">
+                            <div className="font-semibold text-gray-800">
+                              Dr. {doctor.firstName} {doctor.lastName}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Specialization */}
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-700">
+                          {doctor.specialization || "N/A"}
+                        </span>
+                      </td>
+
+                      {/* Age */}
+                      <td className="px-6 py-4 text-gray-700">
+                        {doctor.age || "N/A"}
+                      </td>
+
+                      {/* Contact Email */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-600 max-w-xs truncate">
+                          {doctor.contactEmail || "No email"}
+                        </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => handleViewDoctor(doctor)}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-medium rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
+                          </svg>
+                          View Profile
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-md p-12 text-center">
