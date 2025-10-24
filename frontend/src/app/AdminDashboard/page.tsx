@@ -16,6 +16,8 @@ export default function AdminDashboard() {
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
   const [addeditmodalOpen, setAddeditmodalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [formData, setFromData] = useState<DoctorRegister>({
     firstName: "",
     lastName: "",
@@ -304,12 +306,21 @@ export default function AdminDashboard() {
         },
       });
       setDoctors(res.data || []);
+      setFilteredDoctors(res.data || []);
       console.log("Doctors:", res.data);
     } catch (err) {
       console.log("Error fetching doctors:", err);
       setDoctors([]);
     }
   }, [API, accessToken]);
+
+
+  useEffect (()=>  {
+    const result = doctors.filter((doc)=> doc.firstName.toLocaleLowerCase().includes(search.toLocaleLowerCase())||
+
+    doc.lastName.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
+    setFilteredDoctors(result);
+  },[doctors, search]);
 
   useEffect(() => {
     if (accessToken) {
@@ -974,6 +985,58 @@ export default function AdminDashboard() {
         ) : (
           // Table View
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+            {/* Enhanced Search Bar */}
+            <div className="relative p-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+              <div className="relative max-w-2xl mx-auto">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-teal-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search doctors by name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-gray-700 placeholder-gray-400 shadow-sm hover:border-teal-300 bg-white"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-teal-600 transition-colors"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {search && (
+                <p className="text-center mt-3 text-sm text-gray-600">
+                  Found <span className="font-semibold text-teal-600">{filteredDoctors.length}</span> doctor{filteredDoctors.length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
@@ -1005,7 +1068,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {doctors.map((doctor, index) => (
+                  {filteredDoctors.map((doctor, index) => (
                     <tr
                       key={doctor.id}
                       className={`hover:bg-teal-50 transition-colors ${
