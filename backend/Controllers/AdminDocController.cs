@@ -56,5 +56,26 @@ public class AdminDocController : ControllerBase
         }
     }
 
+    //update a doctor
+    [HttpPut("updatedoctor/{id}")]
+    public async Task<IActionResult> updateDoctor(int id, [FromBody] DoctorRegisterDto doctorRegisterDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _adminDocServices.EditDoctor(id, doctorRegisterDto);
+            return Ok(new { Message = "Doctor updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
 
 }

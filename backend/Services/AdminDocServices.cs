@@ -58,12 +58,42 @@ public class AdminDocServices
     }
 
 
-    //get all doctors
-     //get ALl doctors
+    //get ALl doctors
     public async Task<List<ApplicationUser>> GetAllDoctors()
     {
         var doctors = await _userManager.GetUsersInRoleAsync(RoleEnum.Doctor.ToString());
         return doctors.ToList();
+    }
+
+    //edit doctor
+    public async Task<IActionResult> EditDoctor(int doctorId, DoctorRegisterDto doctorRegisterDto)
+    {
+        var doc = await _userManager.FindByIdAsync(doctorId.ToString());
+        if (doc == null || doc.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Doctor not found");
+        }
+
+        doc.FirstName = doctorRegisterDto.FirstName;
+        doc.LastName = doctorRegisterDto.LastName;
+        doc.Email = doctorRegisterDto.Email;
+        doc.UserName = doctorRegisterDto.Email;
+        doc.PasswordHash = _userManager.PasswordHasher.HashPassword(doc, doctorRegisterDto.Password);
+        doc.Age = doctorRegisterDto.Age;
+        doc.Gender = doctorRegisterDto.Gender;
+        doc.Specialization = doctorRegisterDto.Specialization;
+        doc.DocDescription = doctorRegisterDto.DocDescription;
+        doc.ProfileImageUrl = doctorRegisterDto.ProfileImageUrl;
+        doc.ContactEmail = doctorRegisterDto.ContactEmail;
+        doc.ContactNumbers = doctorRegisterDto.ContactNumbers;
+        doc.Address = doctorRegisterDto.Address;
+
+        var result = await _userManager.UpdateAsync(doc);
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+        return new OkObjectResult("Doctor updated successfully");
     }
     
 }
