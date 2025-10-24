@@ -95,5 +95,22 @@ public class AdminDocServices
         }
         return new OkObjectResult("Doctor updated successfully");
     }
+
+    //dete a doctor
+    public async Task<IActionResult> DeleteDoctor(int doctorId)
+    {
+        var doc = await _userManager.FindByIdAsync(doctorId.ToString());
+        if (doc == null || doc.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Doctor not found");
+        }
+
+        var result = await _userManager.DeleteAsync(doc);
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+        return new OkObjectResult("Doctor deleted successfully");
+    }
     
 }

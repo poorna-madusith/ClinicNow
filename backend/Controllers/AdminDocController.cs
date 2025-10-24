@@ -77,5 +77,20 @@ public class AdminDocController : ControllerBase
     }
 
 
+    //delete a docotor
+    [HttpDelete("deletedoctor/{id}")]
+    public async Task<IActionResult> DeleteDoc(int id)
+    {
+        try
+        {
+            await _adminDocServices.DeleteDoctor(id);
+            return Ok(new { Message = "Doctor deleted successfully" });
+        }catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
 
 }
