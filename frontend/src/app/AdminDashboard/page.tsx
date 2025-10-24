@@ -52,6 +52,25 @@ export default function AdminDashboard() {
 
   };
 
+  const handleDeleteClick = async (doctorId: string) => {
+    try{
+      await axios.delete(
+        `${API}/admin/deletedoctor/${doctorId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      toast.success("Doctor deleted successfully");
+      fetchDoctors();
+    }catch(err: any){
+      console.error("Failed to delete doctor", err);
+      toast.error("Failed to delete doctor");
+    }
+  }
+
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateFrom()) {
@@ -1081,6 +1100,26 @@ export default function AdminDashboard() {
                               ></path>
                             </svg>
                             Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(doctor.id)}
+                            className="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-medium rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md hover:shadow-lg"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"
+                              ></path>
+                            </svg>
+                            Delete
                           </button>
                         </div>
                       </td>
