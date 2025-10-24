@@ -7,6 +7,7 @@ import axios from "axios";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import DeleteButton from "@/components/DeleteButton";
 
 export default function AdminDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -1101,26 +1102,9 @@ export default function AdminDashboard() {
                             </svg>
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDeleteClick(doctor.id)}
-                            className="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-medium rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md hover:shadow-lg"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"
-                              ></path>
-                            </svg>
-                            Delete
-                          </button>
+
+                            <DeleteButton onDelete={() => handleDeleteClick(doctor.id)} />
+
                         </div>
                       </td>
                     </tr>
