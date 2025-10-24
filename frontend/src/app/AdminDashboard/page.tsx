@@ -34,6 +34,12 @@ export default function AdminDashboard() {
   });
   const [errors, setErrors] = useState<{ key: string; message: string }[]>([]);
   const [editDoc, setEditDoc] = useState<Doctor | null>(null);
+  const [selectSpecialization, setSelectSpecialization] = useState("All");
+
+  const specializations = [
+    "All",
+    ...new Set(doctors.map((doc) => doc.specialization)),
+  ];
 
   const handleEditClick = (doctor: Doctor) => {
     setEditDoc(doctor);
@@ -51,28 +57,24 @@ export default function AdminDashboard() {
       docDescription: doctor.docDescription,
       contactNumbers: doctor.contactNumbers,
       address: doctor.address,
-    })
-
+    });
   };
 
   const handleDeleteClick = async (doctorId: string) => {
-    try{
-      await axios.delete(
-        `${API}/admin/deletedoctor/${doctorId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+    try {
+      await axios.delete(`${API}/admin/deletedoctor/${doctorId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       toast.success("Doctor deleted successfully");
       fetchDoctors();
-    }catch(err: any){
+    } catch (err: any) {
       console.error("Failed to delete doctor", err);
       toast.error("Failed to delete doctor");
     }
-  }
+  };
 
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -82,16 +84,12 @@ export default function AdminDashboard() {
     }
 
     try {
-      await axios.put(
-        `${API}/admin/updatedoctor/${editDoc?.id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      await axios.put(`${API}/admin/updatedoctor/${editDoc?.id}`, formData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       toast.success("Doctor updated successfully");
       fetchDoctors();
@@ -116,8 +114,6 @@ export default function AdminDashboard() {
     }
   };
 
-
-  
   const validateFrom = () => {
     const newErrors: { key: string; message: string }[] = [];
 
@@ -314,13 +310,26 @@ export default function AdminDashboard() {
     }
   }, [API, accessToken]);
 
+  useEffect(() => {
+    let result = doctors;
 
-  useEffect (()=>  {
-    const result = doctors.filter((doc)=> doc.firstName.toLocaleLowerCase().includes(search.toLocaleLowerCase())||
+    if (selectSpecialization !== "All") {
+      result = result.filter(
+        (doc) => doc.specialization === selectSpecialization
+      );
+    }
 
-    doc.lastName.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
+    if (search.trim() !== "") {
+      result = result.filter(
+        (doc) =>
+          doc.firstName
+            .toLocaleLowerCase()
+            .includes(search.toLocaleLowerCase()) ||
+          doc.lastName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      );
+    }
     setFilteredDoctors(result);
-  },[doctors, search]);
+  }, [doctors, search, selectSpecialization]);
 
   useEffect(() => {
     if (accessToken) {
@@ -463,7 +472,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Add Doctor Modal */}
-      {addeditmodalOpen  && (
+      {addeditmodalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in zoom-in duration-300">
             {/* Modal Header */}
@@ -490,7 +499,9 @@ export default function AdminDashboard() {
                       {editDoc ? "Edit Doctor" : "Add New Doctor"}
                     </h3>
                     <p className="text-teal-100 text-sm">
-                      {editDoc ? "Edit Details Here" : "Fill the form below to add a new doctor"}
+                      {editDoc
+                        ? "Edit Details Here"
+                        : "Fill the form below to add a new doctor"}
                     </p>
                   </div>
                 </div>
@@ -932,7 +943,7 @@ export default function AdminDashboard() {
                   type="submit"
                   className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-semibold hover:from-teal-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all"
                 >
-                  {editDoc? "Save Changes" : "Add Doctor"}
+                  {editDoc ? "Save Changes" : "Add Doctor"}
                 </button>
               </div>
             </form>
@@ -985,38 +996,14 @@ export default function AdminDashboard() {
         ) : (
           // Table View
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-            {/* Enhanced Search Bar */}
+            {/* Search and Filter Section */}
             <div className="relative p-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-              <div className="relative max-w-2xl mx-auto">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg
-                    className="h-5 w-5 text-teal-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search doctors by name..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-gray-700 placeholder-gray-400 shadow-sm hover:border-teal-300 bg-white"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch("")}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-teal-600 transition-colors"
-                  >
+              <div className="flex flex-col md:flex-row gap-4 items-center">
+                {/* Search Input */}
+                <div className="relative flex-1 w-full">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg
-                      className="h-5 w-5"
+                      className="h-5 w-5 text-teal-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1025,16 +1012,72 @@ export default function AdminDashboard() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
                     </svg>
-                  </button>
-                )}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search doctors by name..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-gray-700 placeholder-gray-400 shadow-sm hover:border-teal-300 bg-white"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch("")}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-teal-600 transition-colors"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+
+                {/* Specialization Filter */}
+                <div className="w-full md:w-64">
+                  <select
+                    value={selectSpecialization}
+                    onChange={(e) => setSelectSpecialization(e.target.value)}
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 bg-white text-gray-700 shadow-sm hover:border-teal-300 cursor-pointer"
+                  >
+                    {specializations.map((spec) => (
+                      <option key={spec} value={spec}>
+                        {spec === "All" ? "All Specializations" : spec}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              {search && (
-                <p className="text-center mt-3 text-sm text-gray-600">
-                  Found <span className="font-semibold text-teal-600">{filteredDoctors.length}</span> doctor{filteredDoctors.length !== 1 ? 's' : ''}
-                </p>
+
+              {/* Results Count */}
+              {(search || selectSpecialization !== "All") && (
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-600">
+                    Found{" "}
+                    <span className="font-semibold text-teal-600">
+                      {filteredDoctors.length}
+                    </span>{" "}
+                    doctor{filteredDoctors.length !== 1 ? "s" : ""}
+                    {selectSpecialization !== "All" && (
+                      <span>
+                        {" "}
+                        in <span className="font-semibold">{selectSpecialization}</span>
+                      </span>
+                    )}
+                  </p>
+                </div>
               )}
             </div>
             <div className="overflow-x-auto">
@@ -1166,8 +1209,9 @@ export default function AdminDashboard() {
                             Edit
                           </button>
 
-                            <DeleteButton onDelete={() => handleDeleteClick(doctor.id)} />
-
+                          <DeleteButton
+                            onDelete={() => handleDeleteClick(doctor.id)}
+                          />
                         </div>
                       </td>
                     </tr>
