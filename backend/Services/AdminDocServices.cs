@@ -66,9 +66,9 @@ public class AdminDocServices
     }
 
     //edit doctor
-    public async Task<IActionResult> EditDoctor(int doctorId, DoctorRegisterDto doctorRegisterDto)
+    public async Task<IActionResult> EditDoctor(string doctorId, DoctorRegisterDto doctorRegisterDto)
     {
-        var doc = await _userManager.FindByIdAsync(doctorId.ToString());
+        var doc = await _userManager.FindByIdAsync(doctorId);
         if (doc == null || doc.Role != RoleEnum.Doctor)
         {
             throw new Exception("Doctor not found");
@@ -78,7 +78,10 @@ public class AdminDocServices
         doc.LastName = doctorRegisterDto.LastName;
         doc.Email = doctorRegisterDto.Email;
         doc.UserName = doctorRegisterDto.Email;
-        doc.PasswordHash = _userManager.PasswordHasher.HashPassword(doc, doctorRegisterDto.Password);
+        if (!string.IsNullOrEmpty(doctorRegisterDto.Password))
+        {
+            doc.PasswordHash = _userManager.PasswordHasher.HashPassword(doc, doctorRegisterDto.Password);
+        }
         doc.Age = doctorRegisterDto.Age;
         doc.Gender = doctorRegisterDto.Gender;
         doc.Specialization = doctorRegisterDto.Specialization;
@@ -97,7 +100,7 @@ public class AdminDocServices
     }
 
     //dete a doctor
-    public async Task<IActionResult> DeleteDoctor(int doctorId)
+    public async Task<IActionResult> DeleteDoctor(string doctorId)
     {
         var doc = await _userManager.FindByIdAsync(doctorId.ToString());
         if (doc == null || doc.Role != RoleEnum.Doctor)

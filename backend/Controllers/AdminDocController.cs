@@ -58,7 +58,7 @@ public class AdminDocController : ControllerBase
 
     //update a doctor
     [HttpPut("updatedoctor/{id}")]
-    public async Task<IActionResult> updateDoctor(int id, [FromBody] DoctorRegisterDto doctorRegisterDto)
+    public async Task<IActionResult> updateDoctor(string id, [FromBody] DoctorRegisterDto doctorRegisterDto)
     {
         try
         {
@@ -79,7 +79,7 @@ public class AdminDocController : ControllerBase
 
     //delete a docotor
     [HttpDelete("deletedoctor/{id}")]
-    public async Task<IActionResult> DeleteDoc(int id)
+    public async Task<IActionResult> DeleteDoc(string id)
     {
         try
         {
