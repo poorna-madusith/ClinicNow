@@ -46,4 +46,29 @@ public class UserSessionServices
         return doctors.ToList();
     }
 
+    //get all sessions for a doctor
+    public async Task<List<Session>> GetAllSessionsForDoctor(string doctorId)
+    {
+        var doctorexsisting = await _userManager.FindByIdAsync(doctorId);
+        if (doctorexsisting == null || doctorexsisting.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Invalid doctor ID");
+        }
+
+        var sessions = await _context.Sessions
+            .Where(s => s.DoctorId == doctorId)
+            .Include(s => s.Bookings)
+                .ThenInclude(b => b.Patient)
+            .OrderBy(s => s.Date)
+            .ThenBy(s => s.StartTime)
+            .ToListAsync();
+        return sessions;
+    }
+
+    // //book a session
+    // public async Task<int positionInQueue> BookASession(int sessionId, string PatientId)
+    // {
+        
+    // }
+
 }

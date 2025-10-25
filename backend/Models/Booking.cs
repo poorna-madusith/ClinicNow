@@ -21,6 +21,8 @@ namespace backend.Models
         [Required]
         public DateTime BookedDateandTime { get; set; }
 
+        public int positionInQueue { get; set; }
+
         public bool OnGoing { get; set; } = false;
 
         public bool Completed { get; set; } = false;
