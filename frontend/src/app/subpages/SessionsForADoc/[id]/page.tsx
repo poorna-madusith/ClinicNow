@@ -3,21 +3,26 @@
 import { useAuth } from "@/Context/AuthContext";
 import { Session } from "@/types/Session";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface sessionPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function SessionsForADoc({ params }: sessionPageProps) {
-  const [session, setSessions] = useState<Session | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [doctorName, setDoctorName] = useState<string>("");
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
-  const { id } = params;
+  const { id } = use(params);
+  const router = useRouter();
 
   const fetchSessions = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
         `${API}/usersession/getsessionsfordoctor/${id}`,
         {
@@ -27,16 +32,324 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
         }
       );
       setSessions(res.data);
+      
+      // Extract doctor name from first session if available
+      if (res.data && res.data.length > 0 && res.data[0].doctor) {
+        const doctor = res.data[0].doctor;
+        setDoctorName(`Dr. ${doctor.firstName || ''} ${doctor.lastName || ''}`.trim());
+      }
+      
       console.log("Fetched sessions for doctor:", res.data);
     } catch (err) {
       console.log("Error fetching sessions for doctor:", err);
       toast.error("Failed to fetch sessions for the doctor.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && id) {
       fetchSessions();
     }
-  }, [accessToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, id]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatTime = (timeString: string) => {
+    // Handle TimeSpan format (HH:MM:SS)
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const getAvailableSlots = (session: Session) => {
+    const bookedCount = session.bookings?.length || 0;
+    return session.capacity - bookedCount;
+  };
+
+  const getSessionStatus = (session: Session) => {
+    if (session.canceled) return "canceled";
+    const availableSlots = getAvailableSlots(session);
+    if (availableSlots === 0) return "full";
+    if (availableSlots <= session.capacity * 0.3) return "filling";
+    return "available";
+  };
+
+  const handleBookSession = (sessionId: number) => {
+    router.push(`/subpages/BookSession/${sessionId}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Back to Doctors
+          </button>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            {doctorName ? `${doctorName}'s Sessions` : "Doctor's Sessions"}
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Browse and book available consultation sessions
+          </p>
+        </div>
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-500 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading sessions...</p>
+            </div>
+          </div>
+        ) : sessions.length === 0 ? (
+          /* Empty State */
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <div className="text-8xl mb-4">📅</div>
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">
+              No Sessions Available
+            </h3>
+            <p className="text-gray-500 text-lg mb-6">
+              This doctor doesn&apos;t have any sessions scheduled at the moment.
+            </p>
+            <button
+              onClick={() => router.back()}
+              className="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition-colors"
+            >
+              Browse Other Doctors
+            </button>
+          </div>
+        ) : (
+          /* Sessions Grid */
+          <div>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+                <span className="bg-indigo-500 w-1.5 h-8 rounded-full mr-3"></span>
+                Available Sessions
+                <span className="ml-3 text-sm font-normal text-gray-500">
+                  ({sessions.filter(s => !s.canceled).length} active {sessions.filter(s => !s.canceled).length === 1 ? 'session' : 'sessions'})
+                </span>
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sessions.map((session) => {
+                const status = getSessionStatus(session);
+                const availableSlots = getAvailableSlots(session);
+
+                return (
+                  <div
+                    key={session.id}
+                    className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-indigo-200"
+                  >
+                    {/* Status Badge */}
+                    <div className="bg-gradient-to-r from-indigo-500 to-blue-500 px-6 py-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-semibold text-lg">
+                          Session #{session.id}
+                        </span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            status === "canceled"
+                              ? "bg-red-100 text-red-700"
+                              : status === "full"
+                              ? "bg-gray-100 text-gray-700"
+                              : status === "filling"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-green-100 text-green-700"
+                          }`}
+                        >
+                          {status === "canceled"
+                            ? "Canceled"
+                            : status === "full"
+                            ? "Full"
+                            : status === "filling"
+                            ? "Filling Fast"
+                            : "Available"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Session Details */}
+                    <div className="p-6">
+                      {/* Date */}
+                      <div className="flex items-start mb-4">
+                        <svg
+                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <div>
+                          <p className="text-sm text-gray-500">Date</p>
+                          <p className="text-gray-800 font-semibold">
+                            {formatDate(session.date)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Time */}
+                      <div className="flex items-start mb-4">
+                        <svg
+                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <div>
+                          <p className="text-sm text-gray-500">Time</p>
+                          <p className="text-gray-800 font-semibold">
+                            {formatTime(session.startTime)} - {formatTime(session.endTime)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Fee */}
+                      <div className="flex items-start mb-4">
+                        <svg
+                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <div>
+                          <p className="text-sm text-gray-500">Session Fee</p>
+                          <p className="text-gray-800 font-semibold text-xl">
+                            ${session.sessionFee.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Capacity */}
+                      <div className="flex items-start mb-4">
+                        <svg
+                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                        <div className="flex-grow">
+                          <p className="text-sm text-gray-500 mb-2">
+                            Available Slots
+                          </p>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-gray-800 font-semibold">
+                              {availableSlots} / {session.capacity}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {((availableSlots / session.capacity) * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                status === "canceled"
+                                  ? "bg-red-500"
+                                  : status === "full"
+                                  ? "bg-gray-500"
+                                  : status === "filling"
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
+                              }`}
+                              style={{
+                                width: `${(availableSlots / session.capacity) * 100}%`,
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      {session.description && (
+                        <div className="mb-4 pb-4 border-b border-gray-100">
+                          <p className="text-sm text-gray-500 mb-1">Description</p>
+                          <p className="text-gray-700 text-sm leading-relaxed">
+                            {session.description.length > 50 ? (session.description.slice(0, 50) + '...') : session.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Action Button */}
+                      <button
+                        onClick={() => handleBookSession(session.id)}
+                        disabled={status === "canceled" || status === "full"}
+                        className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${
+                          status === "canceled" || status === "full"
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 hover:shadow-lg transform hover:-translate-y-0.5"
+                        }`}
+                      >
+                        {status === "canceled"
+                          ? "Session Canceled"
+                          : status === "full"
+                          ? "Session Full"
+                          : "Book This Session"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
