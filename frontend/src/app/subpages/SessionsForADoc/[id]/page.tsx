@@ -19,6 +19,20 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   const { accessToken } = useAuth();
   const { id } = use(params);
   const router = useRouter();
+  const [filteredSessions, setFilteredSessions] = useState<Session[]>([]);
+  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+
+  useEffect(() => {
+    if (date) {
+      const filtered = sessions.filter((session) =>
+        session.date.includes(date)
+      );
+      setFilteredSessions(filtered);
+    } else {
+      setFilteredSessions(sessions);
+    }
+  }, [date, sessions]);
+
 
   const fetchSessions = async () => {
     try {
@@ -32,6 +46,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
         }
       );
       setSessions(res.data);
+      setFilteredSessions(res.data);
       
       // Extract doctor name from first session if available
       if (res.data && res.data.length > 0 && res.data[0].doctor) {
@@ -123,6 +138,69 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
           </p>
         </div>
 
+        {/* Date Filter Section */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-center">
+              <svg
+                className="w-5 h-5 text-indigo-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <label className="text-gray-700 font-semibold">Filter by Date:</label>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 flex-1">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
+              {date && (
+                <button
+                  onClick={() => setDate("")}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Clear Filter
+                </button>
+              )}
+              <div className="text-sm text-gray-500">
+                {date ? (
+                  <span>Showing sessions for {new Date(date).toLocaleDateString("en-US", { 
+                    weekday: "long", 
+                    year: "numeric", 
+                    month: "long", 
+                    day: "numeric" 
+                  })}</span>
+                ) : (
+                  <span>Showing all sessions</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Loading State */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -131,22 +209,33 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
               <p className="text-gray-600 text-lg">Loading sessions...</p>
             </div>
           </div>
-        ) : sessions.length === 0 ? (
+        ) : filteredSessions.length === 0 ? (
           /* Empty State */
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="text-8xl mb-4">📅</div>
             <h3 className="text-2xl font-semibold text-gray-800 mb-2">
-              No Sessions Available
+              {date ? "No Sessions Found for Selected Date" : "No Sessions Available"}
             </h3>
             <p className="text-gray-500 text-lg mb-6">
-              This doctor doesn&apos;t have any sessions scheduled at the moment.
+              {date 
+                ? "There are no sessions scheduled for the selected date. Try choosing a different date."
+                : "This doctor doesn't have any sessions scheduled at the moment."}
             </p>
-            <button
-              onClick={() => router.back()}
-              className="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition-colors"
-            >
-              Browse Other Doctors
-            </button>
+            {date ? (
+              <button
+                onClick={() => setDate("")}
+                className="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition-colors"
+              >
+                Clear Date Filter
+              </button>
+            ) : (
+              <button
+                onClick={() => router.back()}
+                className="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition-colors"
+              >
+                Browse Other Doctors
+              </button>
+            )}
           </div>
         ) : (
           /* Sessions Grid */
@@ -156,13 +245,13 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                 <span className="bg-indigo-500 w-1.5 h-8 rounded-full mr-3"></span>
                 Available Sessions
                 <span className="ml-3 text-sm font-normal text-gray-500">
-                  ({sessions.filter(s => !s.canceled).length} active {sessions.filter(s => !s.canceled).length === 1 ? 'session' : 'sessions'})
+                  ({filteredSessions.filter(s => !s.canceled).length} active {filteredSessions.filter(s => !s.canceled).length === 1 ? 'session' : 'sessions'})
                 </span>
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sessions.map((session) => {
+              {filteredSessions.map((session) => {
                 const status = getSessionStatus(session);
                 const availableSlots = getAvailableSlots(session);
 
