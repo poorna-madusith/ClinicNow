@@ -123,13 +123,13 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+            className="mb-4 flex items-center text-gray-600 hover:text-teal-700 transition-colors"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -160,7 +160,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
               <div className="flex items-center">
                 <svg
-                  className="w-5 h-5 text-indigo-500 mr-2"
+                  className="w-5 h-5 text-teal-500 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -181,7 +181,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 />
                 {date && (
                   <button
@@ -227,8 +227,8 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
               onClick={() => handleCanceledButton()}
               className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium shadow-sm ${
                 canceledButton
-                  ? "bg-red-500 text-white hover:bg-red-600 shadow-red-200"
-                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-red-300 hover:text-red-600"
+                  ? "bg-teal-500 text-white hover:bg-teal-600 shadow-teal-200"
+                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-teal-300 hover:text-teal-600"
               }`}
             >
               {canceledButton ? "Show All Sessions" : "Show Cancelled Sessions"}
@@ -240,7 +240,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-500 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-500 mx-auto mb-4"></div>
               <p className="text-gray-600 text-lg">Loading sessions...</p>
             </div>
           </div>
@@ -261,14 +261,14 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
             {date ? (
               <button
                 onClick={() => setDate("")}
-                className="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition-colors"
+                className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition-colors"
               >
                 Clear Date Filter
               </button>
             ) : (
               <button
                 onClick={() => router.back()}
-                className="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition-colors"
+                className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition-colors"
               >
                 Browse Other Doctors
               </button>
@@ -281,7 +281,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
           <div>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
-                <span className="bg-indigo-500 w-1.5 h-8 rounded-full mr-3"></span>
+                <span className="bg-teal-500 w-1.5 h-8 rounded-full mr-3"></span>
                 Available Sessions
                 <span className="ml-3 text-sm font-normal text-gray-500">
                   ({filteredSessions.filter((s) => !s.canceled).length} active{" "}
@@ -301,10 +301,10 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                 return (
                   <div
                     key={session.id}
-                    className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-indigo-200"
+                    className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-teal-200"
                   >
                     {/* Status Badge */}
-                    <div className="bg-gradient-to-r from-indigo-500 to-blue-500 px-6 py-4">
+                    <div className="bg-gradient-to-r from-teal-500 to-cyan-500 px-6 py-4">
                       <div className="flex items-center justify-between">
                         <span className="text-white font-semibold text-lg">
                           Session #{session.id}
@@ -336,7 +336,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                       {/* Date */}
                       <div className="flex items-start mb-4">
                         <svg
-                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          className="w-5 h-5 text-teal-500 mr-3 mt-1 flex-shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -359,7 +359,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                       {/* Time */}
                       <div className="flex items-start mb-4">
                         <svg
-                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          className="w-5 h-5 text-teal-500 mr-3 mt-1 flex-shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -383,7 +383,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                       {/* Fee */}
                       <div className="flex items-start mb-4">
                         <svg
-                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          className="w-5 h-5 text-teal-500 mr-3 mt-1 flex-shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -406,7 +406,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                       {/* Capacity */}
                       <div className="flex items-start mb-4">
                         <svg
-                          className="w-5 h-5 text-indigo-500 mr-3 mt-1 flex-shrink-0"
+                          className="w-5 h-5 text-teal-500 mr-3 mt-1 flex-shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -476,7 +476,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                         className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${
                           status === "canceled" || status === "full"
                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 hover:shadow-lg transform hover:-translate-y-0.5"
+                            : "bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 hover:shadow-lg transform hover:-translate-y-0.5"
                         }`}
                       >
                         {status === "canceled"
