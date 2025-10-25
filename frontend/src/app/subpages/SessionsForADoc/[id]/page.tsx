@@ -20,19 +20,33 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const [filteredSessions, setFilteredSessions] = useState<Session[]>([]);
-  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [canceledButton, setCanceledButton] = useState<boolean>(false);
 
   useEffect(() => {
-    if (date) {
-      const filtered = sessions.filter((session) =>
-        session.date.includes(date)
-      );
-      setFilteredSessions(filtered);
-    } else {
-      setFilteredSessions(sessions);
-    }
-  }, [date, sessions]);
+    let result = sessions;
 
+    // Filter by canceled status
+    if (canceledButton) {
+      result = result.filter((session) => session.canceled);
+    } else {
+      result = result.filter((session) => !session.canceled);
+    }
+
+    // Filter by date
+    if (date) {
+      result = result.filter((session) => session.date.includes(date));
+    }
+
+    setFilteredSessions(result);
+  }, [date, sessions, canceledButton]);
+
+
+  const handleCanceledButton = () => {
+    setCanceledButton(!canceledButton);
+  };
 
   const fetchSessions = async () => {
     try {
@@ -47,13 +61,15 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
       );
       setSessions(res.data);
       setFilteredSessions(res.data);
-      
+
       // Extract doctor name from first session if available
       if (res.data && res.data.length > 0 && res.data[0].doctor) {
         const doctor = res.data[0].doctor;
-        setDoctorName(`Dr. ${doctor.firstName || ''} ${doctor.lastName || ''}`.trim());
+        setDoctorName(
+          `Dr. ${doctor.firstName || ""} ${doctor.lastName || ""}`.trim()
+        );
       }
-      
+
       console.log("Fetched sessions for doctor:", res.data);
     } catch (err) {
       console.log("Error fetching sessions for doctor:", err);
@@ -140,64 +156,83 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
 
         {/* Date Filter Section */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-indigo-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-              <label className="text-gray-700 font-semibold">Filter by Date:</label>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 flex-1">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-              {date && (
-                <button
-                  onClick={() => setDate("")}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 text-indigo-500 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+                <label className="text-gray-700 font-semibold">
+                  Filter by Date:
+                </label>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                />
+                {date && (
+                  <button
+                    onClick={() => setDate("")}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                  Clear Filter
-                </button>
-              )}
-              <div className="text-sm text-gray-500">
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    Clear Filter
+                  </button>
+                )}
+                <div className="text-sm text-gray-500">
                 {date ? (
-                  <span>Showing sessions for {new Date(date).toLocaleDateString("en-US", { 
-                    weekday: "long", 
-                    year: "numeric", 
-                    month: "long", 
-                    day: "numeric" 
-                  })}</span>
+                  <span>
+                    Showing sessions for{" "}
+                    {new Date(date).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
                 ) : (
                   <span>Showing all sessions</span>
                 )}
               </div>
             </div>
+            </div>
+            
+            {/* Cancelled Sessions Button - Right Side */}
+            <button
+              onClick={() => handleCanceledButton()}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium shadow-sm ${
+                canceledButton
+                  ? "bg-red-500 text-white hover:bg-red-600 shadow-red-200"
+                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-red-300 hover:text-red-600"
+              }`}
+            >
+              {canceledButton ? "Show All Sessions" : "Show Cancelled Sessions"}
+            </button>
           </div>
         </div>
 
@@ -214,10 +249,12 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="text-8xl mb-4">📅</div>
             <h3 className="text-2xl font-semibold text-gray-800 mb-2">
-              {date ? "No Sessions Found for Selected Date" : "No Sessions Available"}
+              {date
+                ? "No Sessions Found for Selected Date"
+                : "No Sessions Available"}
             </h3>
             <p className="text-gray-500 text-lg mb-6">
-              {date 
+              {date
                 ? "There are no sessions scheduled for the selected date. Try choosing a different date."
                 : "This doctor doesn't have any sessions scheduled at the moment."}
             </p>
@@ -237,6 +274,8 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
               </button>
             )}
           </div>
+
+          
         ) : (
           /* Sessions Grid */
           <div>
@@ -245,7 +284,11 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                 <span className="bg-indigo-500 w-1.5 h-8 rounded-full mr-3"></span>
                 Available Sessions
                 <span className="ml-3 text-sm font-normal text-gray-500">
-                  ({filteredSessions.filter(s => !s.canceled).length} active {filteredSessions.filter(s => !s.canceled).length === 1 ? 'session' : 'sessions'})
+                  ({filteredSessions.filter((s) => !s.canceled).length} active{" "}
+                  {filteredSessions.filter((s) => !s.canceled).length === 1
+                    ? "session"
+                    : "sessions"}
+                  )
                 </span>
               </h2>
             </div>
@@ -331,7 +374,8 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                         <div>
                           <p className="text-sm text-gray-500">Time</p>
                           <p className="text-gray-800 font-semibold">
-                            {formatTime(session.startTime)} - {formatTime(session.endTime)}
+                            {formatTime(session.startTime)} -{" "}
+                            {formatTime(session.endTime)}
                           </p>
                         </div>
                       </div>
@@ -383,7 +427,11 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                               {availableSlots} / {session.capacity}
                             </span>
                             <span className="text-sm text-gray-500">
-                              {((availableSlots / session.capacity) * 100).toFixed(0)}%
+                              {(
+                                (availableSlots / session.capacity) *
+                                100
+                              ).toFixed(0)}
+                              %
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -398,7 +446,9 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                                   : "bg-green-500"
                               }`}
                               style={{
-                                width: `${(availableSlots / session.capacity) * 100}%`,
+                                width: `${
+                                  (availableSlots / session.capacity) * 100
+                                }%`,
                               }}
                             ></div>
                           </div>
@@ -408,9 +458,13 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                       {/* Description */}
                       {session.description && (
                         <div className="mb-4 pb-4 border-b border-gray-100">
-                          <p className="text-sm text-gray-500 mb-1">Description</p>
+                          <p className="text-sm text-gray-500 mb-1">
+                            Description
+                          </p>
                           <p className="text-gray-700 text-sm leading-relaxed">
-                            {session.description.length > 50 ? (session.description.slice(0, 50) + '...') : session.description}
+                            {session.description.length > 50
+                              ? session.description.slice(0, 50) + "..."
+                              : session.description}
                           </p>
                         </div>
                       )}
