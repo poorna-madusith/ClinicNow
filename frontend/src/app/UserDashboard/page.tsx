@@ -7,6 +7,8 @@ import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import DoctorFullView from "@/components/DoctorFullView";
+import { useRouter } from "next/navigation";
+import router from "next/dist/shared/lib/router/router";
 
 export default function UserDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -14,6 +16,7 @@ export default function UserDashboard() {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { accessToken } = useAuth();
+  const router = useRouter();
 
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -52,6 +55,11 @@ export default function UserDashboard() {
     setIsModalOpen(false);
     setSelectedDoctor(null);
   };
+
+
+  const handleBookingClick = (id: string) => {
+    router.push(`/subpages/SessionsForADoc/${id}`); 
+  }
 
   return (
     <>
@@ -194,7 +202,7 @@ export default function UserDashboard() {
                               </svg>
                               View Details
                             </button>
-                            <button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm transform hover:scale-105">
+                            <button onClick={()=> handleBookingClick(doctor.id)} className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm transform hover:scale-105">
                               Book Now
                             </button>
                           </div>
