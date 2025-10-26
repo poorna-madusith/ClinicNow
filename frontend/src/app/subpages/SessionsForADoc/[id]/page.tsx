@@ -24,6 +24,8 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
     new Date().toISOString().split("T")[0]
   );
   const [canceledButton, setCanceledButton] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const sessionsPerPage = 6;
 
   useEffect(() => {
     let result = sessions;
@@ -41,6 +43,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
     }
 
     setFilteredSessions(result);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [date, sessions, canceledButton]);
 
 
@@ -120,6 +123,17 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
 
   const handleBookSession = (sessionId: number) => {
     router.push(`/subpages/BookSession/${sessionId}`);
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
+  const indexOfLastSession = currentPage * sessionsPerPage;
+  const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
+  const currentSessions = filteredSessions.slice(indexOfFirstSession, indexOfLastSession);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -294,7 +308,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSessions.map((session) => {
+              {currentSessions.map((session) => {
                 const status = getSessionStatus(session);
                 const availableSlots = getAvailableSlots(session);
 
@@ -490,6 +504,85 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-teal-50 hover:border-teal-500 hover:text-teal-600"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        currentPage === pageNum
+                          ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md"
+                          : "bg-white text-gray-700 border border-gray-300 hover:bg-teal-50 hover:border-teal-500 hover:text-teal-600"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    currentPage === totalPages
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-teal-50 hover:border-teal-500 hover:text-teal-600"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* Pagination Info */}
+            {totalPages > 0 && (
+              <div className="mt-4 text-center text-sm text-gray-600">
+                Showing {indexOfFirstSession + 1} to {Math.min(indexOfLastSession, filteredSessions.length)} of {filteredSessions.length} sessions
+              </div>
+            )}
           </div>
         )}
       </div>
