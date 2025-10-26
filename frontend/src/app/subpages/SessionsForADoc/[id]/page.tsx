@@ -6,6 +6,7 @@ import axios from "axios";
 import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import UserSessionBooking from "@/components/UserSessionBooking";
 
 interface sessionPageProps {
   params: Promise<{ id: string }>;
@@ -20,12 +21,17 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const [filteredSessions, setFilteredSessions] = useState<Session[]>([]);
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [date, setDate] = useState<string>("");
   const [canceledButton, setCanceledButton] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [bookingSession, setBookingSession] = useState<Session | null>(null);
+  const [BookingSessionModalIsOpen, setBookingSessionModalIsOpen] = useState<boolean>(false);
   const sessionsPerPage = 6;
+
+  const handleSessionBookingOnClose = () => {
+    setBookingSession(null);
+    setBookingSessionModalIsOpen(false);
+  }
   
 
   useEffect(() => {
@@ -122,8 +128,9 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
     return "available";
   };
 
-  const handleBookSession = (sessionId: number) => {
-    router.push(`/subpages/BookSession/${sessionId}`);
+  const handleBookSession = (session: Session) => {
+    setBookingSession(session);
+    setBookingSessionModalIsOpen(true);
   };
 
   // Calculate pagination
@@ -486,7 +493,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
 
                       {/* Action Button */}
                       <button
-                        onClick={() => handleBookSession(session.id)}
+                        onClick={() => handleBookSession(session)}
                         disabled={status === "canceled" || status === "full"}
                         className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${
                           status === "canceled" || status === "full"
@@ -587,6 +594,11 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
           </div>
         )}
       </div>
+      <UserSessionBooking 
+        isOpen={BookingSessionModalIsOpen} 
+        onClose={handleSessionBookingOnClose} 
+        session={bookingSession} 
+      />
     </div>
   );
 }
