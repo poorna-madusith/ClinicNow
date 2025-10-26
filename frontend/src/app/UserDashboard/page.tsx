@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import DoctorFullView from "@/components/DoctorFullView";
 import { useRouter } from "next/navigation";
-import router from "next/dist/shared/lib/router/router";
 
 export default function UserDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -17,6 +16,14 @@ export default function UserDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { accessToken } = useAuth();
   const router = useRouter();
+  const [selectSpecialization, setSelectSpecialization] = useState("All");
+  const [search, setSearch] = useState("");
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
+
+  const specializations = [
+    "All",
+    ...new Set(doctors.map((doc) => doc.specialization)),
+  ];
 
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -30,6 +37,7 @@ export default function UserDashboard() {
         },
       });
       setDoctors(res.data || []);
+      setFilteredDoctors(res.data || []);
     } catch (err) {
       console.log("Error fetching doctors:", err);
       toast.error("Failed to fetch doctors");
@@ -40,8 +48,28 @@ export default function UserDashboard() {
   }, [API, accessToken]);
 
   useEffect(() => {
+    let result = doctors;
+
+    if (selectSpecialization !== "All") {
+      result = result.filter(
+        (doc) => doc.specialization === selectSpecialization
+      );
+    }
+
+    if (search.trim() !== "") {
+      result = result.filter(
+        (doc) =>
+          doc.firstName
+            .toLocaleLowerCase()
+            .includes(search.toLocaleLowerCase()) ||
+          doc.lastName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      );
+    }
+    setFilteredDoctors(result);
+  }, [doctors, search, selectSpecialization]);
+
+  useEffect(() => {
     if (accessToken) {
-      console.log("Fetching doctors with access token:", accessToken);
       fetchDoctors();
     }
   }, [accessToken, fetchDoctors]);
@@ -75,13 +103,114 @@ export default function UserDashboard() {
             </p>
           </div>
 
+          {/* Search and Filter Section */}
+          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search Bar */}
+              <div className="flex-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search doctors by name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200 outline-none"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Specialization Dropdown */}
+              <div className="md:w-64">
+                <select
+                  value={selectSpecialization}
+                  onChange={(e) => setSelectSpecialization(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200 outline-none bg-white cursor-pointer"
+                >
+                  {specializations.map((spec) => (
+                    <option key={spec} value={spec}>
+                      {spec === "All" ? "All Specializations" : spec}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Results Summary */}
+            {(search || selectSpecialization !== "All") && (
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <p className="text-gray-600">
+                  Showing {filteredDoctors.length} of {doctors.length} doctors
+                  {search && ` matching "${search}"`}
+                  {selectSpecialization !== "All" && ` in ${selectSpecialization}`}
+                </p>
+                {(search || selectSpecialization !== "All") && (
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setSelectSpecialization("All");
+                    }}
+                    className="text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Doctors Section */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
               <span className="bg-teal-500 w-1.5 h-8 rounded-full mr-3"></span>
               Available Doctors
               <span className="ml-3 text-sm font-normal text-gray-500">
-                ({doctors.length} {doctors.length === 1 ? 'doctor' : 'doctors'} available)
+                ({filteredDoctors.length} {filteredDoctors.length === 1 ? 'doctor' : 'doctors'} {search || selectSpecialization !== "All" ? 'found' : 'available'})
               </span>
             </h2>
 
@@ -89,19 +218,23 @@ export default function UserDashboard() {
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
               </div>
-            ) : doctors.length === 0 ? (
+            ) : filteredDoctors.length === 0 ? (
               <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <div className="text-6xl mb-4">🏥</div>
+                <div className="text-6xl mb-4">🔍</div>
                 <p className="text-gray-500 text-lg">
-                  No doctors available at the moment.
+                  {doctors.length === 0 
+                    ? "No doctors available at the moment." 
+                    : "No doctors found matching your search criteria."}
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
-                  Please check back later.
+                  {doctors.length === 0 
+                    ? "Please check back later." 
+                    : "Try adjusting your filters or search terms."}
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                {doctors.map((doctor: Doctor) => (
+                {filteredDoctors.map((doctor: Doctor) => (
                   <div
                     key={doctor.id}
                     className="relative pt-24 group"

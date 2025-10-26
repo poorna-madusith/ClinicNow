@@ -303,7 +303,6 @@ export default function AdminDashboard() {
       });
       setDoctors(res.data || []);
       setFilteredDoctors(res.data || []);
-      console.log("Doctors:", res.data);
     } catch (err) {
       console.log("Error fetching doctors:", err);
       setDoctors([]);

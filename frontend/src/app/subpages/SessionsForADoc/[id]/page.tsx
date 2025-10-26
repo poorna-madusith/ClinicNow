@@ -26,6 +26,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   const [canceledButton, setCanceledButton] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const sessionsPerPage = 6;
+  
 
   useEffect(() => {
     let result = sessions;
