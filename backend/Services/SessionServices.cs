@@ -95,6 +95,13 @@ public class SessionServices
                     Id = b.Id,
                     PatientId = b.PatientId,
                     PatientName = b.Patient.FirstName + " " + b.Patient.LastName,
+                    Patient = new PatientDto
+                    {
+                        Id = b.Patient.Id,
+                        FirstName = b.Patient.FirstName,
+                        LastName = b.Patient.LastName,
+                        Email = b.Patient.Email
+                    },
                     BookedDateandTime = b.BookedDateandTime,
                     positionInQueue = b.positionInQueue,
                     Completed = b.Completed,

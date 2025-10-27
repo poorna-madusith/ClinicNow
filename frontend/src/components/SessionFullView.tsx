@@ -17,11 +17,18 @@ export default function SessionFullView({isModalOpen,isClose,session}: SessionFu
         return null;
     }
 
+    // Debug logging
+    console.log('Session data:', session);
+    console.log('Session bookings:', session.bookings);
+
     // Get patients from bookings if available, otherwise use patients array for backward compatibility
     const patients = session.bookings?.map(booking => booking.patient).filter(p => p != null) || session.patients || [];
     const bookedCount = patients.length;
     const availableSlots = session.capacity - bookedCount;
     const fillPercentage = (bookedCount / session.capacity) * 100;
+
+    console.log('Extracted patients:', patients);
+    console.log('Booked count:', bookedCount);
 
     return (
         <>
