@@ -3,7 +3,7 @@
 import { useAuth } from "@/Context/AuthContext";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Session } from "@/types/Session";
 import SessionFullView from "@/components/SessionFullView";
 
@@ -17,6 +17,8 @@ export default function DoctorDashboard() {
     SessionFee: 0,
     Description: "",
   });
+  const [filteredSessions, setFilteredSessions] = useState<Session[]>([]);
+  const [date, setDate] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { accessToken,decodedToken,userId} = useAuth();
@@ -27,7 +29,39 @@ export default function DoctorDashboard() {
   const [editSession, setEditSession] = useState<Session | null>(null);
   const [openFullSessionView, setOpenFullSessionView] = useState<boolean>(false);
   const [fullViewSession, setFullViewSession] = useState<Session | null>(null);
+  const [canceledButton, setCanceledButton] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(6);
 
+
+   useEffect(() => {
+    let result = sessions;
+
+    // Filter by canceled status
+    if (canceledButton) {
+      result = result.filter((session) => session.canceled);
+    } else {
+      result = result.filter((session) => !session.canceled);
+    }
+
+    // Filter by date
+    if (date) {
+      result = result.filter((session) => session.date.includes(date));
+    }
+
+    setFilteredSessions(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [date, sessions, canceledButton]);
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSessions = filteredSessions.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleOpenFullView = (session: Session) => {
     setFullViewSession(session);
@@ -43,7 +77,7 @@ export default function DoctorDashboard() {
 
   const cancelSession = async (sessionId: string) => {
     try{
-      const res = await axios.patch(`${API}/session/cancelsession/${sessionId}`,{},{
+      await axios.patch(`${API}/session/cancelsession/${sessionId}`,{},{
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -58,7 +92,7 @@ export default function DoctorDashboard() {
 
 
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try{
       const res = await axios.get(
         `${API}/session/getallsessions`,
@@ -70,12 +104,12 @@ export default function DoctorDashboard() {
         }
       )
       console.log("Sessions fetched:", res.data);
-      const activesessions = res.data.filter((sessions: Session)=> sessions.canceled === false);
-      setSessions(activesessions);
+      // Get all sessions - filtering is now done by the toggle button
+      setSessions(res.data);
     } catch (error) {
       console.error("Error fetching sessions:", error);
     }
-  }
+  }, [API, accessToken]);
 
   const handleEditClick = (session :Session) => {
     setEditSession(session);
@@ -124,9 +158,9 @@ export default function DoctorDashboard() {
       console.log("Session edited:", res.data);
       toast.success("Session updated successfully");
       fetchSessions();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error editing session:", err);
-      const backendMessage = err?.response?.data?.Message || err?.response?.data?.message;
+      const backendMessage = (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));
       } else {
@@ -152,7 +186,7 @@ export default function DoctorDashboard() {
     console.log("token" + accessToken);
     console.log(userId);
     fetchSessions();
-  },[accessToken, decodedToken]);
+  },[accessToken, decodedToken, userId, fetchSessions]);
 
 
 
@@ -229,9 +263,9 @@ export default function DoctorDashboard() {
       console.log("Session created:", res.data);
       toast.success("Session created successfully");
       fetchSessions();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating session:", err);
-      const backendMessage = err?.response?.data?.Message || err?.response?.data?.message;
+      const backendMessage = (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));
       } else {
@@ -281,17 +315,64 @@ export default function DoctorDashboard() {
           Create Session
         </button>
       </div>
+
+      {/* Filter Section */}
+      <div className="filter-section">
+        <div className="filter-controls">
+          <div className="date-filter">
+            <label htmlFor="date-filter">Filter by Date:</label>
+            <input
+              type="date"
+              id="date-filter"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="date-input"
+            />
+            {date && (
+              <button
+                className="clear-date-btn"
+                onClick={() => setDate("")}
+                title="Clear date filter"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="status-toggle">
+            <button
+              className={`toggle-btn ${!canceledButton ? 'active' : ''}`}
+              onClick={() => setCanceledButton(false)}
+            >
+              Active Sessions
+            </button>
+            <button
+              className={`toggle-btn ${canceledButton ? 'active' : ''}`}
+              onClick={() => setCanceledButton(true)}
+            >
+              Canceled Sessions
+            </button>
+          </div>
+        </div>
+
+        <div className="filter-info">
+          <span className="results-count">
+            Showing {currentSessions.length} of {filteredSessions.length} sessions
+          </span>
+        </div>
+      </div>
+
       <div className="sessions-container">
-        {sessions.length > 0 ? (
+        {filteredSessions.length > 0 ? (
           <div className="sessions-grid">
-            {sessions.map((session, index) => {
+            {currentSessions.map((session, index) => {
               // Get patients from bookings if available, otherwise use patients array for backward compatibility
               const bookedCount = session.bookings?.length || session.patients?.length || 0;
               const availableSlots = session.capacity - bookedCount;
               const fillPercentage = (bookedCount / session.capacity) * 100;
               
               return (
-                <div key={session.id || index} className="session-card">
+                <div key={session.id || index} className={`session-card ${session.canceled ? 'canceled-session' : ''}`}>
                   <div className="session-header">
                     <div className="session-date-badge">
                       <svg className="calendar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,8 +385,18 @@ export default function DoctorDashboard() {
                         year: 'numeric'
                       })}</span>
                     </div>
-                    <div className="session-fee">
-                      ${session.sessionFee}
+                    <div className="session-header-right">
+                      {session.canceled && (
+                        <div className="canceled-badge">
+                          <svg className="canceled-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Canceled
+                        </div>
+                      )}
+                      <div className="session-fee">
+                        ${session.sessionFee}
+                      </div>
                     </div>
                   </div>
 
@@ -349,11 +440,16 @@ export default function DoctorDashboard() {
                     <button className="view-details-btn" onClick={() => handleOpenFullView(session)}>
                       View More
                     </button>
-                    <button className="manage-btn" onClick={() => handleEditClick(session)}>
-                      Edit
-                    </button><button className="manage-btn" onClick={() => cancelSession(session.id.toString())}>
-                      Cancel
-                    </button>
+                    {!session.canceled && (
+                      <>
+                        <button className="manage-btn" onClick={() => handleEditClick(session)}>
+                          Edit
+                        </button>
+                        <button className="cancel-btn" onClick={() => cancelSession(session.id.toString())}>
+                          Cancel
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               );
@@ -366,6 +462,45 @@ export default function DoctorDashboard() {
             </svg>
             <h3>No Sessions Yet</h3>
             <p>Create your first session to start scheduling appointments</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {filteredSessions.length > 0 && totalPages > 1 && (
+          <div className="pagination-container">
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <svg className="pagination-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous
+            </button>
+
+            <div className="pagination-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                <button
+                  key={pageNumber}
+                  className={`pagination-number ${currentPage === pageNumber ? 'active' : ''}`}
+                  onClick={() => handlePageChange(pageNumber)}
+                >
+                  {pageNumber}
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <svg className="pagination-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         )}
       </div>
@@ -610,6 +745,142 @@ export default function DoctorDashboard() {
           }
         }
         
+        /* Filter Section */
+        .filter-section {
+          width: 100%;
+          max-width: 1400px;
+          padding: 0 20px;
+          margin-bottom: 32px;
+          background: #ffffff;
+          border-radius: 16px;
+          box-shadow: 0 2px 12px rgba(20, 184, 166, 0.08);
+          border: 1px solid #ccfbf1;
+        }
+        
+        .filter-controls {
+          display: flex;
+          gap: 24px;
+          align-items: flex-end;
+          padding: 24px;
+          flex-wrap: wrap;
+        }
+        
+        .date-filter {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          flex: 1;
+          min-width: 250px;
+          position: relative;
+        }
+        
+        .date-filter label {
+          font-size: 0.95rem;
+          color: #0f766e;
+          font-weight: 600;
+        }
+        
+        .date-input {
+          padding: 10px 14px;
+          border: 2px solid #99f6e4;
+          border-radius: 10px;
+          font-size: 1rem;
+          background: #f0fdfa;
+          color: #134e4a;
+          outline: none;
+          transition: all 0.2s;
+          cursor: pointer;
+        }
+        
+        .date-input:focus {
+          border-color: #14b8a6;
+          box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+        
+        .clear-date-btn {
+          position: absolute;
+          right: 12px;
+          bottom: 12px;
+          background: #14b8a6;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s;
+        }
+        
+        .clear-date-btn:hover {
+          background: #0d9488;
+          transform: scale(1.1);
+        }
+        
+        .status-toggle {
+          display: flex;
+          gap: 8px;
+          background: #f0fdfa;
+          padding: 4px;
+          border-radius: 10px;
+          border: 2px solid #99f6e4;
+        }
+        
+        .toggle-btn {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: transparent;
+          color: #0f766e;
+        }
+        
+        .toggle-btn.active {
+          background: #14b8a6;
+          color: white;
+          box-shadow: 0 2px 8px rgba(20, 184, 166, 0.25);
+        }
+        
+        .toggle-btn:hover:not(.active) {
+          background: #ccfbf1;
+        }
+        
+        .filter-info {
+          padding: 0 24px 20px 24px;
+          border-top: 1px solid #e0f2fe;
+        }
+        
+        .results-count {
+          color: #0f766e;
+          font-size: 0.95rem;
+          font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+          .filter-controls {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          
+          .date-filter {
+            min-width: 100%;
+          }
+          
+          .status-toggle {
+            width: 100%;
+          }
+          
+          .toggle-btn {
+            flex: 1;
+          }
+        }
+        
         /* Sessions Container */
         .sessions-container {
           width: 100%;
@@ -639,6 +910,21 @@ export default function DoctorDashboard() {
           box-shadow: 0 8px 30px rgba(20, 184, 166, 0.15);
         }
         
+        .session-card.canceled-session {
+          opacity: 0.85;
+          border: 1px solid #fecaca;
+          background: #fef2f2;
+        }
+        
+        .session-card.canceled-session:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(239, 68, 68, 0.12);
+        }
+        
+        .session-card.canceled-session .session-header {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
         /* Session Header */
         .session-header {
           background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
@@ -660,6 +946,31 @@ export default function DoctorDashboard() {
         .calendar-icon {
           width: 20px;
           height: 20px;
+        }
+        
+        .session-header-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .canceled-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.95);
+          color: #dc2626;
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-weight: 700;
+          font-size: 0.9rem;
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .canceled-icon {
+          width: 16px;
+          height: 16px;
         }
         
         .session-fee {
@@ -790,7 +1101,8 @@ export default function DoctorDashboard() {
         }
         
         .view-details-btn,
-        .manage-btn {
+        .manage-btn,
+        .cancel-btn {
           flex: 1;
           padding: 10px 16px;
           border-radius: 8px;
@@ -818,6 +1130,15 @@ export default function DoctorDashboard() {
         
         .manage-btn:hover {
           background: #0d9488;
+        }
+        
+        .cancel-btn {
+          background: #ef4444;
+          color: #ffffff;
+        }
+        
+        .cancel-btn:hover {
+          background: #dc2626;
         }
         
         /* Empty State */
@@ -863,6 +1184,97 @@ export default function DoctorDashboard() {
             flex-direction: column;
           }
         }
+        
+        /* Pagination */
+        .pagination-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          margin-top: 40px;
+          padding: 24px;
+          background: #ffffff;
+          border-radius: 16px;
+          box-shadow: 0 2px 12px rgba(20, 184, 166, 0.08);
+          border: 1px solid #ccfbf1;
+        }
+        
+        .pagination-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: #14b8a6;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+          background: #0d9488;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);
+        }
+        
+        .pagination-btn:disabled {
+          background: #99f6e4;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        
+        .pagination-icon {
+          width: 18px;
+          height: 18px;
+        }
+        
+        .pagination-numbers {
+          display: flex;
+          gap: 8px;
+        }
+        
+        .pagination-number {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #99f6e4;
+          background: white;
+          color: #0f766e;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .pagination-number:hover {
+          border-color: #14b8a6;
+          background: #f0fdfa;
+        }
+        
+        .pagination-number.active {
+          background: #14b8a6;
+          border-color: #14b8a6;
+          color: white;
+        }
+        
+        @media (max-width: 768px) {
+          .pagination-container {
+            flex-wrap: wrap;
+            gap: 12px;
+          }
+          
+          .pagination-numbers {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+        }
+        
         .modal {
           position: fixed;
           top: 0;
