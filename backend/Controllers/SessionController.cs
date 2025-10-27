@@ -37,7 +37,7 @@ public class SessionController : ControllerBase
 
     //get all sessions for a logged in doctor
     [HttpGet("getallsessions")]
-    public async Task<IActionResult> GetAllSessionsForDoctor()
+    public async Task<ActionResult<List<SessionDto>>> GetAllSessionsForDoctor()
     {
         try
         {

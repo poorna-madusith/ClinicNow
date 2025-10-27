@@ -64,7 +64,7 @@ public class SessionServices
 
 
     //get all sessions for a doctor
-    public async Task<List<Session>> GetAllSessionsForDoctor(string doctorId)
+    public async Task<List<SessionDto>> GetAllSessionsForDoctor(string doctorId)
     {
         var doctorexsisting = await _userManager.FindByIdAsync(doctorId);
         if (doctorexsisting == null || doctorexsisting.Role != RoleEnum.Doctor)
@@ -78,6 +78,29 @@ public class SessionServices
                 .ThenInclude(b => b.Patient)
             .OrderBy(s => s.Date)
             .ThenBy(s => s.StartTime)
+            .Select(s => new SessionDto
+            {
+                Id = s.Id,
+                DoctorId = s.DoctorId,
+                DoctorName = s.Doctor.FirstName + " " + s.Doctor.LastName,
+                Date = s.Date,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Capacity = s.Capacity,
+                SessionFee = s.SessionFee,
+                Description = s.Description,
+                Canceled = s.Canceled,
+                Bookings = s.Bookings.Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    PatientId = b.PatientId,
+                    PatientName = b.Patient.FirstName + " " + b.Patient.LastName,
+                    BookedDateandTime = b.BookedDateandTime,
+                    positionInQueue = b.positionInQueue,
+                    Completed = b.Completed,
+                    OnGoing = b.OnGoing
+                }).ToList()
+            })
             .ToListAsync();
         return sessions;
     }

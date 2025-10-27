@@ -1,6 +1,9 @@
 'use client';
 
+import { useAuth } from "@/Context/AuthContext";
 import { Session } from "@/types/Session";
+import axios, { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 
 interface UserSessionBookingProps {
@@ -11,6 +14,28 @@ interface UserSessionBookingProps {
 
 
 export default function UserSessionBooking({isOpen, onClose, session}: UserSessionBookingProps) {
+    const {accessToken} = useAuth();
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+
+    const handleBookingClick = async () => {
+
+        try{
+            const res  = await axios.post(`${API}/userSession/booksession/${session?.id}`,{},{
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+        console.log("Booking successful:", res.data);
+        toast.success("Session booked successfully!");
+        onClose();
+        }catch(err){
+            const error = err as AxiosError<{ message: string }>;
+            const errorMessage = error.response?.data?.message || "An unknown error occurred";
+            console.error("Error booking session:", errorMessage);
+            toast.error(errorMessage);
+        }
+    }
 
     if(!isOpen || !session) return null;
 
@@ -345,6 +370,8 @@ export default function UserSessionBooking({isOpen, onClose, session}: UserSessi
                                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                     : "bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                             }`}
+
+                            onClick={()=> handleBookingClick()}
                         >
                             {session.canceled
                                 ? "Session Canceled"

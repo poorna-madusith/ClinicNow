@@ -1,3 +1,4 @@
+using backend.DTOs;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +24,7 @@ public class UserSessionController : ControllerBase
     }
 
     [HttpGet("getsessionsfordoctor/{doctorId}")]
-    public async Task<IActionResult> GetAllSessionsForADoctor(string doctorId)
+    public async Task<ActionResult<List<SessionDto>>> GetAllSessionsForADoctor(string doctorId)
     {
         try
         {

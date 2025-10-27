@@ -1,13 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace backend.DTOs
 {
     public class SessionDto
     {
+        public int Id { get; set; }
 
         [Required(ErrorMessage = "Doctor ID is required")]
-        public string DoctorId { get; set; } = null!;  // Only send ID from frontend, not full user object
+        public string DoctorId { get; set; } = null!;
+
+        public string? DoctorName { get; set; }
 
         [Required(ErrorMessage = "Capacity is required")]
         [Range(1, 500, ErrorMessage = "Capacity must be between 1 and 500")]
@@ -29,5 +33,8 @@ namespace backend.DTOs
         [Required(ErrorMessage = "Description is required")]
         public string Description { get; set; } = string.Empty;
 
+        public bool Canceled { get; set; }
+
+        public List<BookingDto>? Bookings { get; set; }
     }
 }
