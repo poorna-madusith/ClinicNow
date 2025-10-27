@@ -10,13 +10,17 @@ interface UserSessionBookingProps {
     isOpen: boolean;
     onClose: () => void;
     session: Session | null;
+    onBookingSuccess?: () => void;
 }
 
 
-export default function UserSessionBooking({isOpen, onClose, session}: UserSessionBookingProps) {
-    const {accessToken} = useAuth();
+export default function UserSessionBooking({isOpen, onClose, session, onBookingSuccess}: UserSessionBookingProps) {
+    const {accessToken, userId} = useAuth();
     const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+    // Debug: Log userId and bookings
+    console.log('Current userId:', userId);
+    console.log('Session bookings:', session?.bookings);
 
     const handleBookingClick = async () => {
 
@@ -29,6 +33,10 @@ export default function UserSessionBooking({isOpen, onClose, session}: UserSessi
         console.log("Booking successful:", res.data);
         toast.success("Session booked successfully!");
         onClose();
+        // Call the callback to refetch sessions
+        if (onBookingSuccess) {
+            onBookingSuccess();
+        }
         }catch(err){
             const error = err as AxiosError<{ message: string }>;
             const errorMessage = error.response?.data?.message || "An unknown error occurred";
@@ -352,6 +360,71 @@ export default function UserSessionBooking({isOpen, onClose, session}: UserSessi
                                 Description
                             </h3>
                             <p className="text-gray-700 leading-relaxed pl-12">{session.description}</p>
+                        </div>
+                    )}
+
+                    {/* Booked Patients Queue */}
+                    {session.bookings && session.bookings.length > 0 && (
+                        <div className="mb-6 p-5 bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-300 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-2 rounded-lg mr-3 shadow-sm">
+                                    <svg
+                                        className="w-5 h-5 text-blue-700"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                        />
+                                    </svg>
+                                </div>
+                                Booked Patients Queue
+                            </h3>
+                            <div className="space-y-2 pl-12">
+                                {session.bookings
+                                    .sort((a, b) => (a.positionInQueue || 0) - (b.positionInQueue || 0))
+                                    .map((booking) => (
+                                        <div
+                                            key={booking.id}
+                                            className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100 hover:shadow-md transition-all duration-200"
+                                        >
+                                            <div className="flex items-center space-x-3">
+                                                <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-md">
+                                                    {booking.positionInQueue || 0}
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">
+                                                        {booking.patient
+                                                            ? `${booking.patient.firstName || ''} ${booking.patient.lastName || ''}`.trim()
+                                                            : booking.patientName || 'Unknown Patient'}
+                                                        {(booking.patient?.id === userId || booking.patientId === userId) && (
+                                                            <span className="ml-2 text-teal-600 font-bold">(You)</span>
+                                                        )}
+                                                    </p>
+                                                    {booking.patient?.email && (
+                                                        <p className="text-xs text-gray-600">{booking.patient.email}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                {booking.onGoing && (
+                                                    <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full border border-yellow-300">
+                                                        Ongoing
+                                                    </span>
+                                                )}
+                                                {booking.completed && (
+                                                    <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full border border-green-300">
+                                                        Completed
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
                         </div>
                     )}
 

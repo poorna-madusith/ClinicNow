@@ -2,6 +2,8 @@
 
 import { Doctor } from "@/types/Doctor";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 
 interface DoctorFullViewProps {
   isModalOpen: boolean;
@@ -9,13 +11,21 @@ interface DoctorFullViewProps {
   doctor: Doctor | null;
 }
 
+
+
 export default function DoctorFullView({
   isModalOpen,
   onClose,
   doctor,
 }: DoctorFullViewProps) {
+  const router = useRouter();
+
   if (!isModalOpen || !doctor) {
     return null;
+  }
+
+  const handleBookingClick = (id: string) => {
+    router.push(`/subpages/SessionsForADoc/${id}`); 
   }
   return (
     <div
@@ -257,7 +267,9 @@ export default function DoctorFullView({
           >
             Close
           </button>
-          <button className="px-6 py-3 text-white font-medium bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2">
+          <button className="px-6 py-3 text-white font-medium bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2"
+            onClick={() => handleBookingClick(doctor.id)}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>

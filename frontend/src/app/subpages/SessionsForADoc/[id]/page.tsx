@@ -32,6 +32,11 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
     setBookingSession(null);
     setBookingSessionModalIsOpen(false);
   }
+
+  const handleBookingSuccess = () => {
+    // Refetch sessions after successful booking
+    fetchSessions();
+  }
   
 
   useEffect(() => {
@@ -597,7 +602,8 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
       <UserSessionBooking 
         isOpen={BookingSessionModalIsOpen} 
         onClose={handleSessionBookingOnClose} 
-        session={bookingSession} 
+        session={bookingSession}
+        onBookingSuccess={handleBookingSuccess}
       />
     </div>
   );
