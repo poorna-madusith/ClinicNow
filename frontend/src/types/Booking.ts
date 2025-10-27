@@ -8,6 +8,7 @@ export interface Booking {
         firstName?: string;
         lastName?: string;
         email?: string;
+        contactNumbers?: string[];
     };
     bookedDateandTime: string; // ISO date string
     positionInQueue?: number;

@@ -100,7 +100,8 @@ public class SessionServices
                         Id = b.Patient.Id,
                         FirstName = b.Patient.FirstName,
                         LastName = b.Patient.LastName,
-                        Email = b.Patient.Email
+                        Email = b.Patient.Email,
+                        ContactNumbers = b.Patient.ContactNumbers
                     },
                     BookedDateandTime = b.BookedDateandTime,
                     positionInQueue = b.positionInQueue,
