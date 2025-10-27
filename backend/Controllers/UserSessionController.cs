@@ -74,6 +74,28 @@ public class UserSessionController : ControllerBase
     }
 
 
+    //book a session
+    [HttpPost("booksession/{id}")]
+    public async Task<IActionResult> BookASession(int id)
+    {
+        try
+        {
+            var patientId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(patientId))
+            {
+                return Unauthorized(new { Message = "User ID not found in token." });
+            }
+
+            var positionInQueue = await _userSessionServices.BookASession(id, patientId);
+            return Ok(new { PositionInQueue = positionInQueue });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
 
 
 
