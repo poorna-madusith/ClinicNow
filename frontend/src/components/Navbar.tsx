@@ -10,7 +10,7 @@ export default function Navbar() {
     const { userRole, logout } = useAuth();
 
     const adminLinks = [
-    { label: "Dashboard", href: "/DocotorDashboard" },
+    { label: "Dashboard", href: "/AdminDashboard" },
     { label: "Manage Users", href: "/admin/users" },
     { label: "Reports", href: "/admin/reports" },
   ];
@@ -22,8 +22,8 @@ export default function Navbar() {
   ];
 
   const patientLinks = [
-    { label: "Dashboard", href: "/patient/dashboard" },
-    { label: "My Appointments", href: "/patient/appointments" },
+    { label: "Dashboard", href: "/UserDashboard" },
+    { label: "My Appointments", href: "/MyAppoinments" },
     { label: "Profile", href: "/patient/profile" },
   ];
 
