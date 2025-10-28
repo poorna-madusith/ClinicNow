@@ -25,6 +25,9 @@ export default function MyAppointmentsPage(){
     // Date filter state
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    
+    // Cancelled filter state
+    const [showCancelledOnly, setShowCancelledOnly] = useState(false);
 
 
     const fetchBookings = async () => {
@@ -129,6 +132,16 @@ export default function MyAppointmentsPage(){
         
         let filtered = [...myBookings];
         
+        // Filter by cancelled status
+        if (showCancelledOnly) {
+            // Show ONLY cancelled sessions
+            return filtered.filter(booking => booking.session?.canceled === true);
+        } else {
+            // Exclude cancelled sessions from normal view
+            filtered = filtered.filter(booking => booking.session?.canceled !== true);
+        }
+        
+        // Filter by date (only when not showing cancelled)
         if (selectedDate) {
             filtered = filtered.filter(booking => {
                 const bookingDate = new Date(booking.bookedDateandTime);
@@ -156,6 +169,7 @@ export default function MyAppointmentsPage(){
 
     const clearDateFilter = () => {
         setSelectedDate(null);
+        setShowCancelledOnly(false);
         setCurrentPage(1);
     };
 
@@ -182,6 +196,11 @@ export default function MyAppointmentsPage(){
     };
 
     const getStatusBadge = (booking: Booking) => {
+        // Don't show status badge for cancelled sessions
+        if (booking.session?.canceled) {
+            return null;
+        }
+        
         if (booking.completed) {
             return (
                 <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 shadow-sm border border-emerald-200 dark:border-emerald-800 transition-all duration-300">
@@ -221,24 +240,49 @@ export default function MyAppointmentsPage(){
                         {/* Date Filter Section */}
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
-                                onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+                                onClick={() => {
+                                    setShowCancelledOnly(!showCancelledOnly);
+                                    setCurrentPage(1);
+                                    if (showCancelledOnly) {
+                                        setSelectedDate(null);
+                                        setShowDatePicker(false);
+                                    }
+                                }}
+                                className={`px-6 py-3 rounded-xl transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 ${
+                                    showCancelledOnly 
+                                        ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600' 
+                                        : 'bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700'
+                                }`}
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                {selectedDate ? `Filtered: ${selectedDate.toLocaleDateString()}` : 'Select Date'}
+                                {showCancelledOnly ? 'Show All Sessions' : 'Cancelled Sessions'}
                             </button>
-                            {selectedDate && (
-                                <button
-                                    onClick={clearDateFilter}
-                                    className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-                                >
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    Clear Filter
-                                </button>
+                            
+                            {!showCancelledOnly && (
+                                <>
+                                    <button
+                                        onClick={() => setShowDatePicker(!showDatePicker)}
+                                        className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        {selectedDate ? `Filtered: ${selectedDate.toLocaleDateString()}` : 'Select Date'}
+                                    </button>
+                                    {selectedDate && (
+                                        <button
+                                            onClick={clearDateFilter}
+                                            className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Clear Filter
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
@@ -336,31 +380,31 @@ export default function MyAppointmentsPage(){
                             {currentBookings.map((booking) => (
                                 <div 
                                     key={booking.id}
-                                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out overflow-hidden group border-2 border-transparent hover:border-teal-300 dark:hover:border-teal-700 transform hover:-translate-y-2 hover:scale-[1.02]"
+                                    className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out overflow-hidden group border-2 transform hover:-translate-y-2 hover:scale-[1.02] ${
+                                        booking.session?.canceled 
+                                            ? 'border-red-300 dark:border-red-700 opacity-75' 
+                                            : 'border-transparent hover:border-teal-300 dark:hover:border-teal-700'
+                                    }`}
                                 >
                                     {/* Card Header with Status */}
-                                    <div className="bg-gradient-to-r from-teal-500 to-cyan-500 dark:from-teal-600 dark:to-cyan-600 p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <span className="text-sm font-bold text-white/90">
-                                                Booking #{booking.id}
-                                            </span>
+                                    <div className={`p-6 ${
+                                        booking.session?.canceled
+                                            ? 'bg-gradient-to-r from-red-500 to-rose-500 dark:from-red-600 dark:to-rose-600'
+                                            : 'bg-gradient-to-r from-teal-500 to-cyan-500 dark:from-teal-600 dark:to-cyan-600'
+                                    }`}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-bold text-white/90">
+                                                    Booking #{booking.id}
+                                                </span>
+                                                {booking.session?.canceled && (
+                                                    <span className="px-2 py-1 text-xs font-bold rounded-full bg-white/20 text-white border border-white/30">
+                                                        CANCELLED
+                                                    </span>
+                                                )}
+                                            </div>
                                             {getStatusBadge(booking)}
                                         </div>
-                                        
-                                        {/* Patient Name */}
-                                        <h3 className="text-xl font-bold text-white mb-1">
-                                            {booking.patient?.firstName && booking.patient?.lastName 
-                                                ? `${booking.patient.firstName} ${booking.patient.lastName}`
-                                                : booking.patientName || 'Patient'}
-                                        </h3>
-                                        {booking.patient?.email && (
-                                            <p className="text-sm text-white/80 flex items-center gap-2">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                </svg>
-                                                {booking.patient.email}
-                                            </p>
-                                        )}
                                     </div>
 
                                     {/* Card Body */}
