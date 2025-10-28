@@ -35,6 +35,8 @@ namespace backend.DTOs
 
         public bool Canceled { get; set; }
 
+        public bool Ongoing { get; set; }
+
         public List<BookingDto>? Bookings { get; set; }
     }
 }

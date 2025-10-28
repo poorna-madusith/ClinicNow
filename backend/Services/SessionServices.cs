@@ -90,6 +90,7 @@ public class SessionServices
                 SessionFee = s.SessionFee,
                 Description = s.Description,
                 Canceled = s.Canceled,
+                Ongoing = s.Ongoing,
                 Bookings = s.Bookings.Select(b => new BookingDto
                 {
                     Id = b.Id,
