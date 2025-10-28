@@ -7,7 +7,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import SessionFullView from "@/components/SessionFullView";
-import "./appointments.css";
 
 
 export default function MyAppointmentsPage(){
@@ -185,19 +184,19 @@ export default function MyAppointmentsPage(){
     const getStatusBadge = (booking: Booking) => {
         if (booking.completed) {
             return (
-                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 shadow-sm border border-emerald-200 dark:border-emerald-800">
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 shadow-sm border border-emerald-200 dark:border-emerald-800 transition-all duration-300">
                     ✓ Completed
                 </span>
             );
         } else if (booking.onGoing) {
             return (
-                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200 animate-pulse shadow-sm border border-cyan-200 dark:border-cyan-800">
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200 animate-pulse shadow-sm border border-cyan-200 dark:border-cyan-800 transition-all duration-300">
                     ● Ongoing
                 </span>
             );
         } else {
             return (
-                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 shadow-sm border border-amber-200 dark:border-amber-800">
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 shadow-sm border border-amber-200 dark:border-amber-800 transition-all duration-300">
                     ⏱ Scheduled
                 </span>
             );
@@ -223,7 +222,7 @@ export default function MyAppointmentsPage(){
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
                                 onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                                className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -233,7 +232,7 @@ export default function MyAppointmentsPage(){
                             {selectedDate && (
                                 <button
                                     onClick={clearDateFilter}
-                                    className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                                    className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
                                 >
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -258,7 +257,7 @@ export default function MyAppointmentsPage(){
                                         setSelectedDate(e.target.value ? new Date(e.target.value) : null);
                                         setCurrentPage(1);
                                     }}
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border-2 border-teal-200 dark:border-teal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 dark:text-white transition-all text-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border-2 border-teal-200 dark:border-teal-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-600 dark:text-white transition-all duration-300 text-lg cursor-pointer hover:border-teal-400 dark:hover:border-teal-500"
                                 />
                             </div>
                             {selectedDate && (
@@ -337,7 +336,7 @@ export default function MyAppointmentsPage(){
                             {currentBookings.map((booking) => (
                                 <div 
                                     key={booking.id}
-                                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group border-2 border-transparent hover:border-teal-300 dark:hover:border-teal-700 transform hover:-translate-y-1"
+                                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out overflow-hidden group border-2 border-transparent hover:border-teal-300 dark:hover:border-teal-700 transform hover:-translate-y-2 hover:scale-[1.02]"
                                 >
                                     {/* Card Header with Status */}
                                     <div className="bg-gradient-to-r from-teal-500 to-cyan-500 dark:from-teal-600 dark:to-cyan-600 p-6">
@@ -444,7 +443,7 @@ export default function MyAppointmentsPage(){
                                         <button 
                                             onClick={() => fetchFullSessionDetails(booking)}
                                             disabled={!booking.session || loadingSessionId === booking.sessionId}
-                                            className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                            className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95"
                                         >
                                             {loadingSessionId === booking.sessionId ? (
                                                 <>
@@ -482,7 +481,7 @@ export default function MyAppointmentsPage(){
                                     <button
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={currentPage === 1}
-                                        className="p-2 rounded-lg border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                                        className="p-2 rounded-lg border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-110 active:scale-95"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -504,8 +503,8 @@ export default function MyAppointmentsPage(){
                                                         onClick={() => handlePageChange(page)}
                                                         className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all duration-300 ${
                                                             currentPage === page
-                                                                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg transform scale-110'
-                                                                : 'border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30'
+                                                                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/50 transform scale-110'
+                                                                : 'border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:scale-105 active:scale-95'
                                                         }`}
                                                     >
                                                         {page}
@@ -526,7 +525,7 @@ export default function MyAppointmentsPage(){
                                     <button
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={currentPage === totalPages}
-                                        className="p-2 rounded-lg border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                                        className="p-2 rounded-lg border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-110 active:scale-95"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
