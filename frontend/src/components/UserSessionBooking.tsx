@@ -40,7 +40,6 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
         }catch(err){
             const error = err as AxiosError<{ message: string }>;
             const errorMessage = error.response?.data?.message || "An unknown error occurred";
-            console.error("Error booking session:", errorMessage);
             toast.error(errorMessage);
         }
     }

@@ -10,6 +10,18 @@ export interface Booking {
         email?: string;
         contactNumbers?: string[];
     };
+    session?: {
+        id: number;
+        doctorId: string;
+        doctorName?: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+        capacity: number;
+        sessionFee: number;
+        description: string;
+        canceled: boolean;
+    };
     bookedDateandTime: string; // ISO date string
     positionInQueue?: number;
     onGoing: boolean;

@@ -41,16 +41,21 @@ public class SessionController : ControllerBase
     {
         try
         {
-            var doctorId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            // Try "id" claim first (which contains the actual user ID), then fall back to "sub"
+            var doctorId = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(doctorId))
             {
                 return Unauthorized(new { Message = "User ID not found in token." });
             }
+            
+            Console.WriteLine($"Fetching sessions for doctor ID: {doctorId}");
             var sessions = await _sessionServices.GetAllSessionsForDoctor(doctorId);
             return Ok(sessions);
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error in GetAllSessionsForDoctor: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return BadRequest(new { Message = ex.Message });
         }
     }

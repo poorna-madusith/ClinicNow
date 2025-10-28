@@ -66,10 +66,21 @@ public class SessionServices
     //get all sessions for a doctor
     public async Task<List<SessionDto>> GetAllSessionsForDoctor(string doctorId)
     {
+        Console.WriteLine($"SessionServices: Looking for doctor with ID: {doctorId}");
+        
         var doctorexsisting = await _userManager.FindByIdAsync(doctorId);
-        if (doctorexsisting == null || doctorexsisting.Role != RoleEnum.Doctor)
+        
+        if (doctorexsisting == null)
         {
-            throw new Exception("Invalid doctor ID");
+            Console.WriteLine($"SessionServices: Doctor not found with ID: {doctorId}");
+            throw new Exception($"Doctor not found with ID: {doctorId}");
+        }
+        
+        Console.WriteLine($"SessionServices: Found user - Email: {doctorexsisting.Email}, Role: {doctorexsisting.Role}");
+        
+        if (doctorexsisting.Role != RoleEnum.Doctor)
+        {
+            throw new Exception($"User is not a doctor. Current role: {doctorexsisting.Role}");
         }
 
         var sessions = await _context.Sessions

@@ -7,14 +7,16 @@ interface SessionFullViewProps {
   isModalOpen: boolean;
   isClose: () => void;
   session: Session;
+  currentUserId?: string;
 }
 
 export default function SessionFullView({
   isModalOpen,
   isClose,
   session,
+  currentUserId,
 }: SessionFullViewProps) {
-  const { role } = useAuth();
+  const { userRole } = useAuth();
 
   if (!isModalOpen) {
     return null;
@@ -78,7 +80,7 @@ export default function SessionFullView({
           <div className="modal-body">
             {/* Doctor Info Card */}
 
-            {role === "Admin" && (
+            {userRole === "Admin" && (
               <>
                 <div className="info-card doctor-card">
                   <div className="card-header">
@@ -315,39 +317,55 @@ export default function SessionFullView({
               </div>
               <div className="card-content patients-list">
                 {patients && patients.length > 0 ? (
-                  patients.map((patient, index) => (
-                    <div key={patient?.id || index} className="patient-item">
-                      <div className="patient-avatar">
-                        {patient?.firstName?.charAt(0)}
-                        {patient?.lastName?.charAt(0)}
+                  patients.map((patient, index) => {
+                    const isCurrentUser = currentUserId && patient?.id === currentUserId;
+                    // Find the booking for this patient to get queue position
+                    const booking = session.bookings?.find(b => b.patient?.id === patient?.id);
+                    const queuePosition = booking?.positionInQueue;
+                    
+                    return (
+                      <div 
+                        key={patient?.id || index} 
+                        className={`patient-item ${isCurrentUser ? 'current-user' : ''}`}
+                      >
+                        <div className="patient-avatar">
+                          {patient?.firstName?.charAt(0)}
+                          {patient?.lastName?.charAt(0)}
+                        </div>
+                        <div className="patient-info">
+                          <p className="patient-name">
+                            {patient?.firstName} {patient?.lastName}
+                            {isCurrentUser && (
+                              <span className="you-badge">This is You</span>
+                            )}
+                            {isCurrentUser && queuePosition && (
+                              <span className="queue-badge">Queue #{queuePosition}</span>
+                            )}
+                          </p>
+                          <p className="patient-email">{patient?.email}</p>
+                          {patient?.contactNumbers &&
+                            patient.contactNumbers.length > 0 && (
+                              <p className="patient-contact">
+                                <svg
+                                  className="contact-icon"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                  />
+                                </svg>
+                                {patient.contactNumbers.join(", ")}
+                              </p>
+                            )}
+                        </div>
                       </div>
-                      <div className="patient-info">
-                        <p className="patient-name">
-                          {patient?.firstName} {patient?.lastName}
-                        </p>
-                        <p className="patient-email">{patient?.email}</p>
-                        {patient?.contactNumbers &&
-                          patient.contactNumbers.length > 0 && (
-                            <p className="patient-contact">
-                              <svg
-                                className="contact-icon"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                                />
-                              </svg>
-                              {patient.contactNumbers.join(", ")}
-                            </p>
-                          )}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="empty-patients">
                     <svg
@@ -795,6 +813,35 @@ export default function SessionFullView({
           box-shadow: 0 2px 8px rgba(20, 184, 166, 0.1);
         }
 
+        .patient-item.current-user {
+          background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+          border: 2px solid #14b8a6;
+          box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+          position: relative;
+        }
+
+        .patient-item.current-user::before {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          background: linear-gradient(135deg, #14b8a6, #0d9488);
+          border-radius: 12px;
+          z-index: -1;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.6;
+          }
+          50% {
+            opacity: 0.3;
+          }
+        }
+
         .patient-avatar {
           width: 48px;
           height: 48px;
@@ -810,6 +857,11 @@ export default function SessionFullView({
           border: 3px solid #99f6e4;
         }
 
+        .patient-item.current-user .patient-avatar {
+          border: 3px solid #14b8a6;
+          box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+        }
+
         .patient-info {
           flex: 1;
         }
@@ -819,6 +871,53 @@ export default function SessionFullView({
           font-weight: 700;
           color: #134e4a;
           margin: 0 0 4px 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .you-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+          color: #ffffff;
+          font-size: 0.75rem;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 2px 6px rgba(20, 184, 166, 0.3);
+          animation: slideInRight 0.5s ease-out;
+        }
+
+        .queue-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          color: #ffffff;
+          font-size: 0.75rem;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+          animation: slideInRight 0.6s ease-out;
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
         .patient-email {

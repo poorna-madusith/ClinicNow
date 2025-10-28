@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models
 {
@@ -33,6 +34,7 @@ namespace backend.Models
 
         public bool Canceled { get; set; } = false;
 
+        [Column("ongoing")]
         public bool Ongoing { get; set; } = false;
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
