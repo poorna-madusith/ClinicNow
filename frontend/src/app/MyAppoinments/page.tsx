@@ -7,6 +7,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import SessionFullView from "@/components/SessionFullView";
+import "./appointments.css";
 
 
 export default function MyAppointmentsPage(){
@@ -17,6 +18,14 @@ export default function MyAppointmentsPage(){
     const [loadingSessionId, setLoadingSessionId] = useState<number | null>(null);
     const {accessToken, userId} = useAuth();
     const API  = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(6);
+
+    // Date filter state
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
 
     const fetchBookings = async () => {
@@ -115,6 +124,42 @@ export default function MyAppointmentsPage(){
         setSelectedSession(null);
     };
 
+    // Filter bookings by date range
+    const getFilteredBookings = () => {
+        if (!myBookings) return [];
+        
+        let filtered = [...myBookings];
+        
+        if (selectedDate) {
+            filtered = filtered.filter(booking => {
+                const bookingDate = new Date(booking.bookedDateandTime);
+                const filterDate = new Date(selectedDate);
+                
+                // Compare only the date part (ignore time)
+                return bookingDate.toDateString() === filterDate.toDateString();
+            });
+        }
+        
+        return filtered;
+    };
+
+    // Pagination logic
+    const filteredBookings = getFilteredBookings();
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentBookings = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const clearDateFilter = () => {
+        setSelectedDate(null);
+        setCurrentPage(1);
+    };
+
     useEffect(()=> {
         fetchBookings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,186 +185,357 @@ export default function MyAppointmentsPage(){
     const getStatusBadge = (booking: Booking) => {
         if (booking.completed) {
             return (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Completed
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 shadow-sm border border-emerald-200 dark:border-emerald-800">
+                    ✓ Completed
                 </span>
             );
         } else if (booking.onGoing) {
             return (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 animate-pulse">
-                    Ongoing
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200 animate-pulse shadow-sm border border-cyan-200 dark:border-cyan-800">
+                    ● Ongoing
                 </span>
             );
         } else {
             return (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                    Scheduled
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 shadow-sm border border-amber-200 dark:border-amber-800">
+                    ⏱ Scheduled
                 </span>
             );
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-emerald-50 dark:from-slate-900 dark:via-teal-950 dark:to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
+                {/* Header with Date Filter */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                        My Appointments
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        View and manage all your medical appointments
-                    </p>
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div>
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent mb-2">
+                                My Appointments
+                            </h1>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                View and manage all your medical appointments
+                            </p>
+                        </div>
+
+                        {/* Date Filter Section */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={() => setShowDatePicker(!showDatePicker)}
+                                className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {selectedDate ? `Filtered: ${selectedDate.toLocaleDateString()}` : 'Select Date'}
+                            </button>
+                            {selectedDate && (
+                                <button
+                                    onClick={clearDateFilter}
+                                    className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Clear Filter
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Date Picker Dropdown */}
+                    {showDatePicker && (
+                        <div className="mt-6 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border-2 border-teal-200 dark:border-teal-700">
+                            <div className="max-w-md mx-auto">
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                    Select a Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
+                                    onChange={(e) => {
+                                        setSelectedDate(e.target.value ? new Date(e.target.value) : null);
+                                        setCurrentPage(1);
+                                    }}
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border-2 border-teal-200 dark:border-teal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 dark:text-white transition-all text-lg"
+                                />
+                            </div>
+                            {selectedDate && (
+                                <div className="mt-4 p-4 bg-teal-50 dark:bg-teal-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
+                                    <p className="text-sm text-teal-700 dark:text-teal-300 font-medium text-center">
+                                        Showing appointments for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                        <span className="ml-2 px-2 py-1 bg-teal-200 dark:bg-teal-800 rounded-full text-xs">
+                                            {filteredBookings.length} {filteredBookings.length === 1 ? 'result' : 'results'}
+                                        </span>
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Loading State */}
                 {isLoading && (
                     <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                        <div className="relative">
+                            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-teal-500"></div>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <div className="w-4 h-4 bg-teal-500 rounded-full"></div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
                 {/* Empty State */}
                 {!isLoading && (!myBookings || myBookings.length === 0) && (
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-12 text-center">
-                        <svg className="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-12 text-center border-2 border-teal-100 dark:border-teal-900">
+                        <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-full flex items-center justify-center">
+                            <svg className="h-16 w-16 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                             No appointments yet
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            You haven&apos;t booked any appointments. Start by booking your first consultation.
+                        <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                            You haven&apos;t booked any appointments. Start your healthcare journey by booking your first consultation.
                         </p>
-                        <button className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
-                            Book Appointment
+                        <button className="px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            Book Your First Appointment
+                        </button>
+                    </div>
+                )}
+
+                {/* No Results After Filter */}
+                {!isLoading && myBookings && myBookings.length > 0 && filteredBookings.length === 0 && (
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-12 text-center border-2 border-teal-100 dark:border-teal-900">
+                        <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-full flex items-center justify-center">
+                            <svg className="h-16 w-16 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                            No appointments found
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-8">
+                            No appointments match your selected date range. Try adjusting your filters.
+                        </p>
+                        <button 
+                            onClick={clearDateFilter}
+                            className="px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+                        >
+                            Clear Filters
                         </button>
                     </div>
                 )}
 
                 {/* Appointments Grid */}
-                {!isLoading && myBookings && myBookings.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {myBookings.map((booking) => (
-                            <div 
-                                key={booking.id}
-                                className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
-                            >
-                                {/* Card Header with Status */}
-                                <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 p-6 border-b border-slate-200 dark:border-slate-700">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                            Booking #{booking.id}
-                                        </span>
-                                        {getStatusBadge(booking)}
-                                    </div>
-                                    
-                                    {/* Patient Name */}
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                                        {booking.patient?.firstName && booking.patient?.lastName 
-                                            ? `${booking.patient.firstName} ${booking.patient.lastName}`
-                                            : booking.patientName || 'Patient'}
-                                    </h3>
-                                    {booking.patient?.email && (
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {booking.patient.email}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Card Body */}
-                                <div className="p-6 space-y-4">
-                                    {/* Date and Time */}
-                                    <div className="flex items-start space-x-3">
-                                        <svg className="w-5 h-5 text-primary mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                {formatDate(booking.bookedDateandTime)}
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {formatTime(booking.bookedDateandTime)}
-                                            </p>
+                {!isLoading && currentBookings && currentBookings.length > 0 && (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {currentBookings.map((booking) => (
+                                <div 
+                                    key={booking.id}
+                                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group border-2 border-transparent hover:border-teal-300 dark:hover:border-teal-700 transform hover:-translate-y-1"
+                                >
+                                    {/* Card Header with Status */}
+                                    <div className="bg-gradient-to-r from-teal-500 to-cyan-500 dark:from-teal-600 dark:to-cyan-600 p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-sm font-bold text-white/90">
+                                                Booking #{booking.id}
+                                            </span>
+                                            {getStatusBadge(booking)}
                                         </div>
-                                    </div>
-
-                                    {/* Queue Position */}
-                                    {booking.positionInQueue && (
-                                        <div className="flex items-start space-x-3">
-                                            <svg className="w-5 h-5 text-primary mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                            </svg>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                    Queue Position
-                                                </p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                    #{booking.positionInQueue}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Session ID */}
-                                    <div className="flex items-start space-x-3">
-                                        <svg className="w-5 h-5 text-primary mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                        </svg>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                Session ID
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {booking.sessionId}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Contact Numbers */}
-                                    {booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 && (
-                                        <div className="flex items-start space-x-3">
-                                            <svg className="w-5 h-5 text-primary mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                            </svg>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                    Contact
-                                                </p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                    {booking.patient.contactNumbers[0]}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Card Footer */}
-                                <div className="px-6 pb-6">
-                                    <button 
-                                        onClick={() => fetchFullSessionDetails(booking)}
-                                        disabled={!booking.session || loadingSessionId === booking.sessionId}
-                                        className="w-full px-4 py-2.5 bg-primary/10 hover:bg-primary hover:text-white text-primary rounded-lg transition-colors font-medium group-hover:bg-primary group-hover:text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                    >
-                                        {loadingSessionId === booking.sessionId ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                                                Loading...
-                                            </>
-                                        ) : (
-                                            <>
+                                        
+                                        {/* Patient Name */}
+                                        <h3 className="text-xl font-bold text-white mb-1">
+                                            {booking.patient?.firstName && booking.patient?.lastName 
+                                                ? `${booking.patient.firstName} ${booking.patient.lastName}`
+                                                : booking.patientName || 'Patient'}
+                                        </h3>
+                                        {booking.patient?.email && (
+                                            <p className="text-sm text-white/80 flex items-center gap-2">
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
-                                                Session Full View
-                                            </>
+                                                {booking.patient.email}
+                                            </p>
                                         )}
+                                    </div>
+
+                                    {/* Card Body */}
+                                    <div className="p-6 space-y-4 bg-gradient-to-b from-transparent to-teal-50/30 dark:to-teal-950/30">
+                                        {/* Date and Time */}
+                                        <div className="flex items-start space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-xl">
+                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                    {formatDate(booking.bookedDateandTime)}
+                                                </p>
+                                                <p className="text-sm text-teal-600 dark:text-teal-400 font-medium">
+                                                    {formatTime(booking.bookedDateandTime)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Queue Position */}
+                                        {booking.positionInQueue && (
+                                            <div className="flex items-start space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-xl">
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        Queue Position
+                                                    </p>
+                                                    <p className="text-lg font-bold text-teal-600 dark:text-teal-400">
+                                                        #{booking.positionInQueue}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Session ID */}
+                                        <div className="flex items-start space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-xl">
+                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                    Session ID
+                                                </p>
+                                                <p className="text-sm text-teal-600 dark:text-teal-400 font-medium">
+                                                    {booking.sessionId}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Contact Numbers */}
+                                        {booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 && (
+                                            <div className="flex items-start space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-xl">
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        Contact
+                                                    </p>
+                                                    <p className="text-sm text-teal-600 dark:text-teal-400 font-medium">
+                                                        {booking.patient.contactNumbers[0]}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Card Footer */}
+                                    <div className="px-6 pb-6">
+                                        <button 
+                                            onClick={() => fetchFullSessionDetails(booking)}
+                                            disabled={!booking.session || loadingSessionId === booking.sessionId}
+                                            className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                        >
+                                            {loadingSessionId === booking.sessionId ? (
+                                                <>
+                                                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                                    Loading...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    View Full Session
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-2 border-teal-100 dark:border-teal-900">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    Showing <span className="text-teal-600 dark:text-teal-400 font-bold">{indexOfFirstItem + 1}</span> to{' '}
+                                    <span className="text-teal-600 dark:text-teal-400 font-bold">
+                                        {Math.min(indexOfLastItem, filteredBookings.length)}
+                                    </span>{' '}
+                                    of <span className="text-teal-600 dark:text-teal-400 font-bold">{filteredBookings.length}</span> appointments
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    {/* Previous Button */}
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className="p-2 rounded-lg border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Page Numbers */}
+                                    <div className="flex items-center gap-2">
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                                            // Show first page, last page, current page, and pages around current
+                                            if (
+                                                page === 1 ||
+                                                page === totalPages ||
+                                                (page >= currentPage - 1 && page <= currentPage + 1)
+                                            ) {
+                                                return (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => handlePageChange(page)}
+                                                        className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all duration-300 ${
+                                                            currentPage === page
+                                                                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg transform scale-110'
+                                                                : 'border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30'
+                                                        }`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                );
+                                            } else if (page === currentPage - 2 || page === currentPage + 2) {
+                                                return (
+                                                    <span key={page} className="px-2 text-gray-400">
+                                                        ...
+                                                    </span>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
+
+                                    {/* Next Button */}
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className="p-2 rounded-lg border-2 border-teal-200 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )}
             </div>
 
