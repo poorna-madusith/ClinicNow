@@ -8,6 +8,7 @@ export interface Session {
         firstName?: string;
         lastName?: string;
         email?: string;
+        contactNumbers?: string[];
     };
     canceled: boolean;
     ongoing: boolean;

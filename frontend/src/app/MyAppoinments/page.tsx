@@ -67,7 +67,13 @@ export default function MyAppointmentsPage(){
             const sessionData: Session = {
                 id: fullSession.id,
                 doctorId: fullSession.doctorId,
-                doctor: {
+                doctor: fullSession.doctor ? {
+                    id: fullSession.doctor.id,
+                    firstName: fullSession.doctor.firstName,
+                    lastName: fullSession.doctor.lastName,
+                    email: fullSession.doctor.email,
+                    contactNumbers: fullSession.doctor.contactNumbers
+                } : {
                     firstName: fullSession.doctorName?.split(' ')[0],
                     lastName: fullSession.doctorName?.split(' ').slice(1).join(' '),
                 },

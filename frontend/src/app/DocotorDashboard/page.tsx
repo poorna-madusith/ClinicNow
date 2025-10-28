@@ -1401,6 +1401,7 @@ export default function DoctorDashboard() {
           isModalOpen={openFullSessionView}
           isClose={() => handleCloseFullView()}
           session={fullViewSession}
+          currentUserId={userId || undefined}
         />
       )}
     </div>

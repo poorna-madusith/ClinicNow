@@ -12,6 +12,8 @@ namespace backend.DTOs
         public string DoctorId { get; set; } = null!;
 
         public string? DoctorName { get; set; }
+        
+        public DoctorDto? Doctor { get; set; }
 
         [Required(ErrorMessage = "Capacity is required")]
         [Range(1, 500, ErrorMessage = "Capacity must be between 1 and 500")]
@@ -38,5 +40,14 @@ namespace backend.DTOs
         public bool Ongoing { get; set; }
 
         public List<BookingDto>? Bookings { get; set; }
+    }
+
+    public class DoctorDto
+    {
+        public string? Id { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public string[]? ContactNumbers { get; set; }
     }
 }

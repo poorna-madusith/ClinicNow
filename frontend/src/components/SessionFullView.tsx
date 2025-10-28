@@ -1,6 +1,5 @@
 "use-client";
 
-import { useAuth } from "@/Context/AuthContext";
 import { Session } from "@/types/Session";
 
 interface SessionFullViewProps {
@@ -16,15 +15,17 @@ export default function SessionFullView({
   session,
   currentUserId,
 }: SessionFullViewProps) {
-  const { userRole } = useAuth();
-
   if (!isModalOpen) {
     return null;
   }
 
+  // Check if the current user is the doctor of this session
+  const isCurrentUserDoctor = currentUserId === session.doctorId;
+
   // Debug logging
   console.log("Session data:", session);
   console.log("Session bookings:", session.bookings);
+  console.log("Current user is doctor:", isCurrentUserDoctor);
 
   // Get patients from bookings if available, otherwise use patients array for backward compatibility
   const patients =
@@ -78,35 +79,49 @@ export default function SessionFullView({
 
           {/* Content Section */}
           <div className="modal-body">
-            {/* Doctor Info Card */}
-
-            {userRole === "Admin" && (
-              <>
-                <div className="info-card doctor-card">
-                  <div className="card-header">
-                    <svg
-                      className="card-icon"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                    <h3>Doctor Information</h3>
-                  </div>
-                  <div className="card-content">
-                    <p className="doctor-name">
-                      {session.doctor?.firstName} {session.doctor?.lastName}
-                    </p>
-                    <p className="doctor-email">{session.doctor?.email}</p>
-                  </div>
+            {/* Doctor Info Card - Only show if current user is NOT the doctor */}
+            {!isCurrentUserDoctor && session.doctor && (session.doctor.firstName || session.doctor.lastName || session.doctor.email || session.doctor.contactNumbers) && (
+              <div className="info-card doctor-card">
+                <div className="card-header">
+                  <svg
+                    className="card-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  <h3>Doctor Information</h3>
                 </div>
-              </>
+                <div className="card-content">
+                  {(session.doctor.firstName || session.doctor.lastName) && (
+                    <p className="doctor-name">
+                      Dr. {session.doctor.firstName} {session.doctor.lastName}
+                    </p>
+                  )}
+                  {session.doctor.email && (
+                    <div className="doctor-contact-item">
+                      <svg className="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <p className="doctor-email">{session.doctor.email}</p>
+                    </div>
+                  )}
+                  {session.doctor.contactNumbers && session.doctor.contactNumbers.length > 0 && (
+                    <div className="doctor-contact-item">
+                      <svg className="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <p className="doctor-phone">{session.doctor.contactNumbers[0]}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* Session Details Grid */}
@@ -606,14 +621,34 @@ export default function SessionFullView({
           font-size: 1.3rem;
           font-weight: 700;
           color: #1e3a8a;
-          margin: 0 0 8px 0;
+          margin: 0 0 12px 0;
+        }
+
+        .doctor-contact-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 8px 0;
+        }
+
+        .contact-icon {
+          width: 20px;
+          height: 20px;
+          color: #1e40af;
+          flex-shrink: 0;
         }
 
         .doctor-email {
           font-size: 0.95rem;
           color: #1e40af;
           margin: 0;
-          opacity: 0.8;
+        }
+
+        .doctor-phone {
+          font-size: 0.95rem;
+          color: #1e40af;
+          margin: 0;
+          font-weight: 500;
         }
 
         /* Details Grid */

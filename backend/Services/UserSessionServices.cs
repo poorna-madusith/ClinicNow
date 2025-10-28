@@ -39,6 +39,14 @@ public class UserSessionServices
                 Id = s.Id,
                 DoctorId = s.DoctorId,
                 DoctorName = s.Doctor.FirstName + " " + s.Doctor.LastName,
+                Doctor = new DoctorDto
+                {
+                    Id = s.Doctor.Id,
+                    FirstName = s.Doctor.FirstName,
+                    LastName = s.Doctor.LastName,
+                    Email = s.Doctor.Email,
+                    ContactNumbers = s.Doctor.ContactNumbers
+                },
                 Date = s.Date,
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
