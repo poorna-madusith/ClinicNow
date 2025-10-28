@@ -8,6 +8,7 @@ namespace backend.DTOs
         public string PatientId { get; set; } = null!;
         public string? PatientName { get; set; }
         public PatientDto? Patient { get; set; }
+        public SessionDto? Session { get; set; }
         public DateTime BookedDateandTime { get; set; }
         public int positionInQueue { get; set; }
         public bool Completed { get; set; }

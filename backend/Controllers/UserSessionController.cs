@@ -97,6 +97,28 @@ public class UserSessionController : ControllerBase
     }
 
 
+    //get all booking for a patient
+    [HttpGet("getallbookingsforpatient")]
+    public async Task<IActionResult> GetAllBookingsForPatient()
+    {
+        try
+        {
+            var patientId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+
+            if (string.IsNullOrEmpty(patientId))
+            {
+                return Unauthorized(new { Message = "User ID not found in token." });
+            }
+
+            var booking = await _userSessionServices.GetAllBookingsForPatient(patientId);
+            return Ok(booking);
+        }catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
 
 
 

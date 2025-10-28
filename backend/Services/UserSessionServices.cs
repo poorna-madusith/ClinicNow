@@ -135,5 +135,50 @@ public class UserSessionServices
 
         return booking.positionInQueue;
     }
+
+
+    //get all bookings for a logged in patient
+    public async Task<List<BookingDto>> GetAllBookingsForPatient(string patientId)
+    {
+        var patient = await _userManager.FindByIdAsync(patientId);
+        if (patient == null || patient.Role != RoleEnum.Patient)
+        {
+            throw new Exception("Invalid patient ID");
+        }
+
+        var bookings = await _context.Bookings
+            .Where(b => b.PatientId == patientId)
+            .Include(b => b.Session)
+                .ThenInclude(s => s.Doctor)
+                .OrderBy(b => b.Session.Date)
+                .ThenBy(b => b.Session.StartTime)
+            .Select(b => new BookingDto
+            {
+                Id = b.Id,
+                SessionId = b.SessionId,
+                PatientId = b.PatientId,
+                PatientName = patient.FirstName + " " + patient.LastName,
+                BookedDateandTime = b.BookedDateandTime,
+                positionInQueue = b.positionInQueue,
+                Completed = b.Completed,
+                OnGoing = b.OnGoing,
+                Session = new SessionDto
+                {
+                    Id = b.Session.Id,
+                    DoctorId = b.Session.DoctorId,
+                    DoctorName = b.Session.Doctor.FirstName + " " + b.Session.Doctor.LastName,
+                    Date = b.Session.Date,
+                    StartTime = b.Session.StartTime,
+                    EndTime = b.Session.EndTime,
+                    Capacity = b.Session.Capacity,
+                    SessionFee = b.Session.SessionFee,
+                    Description = b.Session.Description,
+                    Canceled = b.Session.Canceled
+                }
+            })
+            .ToListAsync();
+
+        return bookings;
+    }
     
 }
