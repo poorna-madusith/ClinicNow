@@ -225,70 +225,108 @@ export default function MyAppointmentsPage(){
     return (
         <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-emerald-50 dark:from-slate-900 dark:via-teal-950 dark:to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                {/* Header with Date Filter */}
-                <div className="mb-8">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent mb-2">
-                                My Appointments
-                            </h1>
-                            <p className="text-gray-600 dark:text-gray-400">
-                                View and manage all your medical appointments
-                            </p>
-                        </div>
+                {/* Header */}
+                <div className="mb-6">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent mb-2">
+                        My Appointments
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        View and manage all your medical appointments
+                    </p>
+                </div>
 
-                        {/* Date Filter Section */}
-                        <div className="flex flex-col sm:flex-row gap-3">
+                {/* Tab Navigation */}
+                <div className="mb-8">
+                    <div className="border-b-2 border-gray-200 dark:border-gray-700">
+                        <div className="flex gap-2">
+                            {/* Active Sessions Tab */}
                             <button
                                 onClick={() => {
-                                    setShowCancelledOnly(!showCancelledOnly);
+                                    setShowCancelledOnly(false);
                                     setCurrentPage(1);
-                                    if (showCancelledOnly) {
-                                        setSelectedDate(null);
-                                        setShowDatePicker(false);
-                                    }
+                                    setSelectedDate(null);
+                                    setShowDatePicker(false);
                                 }}
-                                className={`px-6 py-3 rounded-xl transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 ${
-                                    showCancelledOnly 
-                                        ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600' 
-                                        : 'bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700'
+                                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                                    !showCancelledOnly
+                                        ? 'border-teal-500 text-teal-600 dark:text-teal-400 bg-teal-50/50 dark:bg-teal-900/20'
+                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-gray-50 dark:hover:bg-slate-800/50'
+                                }`}
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                Active Appointments
+                                {myBookings && (
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                                        !showCancelledOnly
+                                            ? 'bg-teal-500 text-white'
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                                    }`}>
+                                        {myBookings.filter(b => !b.session?.canceled).length}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Cancelled Sessions Tab */}
+                            <button
+                                onClick={() => {
+                                    setShowCancelledOnly(true);
+                                    setCurrentPage(1);
+                                    setSelectedDate(null);
+                                    setShowDatePicker(false);
+                                }}
+                                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                                    showCancelledOnly
+                                        ? 'border-red-500 text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/20'
+                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-slate-800/50'
                                 }`}
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                {showCancelledOnly ? 'Show All Sessions' : 'Cancelled Sessions'}
+                                Cancelled Sessions
+                                {myBookings && (
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                                        showCancelledOnly
+                                            ? 'bg-red-500 text-white'
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                                    }`}>
+                                        {myBookings.filter(b => b.session?.canceled).length}
+                                    </span>
+                                )}
                             </button>
-                            
-                            {!showCancelledOnly && (
-                                <>
-                                    <button
-                                        onClick={() => setShowDatePicker(!showDatePicker)}
-                                        className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        {selectedDate ? `Filtered: ${selectedDate.toLocaleDateString()}` : 'Select Date'}
-                                    </button>
-                                    {selectedDate && (
-                                        <button
-                                            onClick={clearDateFilter}
-                                            className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                            Clear Filter
-                                        </button>
-                                    )}
-                                </>
-                            )}
                         </div>
                     </div>
 
+                    {/* Date Filter Section - Only show for Active Appointments */}
+                    {!showCancelledOnly && (
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                            <button
+                                onClick={() => setShowDatePicker(!showDatePicker)}
+                                className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {selectedDate ? `Filtered: ${selectedDate.toLocaleDateString()}` : 'Filter by Date'}
+                            </button>
+                            {selectedDate && (
+                                <button
+                                    onClick={clearDateFilter}
+                                    className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Clear Filter
+                                </button>
+                            )}
+                        </div>
+                    )}
+
                     {/* Date Picker Dropdown */}
-                    {showDatePicker && (
+                    {showDatePicker && !showCancelledOnly && (
                         <div className="mt-6 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border-2 border-teal-200 dark:border-teal-700">
                             <div className="max-w-md mx-auto">
                                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
