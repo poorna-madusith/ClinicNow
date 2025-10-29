@@ -181,7 +181,8 @@ public class UserSessionServices
                     Capacity = b.Session.Capacity,
                     SessionFee = b.Session.SessionFee,
                     Description = b.Session.Description,
-                    Canceled = b.Session.Canceled
+                    Canceled = b.Session.Canceled,
+                    Ongoing = b.Session.Ongoing
                 }
             })
             .ToListAsync();

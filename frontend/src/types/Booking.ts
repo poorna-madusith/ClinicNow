@@ -21,6 +21,7 @@ export interface Booking {
         sessionFee: number;
         description: string;
         canceled: boolean;
+        ongoing?: boolean;
     };
     bookedDateandTime: string; // ISO date string
     positionInQueue?: number;

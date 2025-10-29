@@ -207,7 +207,7 @@ export default function MyAppointmentsPage(){
                     ✓ Completed
                 </span>
             );
-        } else if (booking.onGoing) {
+        } else if (booking.onGoing || booking.session?.ongoing) {
             return (
                 <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200 animate-pulse shadow-sm border border-cyan-200 dark:border-cyan-800 transition-all duration-300">
                     ● Ongoing
