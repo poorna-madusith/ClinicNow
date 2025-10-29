@@ -203,7 +203,7 @@ public class SessionServices
         }
     }
 
-    
+
 
     //set session ongoing
     public async Task<Session> SetSessionOngoing(int sessionId, string userId)
@@ -231,7 +231,7 @@ public class SessionServices
         }
 
         existingSession.Ongoing = true;
-        
+
         _context.Sessions.Update(existingSession);
 
         var result = await _context.SaveChangesAsync();
@@ -244,5 +244,61 @@ public class SessionServices
         {
             throw new Exception("Failed to set session to ongoing");
         }
+    }
+    
+
+    //get current ongoing session for a doc
+    public async Task<SessionDto> GetCurrentOngoingSession(string doctorId)
+    {
+        var doc = await _userManager.FindByIdAsync(doctorId);
+        if (doc == null || doc.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Invalid doctor ID");
+        }
+
+        var ongoingSession = await _context.Sessions
+            .Where(s => s.DoctorId == doctorId && s.Ongoing)
+            .Include(s => s.Bookings)
+                .ThenInclude(b => b.Patient)
+            .Select(s => new SessionDto
+            {
+                Id = s.Id,
+                DoctorId = s.DoctorId,
+                DoctorName = s.Doctor.FirstName + " " + s.Doctor.LastName,
+                Date = s.Date,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Capacity = s.Capacity,
+                SessionFee = s.SessionFee,
+                Description = s.Description,
+                Canceled = s.Canceled,
+                Ongoing = s.Ongoing,
+                Bookings = s.Bookings.Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    PatientId = b.PatientId,
+                    PatientName = b.Patient.FirstName + " " + b.Patient.LastName,
+                    Patient = new PatientDto
+                    {
+                        Id = b.Patient.Id,
+                        FirstName = b.Patient.FirstName,
+                        LastName = b.Patient.LastName,
+                        Email = b.Patient.Email,
+                        ContactNumbers = b.Patient.ContactNumbers
+                    },
+                    BookedDateandTime = b.BookedDateandTime,
+                    positionInQueue = b.positionInQueue,
+                    Completed = b.Completed,
+                    OnGoing = b.OnGoing
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (ongoingSession == null)
+        {
+            throw new Exception("No ongoing session found for this doctor");
+        }
+
+        return ongoingSession;
     }
 }

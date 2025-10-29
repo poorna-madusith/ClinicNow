@@ -118,4 +118,20 @@ public class SessionController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpGet("getcurrentOngoingSession/{doctorId}")]
+    [Authorize(Roles = "Doctor,Patient")]
+    public async Task<IActionResult> GetCurrentOngoingSession(string doctorId)
+    {
+        try
+        {
+            var session = await _sessionServices.GetCurrentOngoingSession(doctorId);
+            return Ok(session);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+    
 }
