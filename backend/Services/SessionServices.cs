@@ -178,7 +178,7 @@ public class SessionServices
             throw new Exception("Session not found");
         }
 
-        var doctor  = await _userManager.FindByIdAsync(userId);
+        var doctor = await _userManager.FindByIdAsync(userId);
         if (doctor == null || doctor.Role != RoleEnum.Doctor || doctor.Role == RoleEnum.Patient)
         {
             throw new Exception("Only doctors can cancel sessions");
@@ -200,6 +200,49 @@ public class SessionServices
         else
         {
             throw new Exception("Failed to cancel session");
+        }
+    }
+
+    
+
+    //set session ongoing
+    public async Task<Session> SetSessionOngoing(int sessionId, string userId)
+    {
+        var existingSession = await _context.Sessions.FindAsync(sessionId);
+        if (existingSession == null)
+        {
+            throw new Exception("Session not found");
+        }
+
+        if (existingSession.DoctorId != userId)
+        {
+            throw new Exception("You are not authorized to start this session");
+        }
+
+        if (existingSession.Canceled)
+        {
+            throw new Exception("Cannot start a canceled session");
+        }
+
+        var otherOngoingSession = await _context.Sessions.FirstOrDefaultAsync(s => s.DoctorId == userId && s.Ongoing && s.Id != sessionId);
+        if (otherOngoingSession != null)
+        {
+            throw new Exception("Another session is already ongoing. Please stop the current session before starting a new one.");
+        }
+
+        existingSession.Ongoing = true;
+        
+        _context.Sessions.Update(existingSession);
+
+        var result = await _context.SaveChangesAsync();
+
+        if (result > 0)
+        {
+            return existingSession;
+        }
+        else
+        {
+            throw new Exception("Failed to set session to ongoing");
         }
     }
 }

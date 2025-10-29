@@ -99,4 +99,23 @@ public class SessionController : ControllerBase
         }
     }
 
+
+    [HttpPatch("setsessionongoing/{sessionId}")]
+    public async Task<IActionResult> SetSessionOngoing(int sessionId)
+    {
+        try
+        {
+            var doctorId = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return Unauthorized(new { Message = "User ID not found in token." });
+            }
+            var session = await _sessionServices.SetSessionOngoing(sessionId, doctorId);
+            return Ok(new { message = "Session is now ongoing", session });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }
