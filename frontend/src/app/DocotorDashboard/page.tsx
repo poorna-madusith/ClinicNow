@@ -73,6 +73,27 @@ export default function DoctorDashboard() {
     setOpenFullSessionView(false);
   };
 
+  const handleOngoingSession  = async (sessionId: string) => {
+    try{
+      await axios.patch(`${API}/session/setsessionongoing/${sessionId}`,{},{
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      toast.success("Session set to ongoing successfully");
+      fetchSessions();
+    } catch (error) {
+      console.log("Error setting session to ongoing:", error);
+      const backendMessage = (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(String(backendMessage));
+      } else {
+        toast.error("Failed to set session to ongoing");
+      }
+    }
+  }
+
 
 
   const cancelSession = async (sessionId: string) => {
@@ -87,6 +108,12 @@ export default function DoctorDashboard() {
       fetchSessions();
     } catch (error) {
       console.error("Error canceling session:", error);
+      const backendMessage = (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(String(backendMessage));
+      } else {
+        toast.error("Failed to cancel session");
+      }
     }
   }
 
@@ -108,6 +135,12 @@ export default function DoctorDashboard() {
       setSessions(res.data);
     } catch (error) {
       console.error("Error fetching sessions:", error);
+      const backendMessage = (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(String(backendMessage));
+      } else {
+        toast.error("Failed to fetch sessions");
+      }
     }
   }, [API, accessToken]);
 
@@ -374,18 +407,26 @@ export default function DoctorDashboard() {
               return (
                 <div key={session.id || index} className={`session-card ${session.canceled ? 'canceled-session' : ''}`}>
                   <div className="session-header">
-                    <div className="session-date-badge">
-                      <svg className="calendar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span>{new Date(session.date).toLocaleDateString('en-US', { 
-                        weekday: 'short', 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}</span>
-                    </div>
-                    <div className="session-header-right">
+                    <div className="header-content">
+                      <div className="session-date-time">
+                        <div className="date-section">
+                          <svg className="calendar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="date-text">{new Date(session.date).toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}</span>
+                        </div>
+                        <div className="time-section">
+                          <svg className="clock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="time-text">{new Date(`1970-01-01T${session.startTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })} - {new Date(`1970-01-01T${session.endTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
+                        </div>
+                      </div>
                       {session.canceled && (
                         <div className="canceled-badge">
                           <svg className="canceled-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,24 +435,10 @@ export default function DoctorDashboard() {
                           Canceled
                         </div>
                       )}
-                      <div className="session-fee">
-                        ${session.sessionFee}
-                      </div>
                     </div>
                   </div>
 
                   <div className="session-body">
-                    <div className="session-time">
-                      <svg className="clock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>{new Date(`1970-01-01T${session.startTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })} - {new Date(`1970-01-01T${session.endTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
-                    </div>
-
-                    <div className="session-description">
-                      <p>{session.description.length > 90 ? session.description.substring(0, 90) + "..." : session.description}</p>
-                    </div>
-
                     <div className="session-capacity-section">
                       <div className="capacity-header">
                         <div className="capacity-info">
@@ -437,15 +464,32 @@ export default function DoctorDashboard() {
                   </div>
 
                   <div className="session-footer">
-                    <button className="view-details-btn" onClick={() => handleOpenFullView(session)}>
-                      View More
+                    <button className="action-btn view-btn" onClick={() => handleOpenFullView(session)}>
+                      <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View
                     </button>
                     {!session.canceled && (
                       <>
-                        <button className="manage-btn" onClick={() => handleEditClick(session)}>
+                        <button className="action-btn edit-btn" onClick={() => handleEditClick(session)}>
+                          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
                           Edit
                         </button>
-                        <button className="cancel-btn" onClick={() => cancelSession(session.id.toString())}>
+                        <button className="action-btn ongoing-btn" onClick={() => handleOngoingSession(session.id.toString())}>
+                          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Start
+                        </button>
+                        <button className="action-btn cancel-btn" onClick={() => cancelSession(session.id.toString())}>
+                          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
                           Cancel
                         </button>
                       </>
@@ -928,30 +972,52 @@ export default function DoctorDashboard() {
         /* Session Header */
         .session-header {
           background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-          padding: 20px;
+          padding: 24px;
+        }
+        
+        .header-content {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          gap: 16px;
         }
         
-        .session-date-badge {
+        .session-date-time {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          flex: 1;
+        }
+        
+        .date-section,
+        .time-section {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           color: #ffffff;
+        }
+        
+        .date-section {
+          font-weight: 700;
+          font-size: 1.1rem;
+        }
+        
+        .time-section {
           font-weight: 600;
           font-size: 0.95rem;
+          opacity: 0.95;
         }
         
-        .calendar-icon {
-          width: 20px;
-          height: 20px;
+        .calendar-icon,
+        .clock-icon {
+          width: 22px;
+          height: 22px;
+          flex-shrink: 0;
         }
         
-        .session-header-right {
-          display: flex;
-          align-items: center;
-          gap: 12px;
+        .date-text,
+        .time-text {
+          line-height: 1.2;
         }
         
         .canceled-badge {
@@ -960,28 +1026,18 @@ export default function DoctorDashboard() {
           gap: 6px;
           background: rgba(255, 255, 255, 0.95);
           color: #dc2626;
-          padding: 6px 14px;
+          padding: 8px 16px;
           border-radius: 20px;
           font-weight: 700;
           font-size: 0.9rem;
           border: 2px solid rgba(255, 255, 255, 0.5);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          height: fit-content;
         }
         
         .canceled-icon {
           width: 16px;
           height: 16px;
-        }
-        
-        .session-fee {
-          background: rgba(255, 255, 255, 0.25);
-          backdrop-filter: blur(10px);
-          padding: 8px 16px;
-          border-radius: 20px;
-          color: #ffffff;
-          font-weight: 700;
-          font-size: 1.1rem;
-          border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         /* Session Body */
@@ -990,32 +1046,6 @@ export default function DoctorDashboard() {
           display: flex;
           flex-direction: column;
           gap: 20px;
-        }
-        
-        .session-time {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: #0f766e;
-          font-weight: 600;
-          font-size: 1rem;
-        }
-        
-        .clock-icon {
-          width: 20px;
-          height: 20px;
-          color: #14b8a6;
-        }
-        
-        .session-description {
-          color: #134e4a;
-          line-height: 1.6;
-          font-size: 0.95rem;
-          min-height: 60px;
-        }
-        
-        .session-description p {
-          margin: 0;
         }
         
         /* Capacity Section */
@@ -1097,48 +1127,109 @@ export default function DoctorDashboard() {
         .session-footer {
           padding: 0 24px 24px 24px;
           display: flex;
-          gap: 12px;
+          gap: 10px;
+          flex-wrap: wrap;
         }
         
-        .view-details-btn,
-        .manage-btn,
-        .cancel-btn {
+        .action-btn {
           flex: 1;
-          padding: 10px 16px;
-          border-radius: 8px;
+          min-width: 100px;
+          padding: 12px 16px;
+          border-radius: 10px;
           font-weight: 600;
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s ease;
           border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          position: relative;
+          overflow: hidden;
         }
         
-        .view-details-btn {
-          background: #ffffff;
+        .action-btn::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
+          transform: translate(-50%, -50%);
+          transition: width 0.5s, height 0.5s;
+        }
+        
+        .action-btn:hover::before {
+          width: 300px;
+          height: 300px;
+        }
+        
+        .btn-icon {
+          width: 18px;
+          height: 18px;
+          position: relative;
+          z-index: 1;
+        }
+        
+        .action-btn span {
+          position: relative;
+          z-index: 1;
+        }
+        
+        .view-btn {
+          background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
           color: #14b8a6;
           border: 2px solid #14b8a6;
+          box-shadow: 0 2px 8px rgba(20, 184, 166, 0.15);
         }
         
-        .view-details-btn:hover {
-          background: #f0fdfa;
+        .view-btn:hover {
+          background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);
         }
         
-        .manage-btn {
-          background: #14b8a6;
+        .edit-btn {
+          background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
           color: #ffffff;
+          box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
         }
         
-        .manage-btn:hover {
-          background: #0d9488;
+        .edit-btn:hover {
+          background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(20, 184, 166, 0.35);
+        }
+        
+        .ongoing-btn {
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .ongoing-btn:hover {
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
         }
         
         .cancel-btn {
-          background: #ef4444;
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
           color: #ffffff;
+          box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
         }
         
         .cancel-btn:hover {
-          background: #dc2626;
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+        }
+        
+        .action-btn:active {
+          transform: translateY(0);
         }
         
         /* Empty State */
