@@ -44,10 +44,25 @@ export default function DocOngoingSessions(){
         }
     }
 
+    const handleOngoingBooking = async (bookingId: number) => {
+        try {
+            await axios.patch(`${API}/session/ongoingbooking/${bookingId}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            toast.success("Booking marked as ongoing");
+            fetchOnGoingSession(); // refresh the data
+        } catch (err) {
+            console.log({err});
+            toast.error("Failed to make booking ongoing");
+        }
+    }
+
     useEffect(()=>{
         fetchOnGoingSession();
         // console.log(ongoingSession);
-    },[]);
+    },[fetchOnGoingSession]);
 
     const totalBookings = ongoingSession?.bookings?.length ?? 0;
     const completedBookings = ongoingSession?.bookings?.filter(b => b.completed).length ?? 0;
@@ -124,9 +139,21 @@ export default function DocOngoingSessions(){
                                             <div className="card-phone">{booking.patient?.phoneNumber ?? (booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 ? booking.patient.contactNumbers.join(', ') : '-')}</div>
                                         </div>
                                         {!booking.completed && (
-                                            <button className="complete-button" onClick={() => handleCompleteBooking(booking.id)}>
-                                                ✓
-                                            </button>
+                                            <>
+                                                <button className="complete-button" onClick={() => handleCompleteBooking(booking.id)} aria-label={`Mark booking ${booking.id} as completed`} title="Mark as completed">
+                                                    ✓
+                                                </button>
+                                                <button
+                                                    className="ongoing-button"
+                                                    onClick={() => handleOngoingBooking(booking.id)}
+                                                    aria-label={`Mark booking ${booking.id} as ongoing`}
+                                                    title="Mark as ongoing"
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path d="M8 5v14l11-7L8 5z" fill="currentColor" />
+                                                    </svg>
+                                                </button>
+                                            </>
                                         )}
                                         <div className={`status-pill ${booking.completed ? 'pill-completed' : 'pill-pending'}`}>
                                             {booking.completed ? 'Completed' : 'Pending'}
@@ -292,12 +319,12 @@ export default function DocOngoingSessions(){
                     border: 1px solid rgba(0,128,128,0.08);
                     border-radius: 16px;
                     box-shadow: 0 6px 16px rgba(0, 128, 128, 0.12);
-                    padding: 16px;
+                    padding: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     text-align: center;
-                    aspect-ratio: 1 / 1;
+                    aspect-ratio: 1 / 1.1;
                     transition: transform 0.12s ease, box-shadow 0.18s ease;
                     overflow: hidden;
                 }
@@ -386,9 +413,38 @@ export default function DocOngoingSessions(){
                     transform: scale(1.1);
                     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
                 }
-                .status-pill {
+                .ongoing-button {
                     position: absolute;
                     bottom: 10px;
+                    right: 10px;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: linear-gradient(180deg, #ffd8a6 0%, #ffb74d 60%);
+                    color: #1f2937; /* dark icon color for contrast */
+                    border: 1px solid rgba(0,0,0,0.06);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 6px 18px rgba(0,0,0,0.12), inset 0 -2px 6px rgba(255,255,255,0.25);
+                    transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
+                    backdrop-filter: blur(2px);
+                }
+                .ongoing-button svg { display: block; color: #1f2937; }
+                .ongoing-button:hover {
+                    transform: translateY(-2px) scale(1.03);
+                    box-shadow: 0 10px 22px rgba(0,0,0,0.14);
+                }
+                .ongoing-button:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 4px rgba(255, 183, 77, 0.18);
+                }
+                .status-pill {
+                    position: absolute;
+                    top: 10px;
                     right: 10px;
                     padding: 6px 10px;
                     border-radius: 999px;
