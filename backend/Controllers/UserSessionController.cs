@@ -53,7 +53,7 @@ public class UserSessionController : ControllerBase
     }
 
 
-    //get all sessions for a logged in doctor
+    //get all sessions for a  doctor
     [HttpGet("getallsessions/{id}")]
     public async Task<IActionResult> GetAllSessionsForDoctor(string id)
     {

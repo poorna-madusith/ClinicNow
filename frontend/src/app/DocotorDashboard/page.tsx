@@ -452,6 +452,14 @@ export default function DoctorDashboard() {
                           Completed
                         </div>
                       )}
+                      {!session.canceled && !session.completed && (
+                        <div className="scheduled-badge">
+                          <svg className="scheduled-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Scheduled
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1073,6 +1081,26 @@ export default function DoctorDashboard() {
         }
         
         .completed-icon {
+          width: 16px;
+          height: 16px;
+        }
+        
+        .scheduled-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.95);
+          color: #2563eb;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-weight: 700;
+          font-size: 0.9rem;
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          height: fit-content;
+        }
+        
+        .scheduled-icon {
           width: 16px;
           height: 16px;
         }

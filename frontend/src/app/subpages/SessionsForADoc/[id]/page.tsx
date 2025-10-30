@@ -25,19 +25,19 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   const [canceledButton, setCanceledButton] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [bookingSession, setBookingSession] = useState<Session | null>(null);
-  const [BookingSessionModalIsOpen, setBookingSessionModalIsOpen] = useState<boolean>(false);
+  const [BookingSessionModalIsOpen, setBookingSessionModalIsOpen] =
+    useState<boolean>(false);
   const sessionsPerPage = 6;
 
   const handleSessionBookingOnClose = () => {
     setBookingSession(null);
     setBookingSessionModalIsOpen(false);
-  }
+  };
 
   const handleBookingSuccess = () => {
     // Refetch sessions after successful booking
     fetchSessions();
-  }
-  
+  };
 
   useEffect(() => {
     let result = sessions;
@@ -46,7 +46,9 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
     if (canceledButton) {
       result = result.filter((session) => session.canceled);
     } else {
-      result = result.filter((session) => !session.canceled);
+      result = result.filter(
+        (sessions: Session) => !sessions.canceled && !sessions.completed
+      );
     }
 
     // Filter by date
@@ -57,7 +59,6 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
     setFilteredSessions(result);
     setCurrentPage(1); // Reset to first page when filters change
   }, [date, sessions, canceledButton]);
-
 
   const handleCanceledButton = () => {
     setCanceledButton(!canceledButton);
@@ -142,11 +143,14 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
   const indexOfLastSession = currentPage * sessionsPerPage;
   const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
-  const currentSessions = filteredSessions.slice(indexOfFirstSession, indexOfLastSession);
+  const currentSessions = filteredSessions.slice(
+    indexOfFirstSession,
+    indexOfLastSession
+  );
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -232,23 +236,23 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
                   </button>
                 )}
                 <div className="text-sm text-gray-500">
-                {date ? (
-                  <span>
-                    Showing sessions for{" "}
-                    {new Date(date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                ) : (
-                  <span>Showing all sessions</span>
-                )}
+                  {date ? (
+                    <span>
+                      Showing sessions for{" "}
+                      {new Date(date).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  ) : (
+                    <span>Showing all sessions</span>
+                  )}
+                </div>
               </div>
             </div>
-            </div>
-            
+
             {/* Cancelled Sessions Button - Right Side */}
             <button
               onClick={() => handleCanceledButton()}
@@ -301,8 +305,6 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
               </button>
             )}
           </div>
-
-          
         ) : (
           /* Sessions Grid */
           <div>
@@ -548,19 +550,21 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
 
                 {/* Page Numbers */}
                 <div className="flex gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                        currentPage === pageNum
-                          ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md"
-                          : "bg-white text-gray-700 border border-gray-300 hover:bg-teal-50 hover:border-teal-500 hover:text-teal-600"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                          currentPage === pageNum
+                            ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md"
+                            : "bg-white text-gray-700 border border-gray-300 hover:bg-teal-50 hover:border-teal-500 hover:text-teal-600"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  )}
                 </div>
 
                 {/* Next Button */}
@@ -593,15 +597,17 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
             {/* Pagination Info */}
             {totalPages > 0 && (
               <div className="mt-4 text-center text-sm text-gray-600">
-                Showing {indexOfFirstSession + 1} to {Math.min(indexOfLastSession, filteredSessions.length)} of {filteredSessions.length} sessions
+                Showing {indexOfFirstSession + 1} to{" "}
+                {Math.min(indexOfLastSession, filteredSessions.length)} of{" "}
+                {filteredSessions.length} sessions
               </div>
             )}
           </div>
         )}
       </div>
-      <UserSessionBooking 
-        isOpen={BookingSessionModalIsOpen} 
-        onClose={handleSessionBookingOnClose} 
+      <UserSessionBooking
+        isOpen={BookingSessionModalIsOpen}
+        onClose={handleSessionBookingOnClose}
         session={bookingSession}
         onBookingSuccess={handleBookingSuccess}
       />

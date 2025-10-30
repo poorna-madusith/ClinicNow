@@ -28,6 +28,7 @@ export default function MyAppointmentsPage() {
   // Cancelled filter state
   const [showCancelledOnly, setShowCancelledOnly] = useState(false);
   const [showOngoingOnly, setShowOngoingOnly] = useState(false);
+  const [showCompletedOnly, setShowCompletedOnly] = useState(false);
 
   const fetchBookings = async () => {
     setIsLoading(true);
@@ -138,21 +139,26 @@ export default function MyAppointmentsPage() {
 
     let filtered = [...myBookings];
 
-    // Filter by cancelled status
+    // Filter by status first
     if (showCancelledOnly) {
       // Show ONLY cancelled sessions
-      return filtered.filter((booking) => booking.session?.canceled === true);
+      filtered = filtered.filter((booking) => booking.session?.canceled === true);
     } else if (showOngoingOnly) {
       // Show ONLY ongoing sessions
-      return filtered.filter((booking) => booking.session?.ongoing === true);
+      filtered = filtered.filter((booking) => booking.session?.ongoing === true);
+    } else if (showCompletedOnly) {
+      // Show ONLY completed sessions
+      filtered = filtered.filter((booking) => booking.completed === true);
     } else {
-      // Exclude cancelled sessions from normal view
+      // Show ONLY scheduled sessions (not cancelled, not ongoing, not completed)
       filtered = filtered.filter(
-        (booking) => booking.session?.canceled !== true
+        (booking) => booking.session?.canceled !== true && 
+                     booking.session?.ongoing !== true && 
+                     booking.completed !== true
       );
     }
 
-    // Filter by date (only when not showing cancelled)
+    // Apply date filter to all tabs
     if (selectedDate) {
       filtered = filtered.filter((booking) => {
         const bookingDate = new Date(booking.bookedDateandTime);
@@ -185,6 +191,7 @@ export default function MyAppointmentsPage() {
   setSelectedDate(null);
   setShowCancelledOnly(false);
   setShowOngoingOnly(false);
+  setShowCompletedOnly(false);
   setCurrentPage(1);
   };
 
@@ -259,12 +266,13 @@ export default function MyAppointmentsPage() {
                 onClick={() => {
                   setShowCancelledOnly(false);
                   setShowOngoingOnly(false);
+                  setShowCompletedOnly(false);
                   setCurrentPage(1);
                   setSelectedDate(null);
                   setShowDatePicker(false);
                 }}
                 className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
-                  !showCancelledOnly && !showOngoingOnly
+                  !showCancelledOnly && !showOngoingOnly && !showCompletedOnly
                     ? "border-teal-500 text-teal-600 dark:text-teal-400 bg-teal-50/50 dark:bg-teal-900/20"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
                 }`}
@@ -286,12 +294,12 @@ export default function MyAppointmentsPage() {
                 {myBookings && (
                   <span
                     className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                      !showCancelledOnly && !showOngoingOnly
+                      !showCancelledOnly && !showOngoingOnly && !showCompletedOnly
                         ? "bg-teal-500 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
                     }`}
                   >
-                    {myBookings.filter((b) => !b.session?.canceled && !b.session?.ongoing).length}
+                    {myBookings.filter((b) => !b.session?.canceled && !b.session?.ongoing && !b.completed).length}
                   </span>
                 )}
               </button>
@@ -300,6 +308,7 @@ export default function MyAppointmentsPage() {
                 onClick={() => {
                   setShowCancelledOnly(false);
                   setShowOngoingOnly(true);
+                  setShowCompletedOnly(false);
                   setCurrentPage(1);
                   setSelectedDate(null);
                   setShowDatePicker(false);
@@ -337,10 +346,55 @@ export default function MyAppointmentsPage() {
                 )}
               </button>
 
+              {/* Completed Sessions Tab */}
+              <button
+                onClick={() => {
+                  setShowCancelledOnly(false);
+                  setShowOngoingOnly(false);
+                  setShowCompletedOnly(true);
+                  setCurrentPage(1);
+                  setSelectedDate(null);
+                  setShowDatePicker(false);
+                }}
+                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                  showCompletedOnly
+                    ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
+                }`}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Completed Sessions
+                {myBookings && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                      showCompletedOnly
+                        ? "bg-emerald-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    }`}
+                  >
+                    {myBookings.filter((b) => b.completed).length}
+                  </span>
+                )}
+              </button>
+
               {/* Cancelled Sessions Tab */}
               <button
                 onClick={() => {
                   setShowCancelledOnly(true);
+                  setShowOngoingOnly(false);
+                  setShowCompletedOnly(false);
                   setCurrentPage(1);
                   setSelectedDate(null);
                   setShowDatePicker(false);
@@ -380,9 +434,8 @@ export default function MyAppointmentsPage() {
             </div>
           </div>
 
-          {/* Date Filter Section - Only show for Active Appointments */}
-          {!showCancelledOnly && (
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          {/* Date Filter Section - Show for all tabs */}
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
               <button
                 onClick={() => setShowDatePicker(!showDatePicker)}
                 className="px-6 py-3 bg-white dark:bg-slate-800 border-2 border-teal-200 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
@@ -426,10 +479,9 @@ export default function MyAppointmentsPage() {
                 </button>
               )}
             </div>
-          )}
 
           {/* Date Picker Dropdown */}
-          {showDatePicker && !showCancelledOnly && (
+          {showDatePicker && (
             <div className="mt-6 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border-2 border-teal-200 dark:border-teal-700">
               <div className="max-w-md mx-auto">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">

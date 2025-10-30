@@ -236,7 +236,7 @@ export default function SessionFullView({
                       session.canceled ? "canceled" : session.completed ? "completed" : "active"
                     }`}
                   >
-                    {session.canceled ? "Canceled" : session.completed ? "Completed" : "Active"}
+                    {session.canceled ? "Canceled" : session.completed ? "Completed" : "Scheduled"}
                   </span>
                 </div>
               </div>

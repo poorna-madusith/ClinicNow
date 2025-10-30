@@ -52,6 +52,8 @@ public class UserSessionServices
                 EndTime = s.EndTime,
                 Capacity = s.Capacity,
                 SessionFee = s.SessionFee,
+                Completed = s.Completed,
+                Ongoing = s.Ongoing,
                 Description = s.Description,
                 Canceled = s.Canceled,
                 Bookings = s.Bookings.Select(b => new BookingDto

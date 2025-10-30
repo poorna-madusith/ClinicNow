@@ -76,6 +76,7 @@ export default function DocOngoingSessions(){
             });
             toast.success("Session marked as completed");
             fetchOnGoingSession(); // refresh the data
+            setOnGoingSession(null);
         }catch(err){
             console.log({err});
             toast.error("Failed to mark session as completed");
@@ -132,14 +133,17 @@ export default function DocOngoingSessions(){
             )}
             {/* Button to mark the whole session as completed (only when ongoing and not already completed) */}
             {ongoingSession && ongoingSession.ongoing && (
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+                <div className="session-complete-button-container">
                     <button
                         className="mark-session-button"
                         onClick={() => handleMarkSessionCompleted(ongoingSession.id)}
                         title="Mark entire session as completed"
                         aria-label="Mark session completed"
                     >
-                        Mark Session Complete
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
+                        </svg>
+                        Complete Session
                     </button>
                 </div>
             )}
@@ -326,9 +330,13 @@ export default function DocOngoingSessions(){
                     box-shadow: 0 10px 28px rgba(0,128,128,0.12);
                     padding: 40px 34px;
                     border: 1px solid rgba(0,128,128,0.10);
+                    position: relative;
                 }
-                .session-main-info-glass {
-                    margin-bottom: 28px;
+                .session-complete-button-container {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 10;
                 }
                 .session-row-glass {
                     display: flex;
@@ -494,18 +502,31 @@ export default function DocOngoingSessions(){
                     box-shadow: 0 0 0 4px rgba(255, 183, 77, 0.18);
                 }
                 .mark-session-button {
-                    background: linear-gradient(180deg, #00796b 0%, #004d40 100%);
+                    background: linear-gradient(135deg, #00acc1 0%, #00796b 50%, #004d40 100%);
                     color: #fff;
                     border: none;
-                    padding: 10px 18px;
-                    border-radius: 10px;
-                    font-weight: 800;
-                    letter-spacing: 0.4px;
+                    padding: 12px 24px;
+                    border-radius: 50px;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    letter-spacing: 0.5px;
                     cursor: pointer;
-                    box-shadow: 0 8px 22px rgba(0,77,64,0.14);
-                    transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
+                    box-shadow: 0 6px 20px rgba(0,77,64,0.25);
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255,255,255,0.2);
                 }
-                .mark-session-button:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,77,64,0.18); }
+                .mark-session-button:hover {
+                    transform: translateY(-2px) scale(1.05);
+                    box-shadow: 0 10px 30px rgba(0,77,64,0.35);
+                    background: linear-gradient(135deg, #00bcd4 0%, #009688 50%, #00695c 100%);
+                }
+                .mark-session-button:active {
+                    transform: translateY(0) scale(0.98);
+                }
                 .status-pill {
                     position: absolute;
                     top: 10px;
