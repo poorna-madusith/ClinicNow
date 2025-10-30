@@ -29,18 +29,31 @@ export default function DocOngoingSessions(){
         }
     }, [API, userId, accessToken]);
 
-    const handleCompleteBooking = async (bookingId: number) => {
+    const handletoggleCompleteBooking = async (bookingId: number) => {
         try {
-            await axios.patch(`${API}/session/completebooking/${bookingId}`, {}, {
+            await axios.patch(`${API}/session/markbookingcompleted/${bookingId}`, {}, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             });
             toast.success("Booking marked as completed");
             fetchOnGoingSession(); // refresh the data
-        } catch (err) {
-            console.log({err});
-            toast.error("Failed to complete booking");
+        } catch (error: unknown) {
+            // Log full axios error for debugging (includes response body from backend)
+            console.log('Complete booking error', { error });
+            // Narrow the unknown to a shape we can inspect safely
+            const axiosErr = error as { response?: { data?: Record<string, unknown> }; message?: string };
+            console.log('Complete booking error response', axiosErr.response);
+            // Prefer backend message when available
+            const data = axiosErr.response?.data as Record<string, unknown> | undefined;
+            let serverMessage = "Failed to complete booking";
+            if (data) {
+                const m = data['message'] ?? data['Message'];
+                if (typeof m === 'string') serverMessage = m;
+            } else if (axiosErr?.message && typeof axiosErr.message === 'string') {
+                serverMessage = axiosErr.message;
+            }
+            toast.error(serverMessage);
         }
     }
 
@@ -140,7 +153,7 @@ export default function DocOngoingSessions(){
                                         </div>
                                         {!booking.completed && (
                                             <>
-                                                <button className="complete-button" onClick={() => handleCompleteBooking(booking.id)} aria-label={`Mark booking ${booking.id} as completed`} title="Mark as completed">
+                                                <button className="complete-button" onClick={() => handletoggleCompleteBooking(booking.id)} aria-label={`Mark booking ${booking.id} as completed`} title="Mark as completed">
                                                     ✓
                                                 </button>
                                                 <button

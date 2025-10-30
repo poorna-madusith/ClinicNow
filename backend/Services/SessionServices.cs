@@ -246,7 +246,7 @@ public class SessionServices
             throw new Exception("Failed to set session to ongoing");
         }
     }
-    
+
 
     //get current ongoing session for a doc
     public async Task<SessionDto> GetCurrentOngoingSession(string doctorId)
@@ -302,5 +302,44 @@ public class SessionServices
         }
 
         return ongoingSession;
+    }
+    
+    //mark booking as completed
+    public async Task<Booking?> MarkBookingAsCompleted(int bookingId, string doctorId)
+    {
+        // Load booking including Session to safely access Session.DoctorId
+        var booking = await _context.Bookings
+            .Include(b => b.Session)
+            .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+        if (booking == null)
+        {
+            // Not found - controller will translate to 404
+            return null;
+        }
+
+        // Allow the session doctor or an Admin to mark completed
+        var caller = await _userManager.FindByIdAsync(doctorId);
+        var isAdmin = caller != null && caller.Role == RoleEnum.Admin;
+
+        if (booking.Session == null || (booking.Session.DoctorId != doctorId && !isAdmin))
+        {
+            // Unauthorized - controller will translate to 403
+            throw new UnauthorizedAccessException("You are not authorized to complete this booking");
+        }
+
+        // Idempotent: always set Completed = true
+        if (!booking.Completed)
+        {
+            booking.Completed = true;
+            _context.Bookings.Update(booking);
+            var result = await _context.SaveChangesAsync();
+            if (result <= 0)
+            {
+                throw new Exception("Failed to update booking status");
+            }
+        }
+
+        return booking;
     }
 }

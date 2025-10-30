@@ -47,7 +47,7 @@ public class SessionController : ControllerBase
             {
                 return Unauthorized(new { Message = "User ID not found in token." });
             }
-            
+
             Console.WriteLine($"Fetching sessions for doctor ID: {doctorId}");
             var sessions = await _sessionServices.GetAllSessionsForDoctor(doctorId);
             return Ok(sessions);
@@ -133,5 +133,63 @@ public class SessionController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
-    
+
+
+    //mark booking as completed
+    [HttpPatch("markbookingcompleted/{bookingId}")]
+    public async Task<IActionResult> MarkBookingAsCompleted(int bookingId)
+    {
+        try
+        {
+            var doctorId = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return Unauthorized(new { message = "User ID not found in token." });
+            }
+
+            var booking = await _sessionServices.MarkBookingAsCompleted(bookingId, doctorId);
+
+            if (booking == null)
+            {
+                return NotFound(new { message = "Booking not found" });
+            }
+
+            // Map to DTO to avoid EF navigation circular references during JSON serialization
+            var bookingDto = new BookingDto
+            {
+                Id = booking.Id,
+                SessionId = booking.SessionId,
+                PatientId = booking.PatientId,
+                PatientName = booking.Patient != null ? booking.Patient.FirstName + " " + booking.Patient.LastName : null,
+                Patient = booking.Patient != null ? new PatientDto
+                {
+                    Id = booking.Patient.Id,
+                    FirstName = booking.Patient.FirstName,
+                    LastName = booking.Patient.LastName,
+                    Email = booking.Patient.Email,
+                    PhoneNumber = booking.Patient.PhoneNumber,
+                    ContactNumbers = booking.Patient.ContactNumbers
+                } : null,
+                Session = null, // avoid embedding session (could cause cycles)
+                BookedDateandTime = booking.BookedDateandTime,
+                positionInQueue = booking.positionInQueue,
+                Completed = booking.Completed,
+                OnGoing = booking.OnGoing
+            };
+
+            return Ok(new { message = "Booking marked as completed", booking = bookingDto });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        
+    }
+
+
+
 }
