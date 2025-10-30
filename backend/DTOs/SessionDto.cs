@@ -12,7 +12,7 @@ namespace backend.DTOs
         public string DoctorId { get; set; } = null!;
 
         public string? DoctorName { get; set; }
-        
+
         public DoctorDto? Doctor { get; set; }
 
         [Required(ErrorMessage = "Capacity is required")]
@@ -36,6 +36,9 @@ namespace backend.DTOs
         public string Description { get; set; } = string.Empty;
 
         public bool Canceled { get; set; }
+
+        public bool Completed { get; set; } = false;
+
 
         public bool Ongoing { get; set; }
 

@@ -22,6 +22,7 @@ export interface Booking {
         sessionFee: number;
         description: string;
         canceled: boolean;
+        completed: boolean;
         ongoing?: boolean;
     };
     bookedDateandTime: string; // ISO date string

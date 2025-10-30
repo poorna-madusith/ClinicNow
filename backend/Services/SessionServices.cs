@@ -303,7 +303,7 @@ public class SessionServices
 
         return ongoingSession;
     }
-    
+
     //mark booking as completed
     public async Task<Booking?> MarkBookingAsCompleted(int bookingId, string doctorId)
     {
@@ -341,5 +341,34 @@ public class SessionServices
         }
 
         return booking;
+    }
+
+    // //mark session as completed
+    public async Task<IActionResult> MarkSessionAsCompleted(int sessionId, string doctorId) {
+
+        var session = await _context.Sessions.Include(s => s.Doctor).FirstOrDefaultAsync(s => s.Id == sessionId);
+        if (session == null)
+        {
+            throw new Exception("Session not found");
+        }
+        if (session.DoctorId != doctorId)
+        {
+            throw new Exception("You are not authorized to complete this session");
+        }
+
+        session.Ongoing = false;
+        session.Completed = true;
+
+        _context.Sessions.Update(session);
+        var result = await _context.SaveChangesAsync();
+        if (result > 0)
+        {
+            return new OkObjectResult(session);
+        }
+        else
+        {
+            throw new Exception("Failed to complete session");
+        }
+        
     }
 }

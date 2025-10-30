@@ -24,8 +24,18 @@ export default function DocOngoingSessions(){
             });
             setOnGoingSession(res.data);
         }catch(err){
-            console.log({err});
-            toast.error("Failed to fetch ongoing session");
+            console.log('Fetch ongoing session error', { err, userId, url: `${API}/session/getcurrentOngoingSession/${userId}` });
+            // If axios error has response with message, prefer that
+            const axiosErr = err as { response?: { data?: Record<string, unknown> }; message?: string };
+            const data = axiosErr.response?.data as Record<string, unknown> | undefined;
+            let serverMessage = "Failed to fetch ongoing session";
+            if (data) {
+                const m = data['message'] ?? data['Message'];
+                if (typeof m === 'string') serverMessage = m;
+            } else if (axiosErr?.message && typeof axiosErr.message === 'string') {
+                serverMessage = axiosErr.message;
+            }
+            console.log(serverMessage);
         }
     }, [API, userId, accessToken]);
 
@@ -54,6 +64,21 @@ export default function DocOngoingSessions(){
                 serverMessage = axiosErr.message;
             }
             toast.error(serverMessage);
+        }
+    }
+
+    const handleMarkSessionCompleted = async (sessionId: number) => {
+        try{
+            await axios.patch(`${API}/session/marksessioncompleted/${sessionId}`,{},{
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            toast.success("Session marked as completed");
+            fetchOnGoingSession(); // refresh the data
+        }catch(err){
+            console.log({err});
+            toast.error("Failed to mark session as completed");
         }
     }
 
@@ -103,6 +128,19 @@ export default function DocOngoingSessions(){
                         <span>Pending</span>
                         <strong>{pendingBookings}</strong>
                     </div>
+                </div>
+            )}
+            {/* Button to mark the whole session as completed (only when ongoing and not already completed) */}
+            {ongoingSession && ongoingSession.ongoing && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+                    <button
+                        className="mark-session-button"
+                        onClick={() => handleMarkSessionCompleted(ongoingSession.id)}
+                        title="Mark entire session as completed"
+                        aria-label="Mark session completed"
+                    >
+                        Mark Session Complete
+                    </button>
                 </div>
             )}
             {ongoingSession ? (
@@ -455,6 +493,19 @@ export default function DocOngoingSessions(){
                     outline: none;
                     box-shadow: 0 0 0 4px rgba(255, 183, 77, 0.18);
                 }
+                .mark-session-button {
+                    background: linear-gradient(180deg, #00796b 0%, #004d40 100%);
+                    color: #fff;
+                    border: none;
+                    padding: 10px 18px;
+                    border-radius: 10px;
+                    font-weight: 800;
+                    letter-spacing: 0.4px;
+                    cursor: pointer;
+                    box-shadow: 0 8px 22px rgba(0,77,64,0.14);
+                    transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
+                }
+                .mark-session-button:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,77,64,0.18); }
                 .status-pill {
                     position: absolute;
                     top: 10px;

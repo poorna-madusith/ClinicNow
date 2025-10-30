@@ -187,7 +187,32 @@ public class SessionController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
-        
+
+    }
+
+
+    //mark session as completed
+    [HttpPatch("marksessioncompleted/{sessionId}")]
+    public async Task<IActionResult> MarkSessionAsCompleted(int sessionId) {
+        try { 
+            var doctorId = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return Unauthorized(new { message = "User ID not found in token." });
+            }
+
+            var session = await _sessionServices.MarkSessionAsCompleted(sessionId, doctorId);
+
+            return Ok();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
 

@@ -34,6 +34,8 @@ namespace backend.Models
 
         public bool Canceled { get; set; } = false;
 
+        public bool Completed { get; set; } = false;
+
         [Column("ongoing")]
         public bool Ongoing { get; set; } = false;
 

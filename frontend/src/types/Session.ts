@@ -11,6 +11,7 @@ export interface Session {
         contactNumbers?: string[];
     };
     canceled: boolean;
+    completed: boolean;
     ongoing: boolean;
     date: string; // ISO date string
     startTime: string; // TimeSpan from C# will be serialized as string (e.g., "14:30:00")
