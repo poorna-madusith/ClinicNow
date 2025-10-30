@@ -29,7 +29,7 @@ export default function DoctorDashboard() {
   const [editSession, setEditSession] = useState<Session | null>(null);
   const [openFullSessionView, setOpenFullSessionView] = useState<boolean>(false);
   const [fullViewSession, setFullViewSession] = useState<Session | null>(null);
-  const [canceledButton, setCanceledButton] = useState<boolean>(false);
+  const [tabState, setTabState] = useState<'active' | 'canceled' | 'completed'>('active');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(6);
 
@@ -37,11 +37,14 @@ export default function DoctorDashboard() {
    useEffect(() => {
     let result = sessions;
 
-    // Filter by canceled status
-    if (canceledButton) {
+    // Filter by tab state
+    if (tabState === 'canceled') {
       result = result.filter((session) => session.canceled);
+    } else if (tabState === 'completed') {
+      result = result.filter((session) => session.completed);
     } else {
-      result = result.filter((session) => !session.canceled);
+      // Active sessions: not canceled and not completed
+      result = result.filter((session) => !session.canceled && !session.completed);
     }
 
     // Filter by date
@@ -51,7 +54,7 @@ export default function DoctorDashboard() {
 
     setFilteredSessions(result);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [date, sessions, canceledButton]);
+  }, [date, sessions, tabState]);
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -374,16 +377,22 @@ export default function DoctorDashboard() {
 
           <div className="status-toggle">
             <button
-              className={`toggle-btn ${!canceledButton ? 'active' : ''}`}
-              onClick={() => setCanceledButton(false)}
+              className={`toggle-btn ${tabState === 'active' ? 'active' : ''}`}
+              onClick={() => setTabState('active')}
             >
               Active Sessions
             </button>
             <button
-              className={`toggle-btn ${canceledButton ? 'active' : ''}`}
-              onClick={() => setCanceledButton(true)}
+              className={`toggle-btn ${tabState === 'canceled' ? 'active' : ''}`}
+              onClick={() => setTabState('canceled')}
             >
               Canceled Sessions
+            </button>
+            <button
+              className={`toggle-btn ${tabState === 'completed' ? 'active' : ''}`}
+              onClick={() => setTabState('completed')}
+            >
+              Completed Sessions
             </button>
           </div>
         </div>
@@ -435,6 +444,14 @@ export default function DoctorDashboard() {
                           Canceled
                         </div>
                       )}
+                      {session.completed && !session.canceled && (
+                        <div className="completed-badge">
+                          <svg className="completed-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Completed
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -471,7 +488,7 @@ export default function DoctorDashboard() {
                       </svg>
                       View
                     </button>
-                    {!session.canceled && (
+                    {!session.canceled && !session.completed && (
                       <>
                         <button className="action-btn edit-btn" onClick={() => handleEditClick(session)}>
                           <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1036,6 +1053,26 @@ export default function DoctorDashboard() {
         }
         
         .canceled-icon {
+          width: 16px;
+          height: 16px;
+        }
+        
+        .completed-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.95);
+          color: #16a34a;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-weight: 700;
+          font-size: 0.9rem;
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          height: fit-content;
+        }
+        
+        .completed-icon {
           width: 16px;
           height: 16px;
         }

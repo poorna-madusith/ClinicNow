@@ -212,6 +212,13 @@ export default function SessionFullView({
                         strokeWidth={2}
                         d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
+                    ) : session.completed ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     ) : (
                       <path
                         strokeLinecap="round"
@@ -226,10 +233,10 @@ export default function SessionFullView({
                   <p className="detail-label">Status</p>
                   <span
                     className={`status-badge ${
-                      session.canceled ? "canceled" : "active"
+                      session.canceled ? "canceled" : session.completed ? "completed" : "active"
                     }`}
                   >
-                    {session.canceled ? "Canceled" : "Active"}
+                    {session.canceled ? "Canceled" : session.completed ? "Completed" : "Active"}
                   </span>
                 </div>
               </div>
@@ -748,6 +755,11 @@ export default function SessionFullView({
         .status-badge.canceled {
           background: #fee2e2;
           color: #991b1b;
+        }
+
+        .status-badge.completed {
+          background: #d1fae5;
+          color: #065f46;
         }
 
         /* Description Card */

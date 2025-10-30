@@ -101,6 +101,7 @@ public class SessionServices
                 SessionFee = s.SessionFee,
                 Description = s.Description,
                 Canceled = s.Canceled,
+                Completed = s.Completed,
                 Ongoing = s.Ongoing,
                 Bookings = s.Bookings.Select(b => new BookingDto
                 {
@@ -273,6 +274,7 @@ public class SessionServices
                 SessionFee = s.SessionFee,
                 Description = s.Description,
                 Canceled = s.Canceled,
+                Completed = s.Completed,
                 Ongoing = s.Ongoing,
                 Bookings = s.Bookings.Select(b => new BookingDto
                 {
