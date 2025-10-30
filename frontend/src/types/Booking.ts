@@ -8,6 +8,7 @@ export interface Booking {
         firstName?: string;
         lastName?: string;
         email?: string;
+        phoneNumber?: string;
         contactNumbers?: string[];
     };
     session?: {

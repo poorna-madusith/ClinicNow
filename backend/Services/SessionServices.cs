@@ -113,6 +113,7 @@ public class SessionServices
                         FirstName = b.Patient.FirstName,
                         LastName = b.Patient.LastName,
                         Email = b.Patient.Email,
+                        PhoneNumber = b.Patient.PhoneNumber,
                         ContactNumbers = b.Patient.ContactNumbers
                     },
                     BookedDateandTime = b.BookedDateandTime,
@@ -284,6 +285,7 @@ public class SessionServices
                         FirstName = b.Patient.FirstName,
                         LastName = b.Patient.LastName,
                         Email = b.Patient.Email,
+                        PhoneNumber = b.Patient.PhoneNumber,
                         ContactNumbers = b.Patient.ContactNumbers
                     },
                     BookedDateandTime = b.BookedDateandTime,

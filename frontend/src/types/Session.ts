@@ -25,6 +25,7 @@ export interface Session {
         firstName?: string;
         lastName?: string;
         email?: string;
+        phoneNumber?: string;
         contactNumbers?: string[];
     }>;
 }
