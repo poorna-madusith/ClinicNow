@@ -122,16 +122,20 @@ public class UserSessionController : ControllerBase
 
     //get a session by id
     [HttpGet("getseesionbyid/{id}")]
-    public async Task<SessionDto> GetSessionById(int sessionId)
+    public async Task<IActionResult> GetSessionById(int id)
     {
         try
         {
-            var session = await _userSessionServices.getSessionById(sessionId);
-            return session;
+            var session = await _userSessionServices.getSessionById(id);
+            return Ok(session);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            if (ex.Message == "Session not found")
+            {
+                return NotFound("Session not found");
+            }
+            return StatusCode(500, ex.Message);
         }
     }
 
