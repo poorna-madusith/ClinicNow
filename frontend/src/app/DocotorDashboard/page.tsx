@@ -44,7 +44,7 @@ export default function DoctorDashboard() {
       result = result.filter((session) => session.completed);
     } else {
       // Active sessions: not canceled and not completed
-      result = result.filter((session) => !session.canceled && !session.completed);
+      result = result.filter((session) => !session.canceled && !session.completed && !session.ongoing);
     }
 
     // Filter by date

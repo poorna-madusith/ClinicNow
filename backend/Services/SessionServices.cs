@@ -345,6 +345,31 @@ public class SessionServices
         return booking;
     }
 
+
+    //mark booking as ongoing
+    public async Task<IActionResult> MarkBookingAsOngoing(int bookingId, string doctorId)
+    {
+        var booking = await _context.Bookings.Include(b => b.Session).ThenInclude(s => s.Doctor).FirstOrDefaultAsync(b => b.Id == bookingId);
+        if (booking == null || booking.Session.DoctorId != doctorId)
+        {
+            throw new Exception("Booking not found or you are not authorized");
+        }
+
+        booking.OnGoing = true;
+        _context.Bookings.Update(booking);
+        var result = await _context.SaveChangesAsync();
+        if (result > 0)
+        {
+            return new OkObjectResult(booking);
+        }
+        else
+        {
+            throw new Exception("Failed to update booking status");
+        }
+
+    }
+
+
     // //mark session as completed
     public async Task<IActionResult> MarkSessionAsCompleted(int sessionId, string doctorId) {
 

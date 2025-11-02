@@ -193,8 +193,10 @@ public class SessionController : ControllerBase
 
     //mark session as completed
     [HttpPatch("marksessioncompleted/{sessionId}")]
-    public async Task<IActionResult> MarkSessionAsCompleted(int sessionId) {
-        try { 
+    public async Task<IActionResult> MarkSessionAsCompleted(int sessionId)
+    {
+        try
+        {
             var doctorId = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(doctorId))
             {
@@ -215,6 +217,31 @@ public class SessionController : ControllerBase
         }
     }
 
+    //mark booking as ongoing
+    [HttpPatch("markbookingongoing/{bookingId}")]
+    public async Task<IActionResult> MarkBookingAsOngoing(int bookingId)
+    {
+        try
+        {
+            var doctorId = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return Unauthorized(new { message = "User ID not found in token." });
+            }
+
+            await _sessionServices.MarkBookingAsOngoing(bookingId, doctorId);
+
+            return Ok(new { message = "Booking marked as ongoing" });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 
 
 }

@@ -47,7 +47,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
       result = result.filter((session) => session.canceled);
     } else {
       result = result.filter(
-        (sessions: Session) => !sessions.canceled && !sessions.completed
+        (sessions: Session) => !sessions.canceled && !sessions.completed && !sessions.ongoing
       );
     }
 
