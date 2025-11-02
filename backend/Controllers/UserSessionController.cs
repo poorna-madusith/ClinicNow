@@ -112,14 +112,28 @@ public class UserSessionController : ControllerBase
 
             var booking = await _userSessionServices.GetAllBookingsForPatient(patientId);
             return Ok(booking);
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             return BadRequest(new { Message = ex.Message });
         }
+
     }
 
-
-
+    //get a session by id
+    [HttpGet("getseesionbyid/{id}")]
+    public async Task<SessionDto> GetSessionById(int sessionId)
+    {
+        try
+        {
+            var session = await _userSessionServices.getSessionById(sessionId);
+            return session;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 
 
 

@@ -191,5 +191,65 @@ public class UserSessionServices
 
         return bookings;
     }
+
+    //get a session by if
+    public async Task<SessionDto> getSessionById(int sessionId)
+    {
+        var session = await _context.Sessions
+            .Where(s => s.Id == sessionId)
+            .Include(s => s.Doctor)
+            .Include(s => s.Bookings)
+                .ThenInclude(b => b.Patient)
+            .Select(s => new SessionDto
+            {
+                Id = s.Id,
+                DoctorId = s.DoctorId,
+                DoctorName = s.Doctor.FirstName + " " + s.Doctor.LastName,
+                Doctor = new DoctorDto
+                {
+                    Id = s.Doctor.Id,
+                    FirstName = s.Doctor.FirstName,
+                    LastName = s.Doctor.LastName,
+                    Email = s.Doctor.Email,
+                    ContactNumbers = s.Doctor.ContactNumbers
+                },
+                Date = s.Date,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Capacity = s.Capacity,
+                SessionFee = s.SessionFee,
+                Completed = s.Completed,
+                Ongoing = s.Ongoing,
+                Description = s.Description,
+                Canceled = s.Canceled,
+                Bookings = s.Bookings.Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    PatientId = b.PatientId,
+                    PatientName = b.Patient.FirstName + " " + b.Patient.LastName,
+                    Patient = new PatientDto
+                    {
+                        Id = b.Patient.Id,
+                        FirstName = b.Patient.FirstName,
+                        LastName = b.Patient.LastName,
+                        Email = b.Patient.Email,
+                        ContactNumbers = b.Patient.ContactNumbers
+                    },
+                    BookedDateandTime = b.BookedDateandTime,
+                    positionInQueue = b.positionInQueue,
+                    Completed = b.Completed,
+                    OnGoing = b.OnGoing
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (session == null)
+        {
+            throw new Exception("Session not found");
+        }
+
+        return session;
+    }
+    
     
 }
