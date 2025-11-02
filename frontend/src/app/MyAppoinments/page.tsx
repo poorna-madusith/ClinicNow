@@ -7,6 +7,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import SessionFullView from "@/components/SessionFullView";
+import { useRouter } from "next/navigation";
 
 export default function MyAppointmentsPage() {
   const [myBookings, setMyBookings] = useState<Booking[] | null>(null);
@@ -16,6 +17,7 @@ export default function MyAppointmentsPage() {
   const [loadingSessionId, setLoadingSessionId] = useState<number | null>(null);
   const { accessToken, userId } = useAuth();
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const router = useRouter();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,6 +52,10 @@ export default function MyAppointmentsPage() {
       setIsLoading(false);
     }
   };
+
+  const handleOngoingView = async (id : number) => {
+    router.push(`/subpages/UserSessionOngoing/${id}`);
+  }
 
   const fetchFullSessionDetails = async (booking: Booking) => {
     if (!booking.session) {
@@ -757,7 +763,7 @@ export default function MyAppointmentsPage() {
                   {/* Card Footer */}
                   <div className="px-6 pb-6">
                     <button
-                      onClick={() => fetchFullSessionDetails(booking)}
+                      onClick={() => booking.session?.ongoing ? handleOngoingView(booking.session.id) : fetchFullSessionDetails(booking)}
                       disabled={
                         !booking.session ||
                         loadingSessionId === booking.sessionId
