@@ -1,9 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using backend.Data;
 using backend.Models;
 using backend.Services;
+using backend.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
+
 
 
 //postgresql connection(AIVEN)
@@ -52,6 +55,21 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured"),
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/session"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 })
 .AddGoogle(options =>
 {
@@ -63,6 +81,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AdminDocServices>();
 builder.Services.AddScoped<SessionServices>();
 builder.Services.AddScoped<UserSessionServices>();
+builder.Services.AddScoped<SessionRealtimeNotifier>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -108,6 +127,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseHttpsRedirection();
+app.MapHub<SessionHub>("/hubs/session");
 
 
 app.Run();

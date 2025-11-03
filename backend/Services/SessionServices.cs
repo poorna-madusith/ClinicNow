@@ -11,11 +11,13 @@ public class SessionServices
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDBContext _context;
+    private readonly SessionRealtimeNotifier _notifier;
 
-    public SessionServices(ApplicationDBContext context, UserManager<ApplicationUser> userManager)
+    public SessionServices(ApplicationDBContext context, UserManager<ApplicationUser> userManager, SessionRealtimeNotifier notifier)
     {
         _context = context;
         _userManager = userManager;
+        _notifier = notifier;
     }
 
     public async Task<IActionResult> AddSession(SessionDto sessionDto)
@@ -54,6 +56,7 @@ public class SessionServices
 
         if (result > 0)
         {
+            await _notifier.BroadcastSession(session.Id);
             return new OkObjectResult(session);
         }
         else
@@ -162,6 +165,7 @@ public class SessionServices
 
         if (result > 0)
         {
+            await _notifier.BroadcastSession(existingSession.Id);
             return new OkObjectResult(existingSession);
         }
         else
@@ -197,6 +201,7 @@ public class SessionServices
 
         if (result > 0)
         {
+            await _notifier.BroadcastSession(existingSession.Id);
             return existingSession;
         }
         else
@@ -240,6 +245,7 @@ public class SessionServices
 
         if (result > 0)
         {
+            await _notifier.BroadcastSession(existingSession.Id);
             return existingSession;
         }
         else
@@ -342,6 +348,8 @@ public class SessionServices
             }
         }
 
+        await _notifier.BroadcastSession(booking.SessionId);
+
         return booking;
     }
 
@@ -360,13 +368,13 @@ public class SessionServices
         var result = await _context.SaveChangesAsync();
         if (result > 0)
         {
+            await _notifier.BroadcastSession(booking.SessionId);
             return new OkObjectResult(booking);
         }
         else
         {
             throw new Exception("Failed to update booking status");
         }
-
     }
 
 
@@ -390,6 +398,7 @@ public class SessionServices
         var result = await _context.SaveChangesAsync();
         if (result > 0)
         {
+            await _notifier.BroadcastSession(session.Id);
             return new OkObjectResult(session);
         }
         else

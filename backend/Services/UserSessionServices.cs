@@ -11,11 +11,13 @@ public class UserSessionServices
     private readonly UserManager<ApplicationUser> _userManager;
 
     private readonly ApplicationDBContext _context;
+    private readonly SessionRealtimeNotifier _notifier;
 
-    public UserSessionServices(ApplicationDBContext context, UserManager<ApplicationUser> userManager)
+    public UserSessionServices(ApplicationDBContext context, UserManager<ApplicationUser> userManager, SessionRealtimeNotifier notifier)
     {
         _context = context;
         _userManager = userManager;
+        _notifier = notifier;
     }
 
 
@@ -142,6 +144,8 @@ public class UserSessionServices
 
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
+
+        await _notifier.BroadcastSession(sessionId);
 
         return booking.positionInQueue;
     }
