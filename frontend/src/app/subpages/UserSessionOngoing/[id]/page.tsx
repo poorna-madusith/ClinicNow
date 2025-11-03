@@ -1,37 +1,45 @@
 'use client';
 
 import { useAuth } from "@/Context/AuthContext";
+import { createSessionConnection } from "@/Lib/sessionHubClient";
 import { Session } from "@/types/Session";
 import axios, { AxiosError } from "axios";
+import { HubConnectionState } from "@microsoft/signalr";
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 
-interface UserSessionOngoingprops{
-    params: Promise<{ id: number }>;
+interface UserSessionOngoingProps {
+    params: Promise<{ id: string }>;
 }
 
-export default function UserSessionOngoing({params}: UserSessionOngoingprops){
+export default function UserSessionOngoing({ params }: UserSessionOngoingProps) {
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const {accessToken}  = useAuth();
-    const {id} = React.use(params);
+    const { accessToken } = useAuth();
+    const resolvedParams = React.use(params);
+    const sessionId = Number(resolvedParams?.id);
     const router = useRouter();
     const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const hubBaseUrl = API?.replace(/\/?api\/?$/, "") ?? API;
 
     const fetchSession = useCallback(async () => {
+        if (!API || !accessToken || Number.isNaN(sessionId)) {
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try{
-            const res = await axios.get(`${API}/userSession/getseesionbyid/${id}`, {
+            const res = await axios.get(`${API}/userSession/getseesionbyid/${sessionId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             });
             setSession(res.data);
-            console.log(id);
+            console.log(sessionId);
             console.log("Fetched session:", res.data);
         }catch(error){
             console.error("Error fetching session:", error);
@@ -47,12 +55,57 @@ export default function UserSessionOngoing({params}: UserSessionOngoingprops){
         } finally {
             setLoading(false);
         }
-    }, [API, accessToken, id, router]);
+    }, [API, accessToken, sessionId, router]);
 
     useEffect(() => {
-       fetchSession(); 
-       console.log(`id: ${id}`);
-    },[fetchSession, id]);
+        if (!accessToken || Number.isNaN(sessionId)) {
+            return;
+        }
+
+        fetchSession(); 
+        console.log(`id: ${sessionId}`);
+    },[fetchSession, accessToken, sessionId]);
+
+    useEffect(() => {
+        if (!hubBaseUrl || !accessToken || Number.isNaN(sessionId)) {
+            return;
+        }
+
+        const connection = createSessionConnection(hubBaseUrl, accessToken);
+        let didStart = false;
+
+        connection.on("SessionUpdated", (latest: Session) => {
+            setSession(latest);
+        });
+
+        connection
+            .start()
+            .then(() => {
+                didStart = true;
+                return connection.invoke("JoinSession", sessionId);
+            })
+            .catch((err) => {
+                if (err instanceof Error && err.message.includes("stopped during negotiation")) {
+                    console.debug("SignalR connection canceled during navigation:", err.message);
+                    return;
+                }
+                console.error("SignalR connection error:", err);
+            });
+
+        return () => {
+            const stopConnection = () =>
+                connection.stop().catch((stopErr) => console.error("SignalR stop error:", stopErr));
+
+            if (didStart && connection.state === HubConnectionState.Connected) {
+                connection
+                    .invoke("LeaveSession", sessionId)
+                    .catch((err) => console.error("SignalR leave error:", err))
+                    .finally(stopConnection);
+            } else {
+                stopConnection();
+            }
+        };
+    }, [hubBaseUrl, accessToken, sessionId]);
 
     if (loading) {
         return (
