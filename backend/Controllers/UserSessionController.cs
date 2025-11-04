@@ -1,6 +1,10 @@
+using System.Reflection.Metadata;
 using backend.DTOs;
 using backend.Models;
 using backend.Services;
+using iText.Kernel.Pdf;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -87,8 +91,8 @@ public class UserSessionController : ControllerBase
                 return Unauthorized(new { Message = "User ID not found in token." });
             }
 
-            var positionInQueue = await _userSessionServices.BookASession(id, patientId);
-            return Ok(new { PositionInQueue = positionInQueue });
+            var (positionInQueue, bookingId) = await _userSessionServices.BookASession(id, patientId);
+            return Ok(new { PositionInQueue = positionInQueue, BookingId = bookingId });
         }
         catch (Exception ex)
         {
@@ -140,5 +144,5 @@ public class UserSessionController : ControllerBase
     }
 
 
-
+    
 }

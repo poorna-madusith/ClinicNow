@@ -26,7 +26,7 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
     console.log('Current userId:', userId);
     console.log('Session bookings:', session?.bookings);
 
-    const handleBookingClick = async () => {
+    const handleBookingClick = async (): Promise<{ positionInQueue: number; bookingId: number } | null> => {
 
         try{
             const res  = await axios.post(`${API}/userSession/booksession/${session?.id}`,{},{
@@ -41,10 +41,12 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
         if (onBookingSuccess) {
             onBookingSuccess();
         }
+        return res.data; // Return the booking data
         }catch(err){
             const error = err as AxiosError<{ message: string }>;
             const errorMessage = error.response?.data?.message || "An unknown error occurred";
             toast.error(errorMessage);
+            return null;
         }
     }
 
@@ -474,8 +476,47 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                                     amount={sessionPrice}
                                     bookingId={0}
                                     patientId={userId || ''}
-                                    onSuccess={() => {
-                                        handleBookingClick();
+                                    onSuccess={async () => {
+                                        const bookingData = await handleBookingClick();
+                                        if (bookingData) {
+                                            // Update the payment with bookingId
+                                            try {
+                                                const paymentRes = await axios.get(`${API}/api/payment/latest/${userId}`, {
+                                                    headers: {
+                                                        Authorization: `Bearer ${accessToken}`
+                                                    }
+                                                });
+                                                const paymentId = paymentRes.data.paymentId;
+                                                await axios.put(`${API}/api/payment/updatebooking/${paymentId}`, bookingData.bookingId, {
+                                                    headers: {
+                                                        Authorization: `Bearer ${accessToken}`,
+                                                        'Content-Type': 'application/json'
+                                                    }
+                                                });
+                                            } catch (updateError) {
+                                                console.error("Failed to update payment:", updateError);
+                                            }
+
+                                            // Download the receipt
+                                            try {
+                                                const response = await axios.get(`${API}/api/payment/receipt/${bookingData.bookingId}`, {
+                                                    responseType: 'blob',
+                                                    headers: {
+                                                        Authorization: `Bearer ${accessToken}`
+                                                    }
+                                                });
+                                                const url = window.URL.createObjectURL(new Blob([response.data]));
+                                                const link = document.createElement('a');
+                                                link.href = url;
+                                                link.setAttribute('download', `receipt_${bookingData.bookingId}.pdf`);
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                link.remove();
+                                                window.URL.revokeObjectURL(url);
+                                            } catch {
+                                                toast.error("Failed to download receipt");
+                                            }
+                                        }
                                         setShowPayment(false);
                                     }}
                                     onError={(error) => {

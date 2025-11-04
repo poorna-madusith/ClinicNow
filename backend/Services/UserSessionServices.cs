@@ -110,7 +110,7 @@ public class UserSessionServices
     }
 
     // //book a session
-    public async Task<int> BookASession(int sessionId, string PatientId)
+    public async Task<(int positionInQueue, int bookingId)> BookASession(int sessionId, string PatientId)
     {
         var session = await _context.Sessions.Include(s => s.Bookings).FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -147,7 +147,7 @@ public class UserSessionServices
 
         await _notifier.BroadcastSession(sessionId);
 
-        return booking.positionInQueue;
+        return (booking.positionInQueue, booking.Id);
     }
 
 
