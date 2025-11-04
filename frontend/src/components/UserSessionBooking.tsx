@@ -4,6 +4,8 @@ import { useAuth } from "@/Context/AuthContext";
 import { Session } from "@/types/Session";
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { useState } from "react";
+import PaymentForm from "./PaymentForm";
 
 
 interface UserSessionBookingProps {
@@ -17,6 +19,8 @@ interface UserSessionBookingProps {
 export default function UserSessionBooking({isOpen, onClose, session, onBookingSuccess}: UserSessionBookingProps) {
     const {accessToken, userId} = useAuth();
     const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const [showPayment, setShowPayment] = useState(false);
+    const sessionPrice = session?.sessionFee || 0; // Set your session price here
 
     // Debug: Log userId and bookings
     console.log('Current userId:', userId);
@@ -427,6 +431,43 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                         </div>
                     )}
 
+                    {/* Payment Form */}
+                    {showPayment && (
+                        <div className="mb-6 p-5 bg-white rounded-2xl border-2 border-teal-200 hover:border-teal-300 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <div className="bg-gradient-to-br from-teal-100 to-teal-200 p-2 rounded-lg mr-3 shadow-sm">
+                                    <svg
+                                        className="w-5 h-5 text-teal-700"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                        />
+                                    </svg>
+                                </div>
+                                Payment Details
+                            </h3>
+                            <PaymentForm
+                                amount={sessionPrice}
+                                bookingId={0} // This will be set after booking
+                                patientId={userId || ''}
+                                onSuccess={() => {
+                                    handleBookingClick();
+                                    setShowPayment(false);
+                                }}
+                                onError={(error) => {
+                                    toast.error(error);
+                                    setShowPayment(false);
+                                }}
+                            />
+                        </div>
+                    )}
+
                     {/* Action Buttons */}
                     <div className="flex gap-4 pt-2">
                         <button
@@ -442,14 +483,15 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                     : "bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                             }`}
-
-                            onClick={()=> handleBookingClick()}
+                            onClick={() => !showPayment && setShowPayment(true)}
                         >
                             {session.canceled
                                 ? "Session Canceled"
                                 : availableSlots === 0
                                 ? "Session Full"
-                                : "Book Session"}
+                                : showPayment 
+                                ? `Pay $${sessionPrice.toFixed(2)}`
+                                : "Book Session ($" + sessionPrice.toFixed(2) + ")"}
                         </button>
                     </div>
                 </div>
