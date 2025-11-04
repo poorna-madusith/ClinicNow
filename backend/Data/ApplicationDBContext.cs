@@ -17,6 +17,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Booking> Bookings { get; set; }
 
+    public DbSet<Payment> Payments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -43,6 +45,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
             .HasOne(b => b.Patient)
             .WithMany()
             .HasForeignKey(b => b.PatientId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.Entity<Payment>()
+            .HasOne(p => p.Booking)
+            .WithMany()
+            .HasForeignKey(p => p.BookingId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.Entity<Payment>()
+            .HasOne(p => p.Patient)
+            .WithMany()
+            .HasForeignKey(p => p.PatientId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 
