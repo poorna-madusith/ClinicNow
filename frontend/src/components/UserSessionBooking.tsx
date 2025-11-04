@@ -450,21 +450,40 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                                         />
                                     </svg>
                                 </div>
-                                Payment Details
+                                Payment Options
                             </h3>
-                            <PaymentForm
-                                amount={sessionPrice}
-                                bookingId={0} // This will be set after booking
-                                patientId={userId || ''}
-                                onSuccess={() => {
-                                    handleBookingClick();
-                                    setShowPayment(false);
-                                }}
-                                onError={(error) => {
-                                    toast.error(error);
-                                    setShowPayment(false);
-                                }}
-                            />
+                            <div className="flex flex-col gap-4">
+                                <button
+                                    onClick={() => {
+                                        handleBookingClick();
+                                        setShowPayment(false);
+                                    }}
+                                    className="w-full px-6 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl font-semibold hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 shadow-md hover:shadow-xl transform hover:-translate-y-0.5"
+                                >
+                                    Pay at Session (Pay Later)
+                                </button>
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-gray-300"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-sm">
+                                        <span className="px-2 bg-white text-gray-500">or pay now with card</span>
+                                    </div>
+                                </div>
+                                <PaymentForm
+                                    amount={sessionPrice}
+                                    bookingId={0}
+                                    patientId={userId || ''}
+                                    onSuccess={() => {
+                                        handleBookingClick();
+                                        setShowPayment(false);
+                                    }}
+                                    onError={(error) => {
+                                        toast.error(error);
+                                        setShowPayment(false);
+                                    }}
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -489,8 +508,6 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                                 ? "Session Canceled"
                                 : availableSlots === 0
                                 ? "Session Full"
-                                : showPayment 
-                                ? `Pay $${sessionPrice.toFixed(2)}`
                                 : "Book Session ($" + sessionPrice.toFixed(2) + ")"}
                         </button>
                     </div>
