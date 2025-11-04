@@ -18,7 +18,7 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { accessToken } = useAuth();
+    const { accessToken, userId } = useAuth();
     const resolvedParams = React.use(params);
     const sessionId = Number(resolvedParams?.id);
     const router = useRouter();
@@ -217,7 +217,7 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                                 <li key={booking.id} className={`booking-card-square ${booking.completed ? 'is-completed' : booking.onGoing ? 'is-ongoing' : 'is-pending'}`}>
                                     <div className="card-queue-badge">{booking.positionInQueue ?? '-'}</div>
                                     <div className="card-content">
-                                        <div className="card-name">{booking.patient?.firstName ?? booking.patientName?.split(' ')[0] ?? booking.patientId}</div>
+                                        <div className="card-name">{booking.patient?.firstName ?? booking.patientName?.split(' ')[0] ?? booking.patientId}{booking.patientId === userId && " (this is you)"}</div>
                                         <div className="card-email">{booking.patient?.email ?? '-'}</div>
                                         <div className="card-phone">{booking.patient?.phoneNumber ?? (booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 ? booking.patient.contactNumbers.join(', ') : '-')}</div>
                                     </div>
