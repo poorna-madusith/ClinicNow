@@ -8,6 +8,7 @@ import { HubConnectionState } from "@microsoft/signalr";
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { ArrowLeft } from "lucide-react";
 
 
 interface UserSessionOngoingProps {
@@ -134,6 +135,13 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
 
     return (
         <div className="ongoing-session-container-teal-glass">
+            <button
+                onClick={() => router.push("/MyAppoinments")}
+                className="back-button-teal-glass mb-6"
+            >
+                <ArrowLeft size={20} />
+                Back to Appointments
+            </button>
             <h2 className="teal-title-glass">
                 Session #{session.id}
             </h2>
@@ -233,6 +241,28 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                 </div>
             </div>
             <style jsx>{`
+                .back-button-teal-glass {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px 20px;
+                    background: linear-gradient(135deg, rgba(224,242,241,0.9) 0%, rgba(178,223,219,0.7) 100%);
+                    border: 2px solid rgba(0,150,136,0.3);
+                    border-radius: 12px;
+                    color: #00695c;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 4px 16px rgba(0,150,136,0.15);
+                    backdrop-filter: blur(8px);
+                }
+                .back-button-teal-glass:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(0,150,136,0.25);
+                    background: linear-gradient(135deg, rgba(224,242,241,1) 0%, rgba(178,223,219,0.85) 100%);
+                    border-color: rgba(0,150,136,0.5);
+                }
                 .session-grid-4x4 {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
