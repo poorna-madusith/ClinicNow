@@ -6,6 +6,16 @@ import toast from "react-hot-toast";
 import { useEffect, useState, useCallback } from "react";
 import { Session } from "@/types/Session";
 import SessionFullView from "@/components/SessionFullView";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function DoctorDashboard() {
   const [formData, setFormData] = useState({
@@ -32,6 +42,7 @@ export default function DoctorDashboard() {
   const [tabState, setTabState] = useState<'active' | 'canceled' | 'completed'>('active');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(6);
+  const [sessionToCancel, setSessionToCancel] = useState<string | null>(null);
 
 
    useEffect(() => {
@@ -108,6 +119,7 @@ export default function DoctorDashboard() {
         },
       });
       toast.success("Session canceled successfully");
+      setSessionToCancel(null);
       fetchSessions();
     } catch (error) {
       console.error("Error canceling session:", error);
@@ -504,18 +516,18 @@ export default function DoctorDashboard() {
                           </svg>
                           Edit
                         </button>
+                        <button className="action-btn cancel-btn" onClick={() => setSessionToCancel(session.id.toString())}>
+                          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Cancel
+                        </button>
                         <button className="action-btn ongoing-btn" onClick={() => handleOngoingSession(session.id.toString())}>
                           <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           Start
-                        </button>
-                        <button className="action-btn cancel-btn" onClick={() => cancelSession(session.id.toString())}>
-                          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Cancel
                         </button>
                       </>
                     )}
@@ -1560,6 +1572,44 @@ export default function DoctorDashboard() {
           currentUserId={userId || undefined}
         />
       )}
+
+      {/* Cancel Session Confirmation Dialog */}
+      <AlertDialog open={sessionToCancel !== null} onOpenChange={(open) => !open && setSessionToCancel(null)}>
+        <AlertDialogContent className="bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              Cancel Session
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400 text-base">
+              Are you sure you want to cancel this session? This action cannot be undone and all patients booked for this session will be notified.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-900 dark:text-white border-gray-300 dark:border-slate-600">
+              No, Keep Session
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => sessionToCancel && cancelSession(sessionToCancel)}
+              className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white"
+            >
+              Yes, Cancel Session
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
