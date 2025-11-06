@@ -1,6 +1,7 @@
 using System.Net;
 using backend.DTOs;
 using backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -178,6 +179,48 @@ public class AuthController : ControllerBase
         {
             Response.Cookies.Delete("refreshToken");
             return Unauthorized(new { success = false, message = ex.Message });
+        }
+    }
+
+
+    //user profile update
+    [HttpPut("userprofileupdate/{userId}")]
+    public async Task<IActionResult> UserProfileUpdate(string userId, [FromBody] UserProfileUpdateDto userupdateDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _authService.UserProfileUpdate(userId, userupdateDto);
+            return Ok(new { Message = "User profile updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    //doctor profile update
+    [HttpPut("doctorprofileupdate/{doctorId}")]
+    [Authorize (Roles = "Doctor, Admin")]
+    public async Task<IActionResult> DoctorProfileUpdate(string doctorId, [FromBody] DoctorUpdateDto doctorUpdateDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _authService.DoctorprofileUpdate(doctorId, doctorUpdateDto);
+            return Ok(new { Message = "Doctor profile updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
         }
     }
 }

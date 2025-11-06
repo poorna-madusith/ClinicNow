@@ -6,6 +6,7 @@ using backend.DTOs;
 using backend.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -251,6 +252,63 @@ public class AuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+
+    //update profile
+    public async Task UserProfileUpdate(string userId, UserProfileUpdateDto userupdateDto)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        user.FirstName = userupdateDto.FirstName;
+        user.LastName = userupdateDto.LastName;
+        user.Age = userupdateDto.Age;
+        user.Gender = userupdateDto.Gender;
+        user.Town = userupdateDto.Town;
+        user.Address = userupdateDto.Address;
+        user.ContactNumbers = userupdateDto.ContactNumbers;
+        user.Email = userupdateDto.Email;
+        user.UserName = userupdateDto.Email;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new Exception("Failed to update user profile: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+    }
+
+
+    //update doctorProfile
+    public async Task DoctorprofileUpdate(string doctorId, DoctorUpdateDto registerDto)
+    {
+        var doctor = await _userManager.FindByIdAsync(doctorId);
+        if (doctor == null)
+        {
+            throw new Exception("Doctor not found");
+        }
+
+        doctor.FirstName = registerDto.FirstName;
+        doctor.LastName = registerDto.LastName;
+        doctor.Age = registerDto.Age;
+        doctor.Gender = registerDto.Gender;
+        doctor.Address = registerDto.Address;
+        doctor.Specialization = registerDto.Specialization;
+        doctor.DocDescription = registerDto.DocDescription;
+        doctor.ProfileImageUrl = registerDto.ProfileImageUrl;
+        doctor.ContactEmail = registerDto.ContactEmail;
+        doctor.ContactNumbers = registerDto.ContactNumbers;
+        doctor.Email = registerDto.Email;
+        doctor.UserName = registerDto.Email;
+
+        var result = await _userManager.UpdateAsync(doctor);
+        if (!result.Succeeded)
+        {
+            throw new Exception("Failed to update doctor profile: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
     }
 
 
