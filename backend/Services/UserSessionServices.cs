@@ -298,6 +298,42 @@ public class UserSessionServices
 
         return new OkResult();
     }
+
+
+    //add a feedback to the doctor
+    public async Task<IActionResult> AddFeedbackToDoc(string doctorId, string patientId,FeedbackDto feedbackDto)
+    {
+        var doctor = await _userManager.FindByIdAsync(doctorId);
+        if (doctor == null || doctor.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Invalid doctor ID");
+        }
+
+        var patient = await _userManager.FindByIdAsync(patientId);
+        if (patient == null || patient.Role != RoleEnum.Patient)
+        {
+            throw new Exception("Invalid patient ID");
+        }
+
+        var feedback = new Feedback
+        {
+            doctorId = doctorId,
+            patientId = patientId,
+            CommunicationRating = feedbackDto.CommunicationRating,
+            ProfessionalismRating = feedbackDto.ProfessionalismRating,
+            PunctualityRating = feedbackDto.PunctualityRating,
+            TreatmentRating = feedbackDto.TreatmentRating,
+            OverallRating = feedbackDto.OverallRating,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Feedbacks.Add(feedback);
+        await _context.SaveChangesAsync();
+        
+
+        return new OkResult();
+
+    }
     
     
 }

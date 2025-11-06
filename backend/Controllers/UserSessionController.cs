@@ -145,8 +145,10 @@ public class UserSessionController : ControllerBase
 
     //cancel a booking
     [HttpDelete("cancelbooking/{bookingId}")]
-    public async Task<IActionResult> cancelBooking(int bookingId) {
-        try {
+    public async Task<IActionResult> cancelBooking(int bookingId)
+    {
+        try
+        {
             var patientId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
             await _userSessionServices.CancelBooking(bookingId, patientId);
             return Ok(new { Message = "Booking cancelled successfully." });
@@ -156,6 +158,31 @@ public class UserSessionController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+
+    //give feedback
+    [HttpPost("givefeedback/{doctorId}")]
+    public async Task<IActionResult> GiveFeedback(string doctorId,[FromBody] FeedbackDto feedbackDto)
+    {
+        try
+        {
+            var patientId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(patientId))
+            {
+                return Unauthorized(new { Message = "User ID not found in token." });
+            }
+
+            await _userSessionServices.AddFeedbackToDoc(doctorId, patientId, feedbackDto);
+            return Ok(new { Message = "Feedback submitted successfully." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    
+    
 
 
     
