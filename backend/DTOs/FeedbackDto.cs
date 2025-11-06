@@ -6,14 +6,12 @@ namespace backend.DTOs
     {
         public int Id { get; set; }
 
-        [Required]
-        public string DoctorId { get; set; } = null!;
+        public string? DoctorId { get; set; }
 
         public string? DoctorName { get; set; }
         public DoctorDto? Doctor { get; set; }
 
-        [Required]
-        public string PatientId { get; set; } = null!;
+        public string? PatientId { get; set; }
 
         public string? PatientName { get; set; }
         public PatientDto? Patient { get; set; }
