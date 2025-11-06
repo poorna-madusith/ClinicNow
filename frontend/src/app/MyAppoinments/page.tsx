@@ -3,12 +3,21 @@
 import { useAuth } from "@/Context/AuthContext";
 import { Booking } from "@/types/Booking";
 import { Session } from "@/types/Session";
-import axios, { Axios, AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import SessionFullView from "@/components/SessionFullView";
 import { useRouter } from "next/navigation";
-import { error } from "console";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function MyAppointmentsPage() {
   const [myBookings, setMyBookings] = useState<Booking[] | null>(null);
@@ -16,6 +25,7 @@ export default function MyAppointmentsPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [loadingSessionId, setLoadingSessionId] = useState<number | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<number | null>(null);
   const { accessToken, userId } = useAuth();
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const router = useRouter();
@@ -56,12 +66,13 @@ export default function MyAppointmentsPage() {
 
   const handleCancelClick = async (bookingId: number) =>{
     try{
-      const res = await axios.delete(`${API}/userSession/cancelbooking/${bookingId}`, {
+      await axios.delete(`${API}/userSession/cancelbooking/${bookingId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
       toast.success("Booking cancelled");
+      setBookingToCancel(null);
       fetchBookings();
     }catch(err){
       const error = err as AxiosError<{message: string}>
@@ -822,7 +833,7 @@ export default function MyAppointmentsPage() {
                       </button>
                       {!booking.session?.ongoing && !booking.session?.canceled && !booking.completed ? (
                         <button
-                          onClick={() => handleCancelClick(booking.id)}
+                          onClick={() => setBookingToCancel(booking.id)}
                           className="px-3 py-2 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95 text-sm"
                         >
                           <svg
@@ -962,6 +973,44 @@ export default function MyAppointmentsPage() {
           currentUserId={userId || undefined}
         />
       )}
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={bookingToCancel !== null} onOpenChange={(open) => !open && setBookingToCancel(null)}>
+        <AlertDialogContent className="bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              Cancel Appointment
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400 text-base">
+              Are you sure you want to cancel this appointment? This action cannot be undone and you may need to book a new appointment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-900 dark:text-white border-gray-300 dark:border-slate-600">
+              No, Keep It
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => bookingToCancel && handleCancelClick(bookingToCancel)}
+              className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white"
+            >
+              Yes, Cancel Appointment
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
