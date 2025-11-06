@@ -19,6 +19,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Payment> Payments { get; set; }
 
+    public DbSet<Feedback> Feedbacks { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -52,12 +54,25 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(p => p.BookingId)
             .OnDelete(DeleteBehavior.SetNull);
-        
+
         builder.Entity<Payment>()
             .HasOne(p => p.Patient)
             .WithMany()
             .HasForeignKey(p => p.PatientId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Feedback>()
+            .HasOne(f => f.Doctor)
+            .WithMany()
+            .HasForeignKey(f => f.doctorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Feedback>()
+            .HasOne(f => f.Patient)
+            .WithMany()
+            .HasForeignKey(f => f.patientId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 
  }
