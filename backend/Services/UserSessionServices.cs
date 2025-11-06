@@ -2,6 +2,7 @@ using backend.Data;
 using backend.DTOs;
 using backend.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
@@ -253,6 +254,49 @@ public class UserSessionServices
         }
 
         return session;
+    }
+
+
+    //cancel a booking before 24 hours
+    public async Task<IActionResult> CancelBooking(int bookingId, string patientId)
+    {
+        var booking = await _context.Bookings.Include(b => b.Session).FirstOrDefaultAsync(b => b.Id == bookingId && b.PatientId == patientId);
+        if (booking == null)
+        {
+            throw new Exception("Booking not found");
+        }
+
+        if (booking.Session.Ongoing || booking.Session.Completed)
+        {
+            throw new Exception("Cannot cancel booking for an ongoing or completed session");
+        }
+
+        DateTime bookedTime = booking.BookedDateandTime;
+        DateTime now = DateTime.UtcNow;
+
+        TimeSpan timeSinceBooking = now - bookedTime;
+
+        if (timeSinceBooking.TotalHours > 24)
+        {
+            throw new Exception("Cannot cancel booking after 24 hours of booking");
+        }
+
+        int removedPosition = booking.positionInQueue;
+
+        _context.Bookings.Remove(booking);
+        await _context.SaveChangesAsync();
+
+        // Update queue positions for remaining bookings
+        var bookingsToUpdate = await _context.Bookings.Where(b => b.SessionId == booking.SessionId && b.positionInQueue > removedPosition).ToListAsync();
+        foreach (var b in bookingsToUpdate)
+        {
+            b.positionInQueue--;
+        }
+        await _context.SaveChangesAsync();
+
+        await _notifier.BroadcastSession(booking.SessionId);
+
+        return new OkResult();
     }
     
     

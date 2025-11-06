@@ -143,6 +143,20 @@ public class UserSessionController : ControllerBase
         }
     }
 
+    //cancel a booking
+    [HttpDelete("cancelbooking/{bookingId}")]
+    public async Task<IActionResult> cancelBooking(int bookingId) {
+        try {
+            var patientId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            await _userSessionServices.CancelBooking(bookingId, patientId);
+            return Ok(new { Message = "Booking cancelled successfully." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 
     
 }
