@@ -191,7 +191,7 @@ export default function DocOngoingSessions(){
                                         <div className="card-content">
                                             <div className="card-name">{booking.patient?.firstName ?? booking.patientName?.split(' ')[0] ?? booking.patientId}</div>
                                             <div className="card-email">{booking.patient?.email ?? '-'}</div>
-                                            <div className="card-phone">{booking.patient?.phoneNumber ?? (booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 ? booking.patient.contactNumbers.join(', ') : '-')}</div>
+                                            <div className="card-phone">{booking.patient?.phoneNumber ?? (booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 ? booking.patient.contactNumbers[0] : '-')}</div>
                                         </div>
                                         {!booking.completed && (
                                             <>

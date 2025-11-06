@@ -227,7 +227,7 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                                     <div className="card-content">
                                         <div className="card-name">{booking.patient?.firstName ?? booking.patientName?.split(' ')[0] ?? booking.patientId}{booking.patientId === userId && " (you)"}</div>
                                         <div className="card-email">{booking.patient?.email ?? '-'}</div>
-                                        <div className="card-phone">{booking.patient?.phoneNumber ?? (booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 ? booking.patient.contactNumbers.join(', ') : '-')}</div>
+                                        <div className="card-phone">{booking.patient?.phoneNumber ?? (booking.patient?.contactNumbers && booking.patient.contactNumbers.length > 0 ? booking.patient.contactNumbers[0] : '-')}</div>
                                     </div>
                                     <div className={`status-pill ${booking.completed ? 'pill-completed' : booking.onGoing ? 'pill-ongoing' : 'pill-pending'}`}>
                                         {booking.completed ? 'Completed' : booking.onGoing ? 'Ongoing' : 'Pending'}
@@ -551,16 +551,16 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     position: absolute;
                     top: 12px;
                     left: 12px;
-                    width: 42px;
-                    height: 42px;
-                    border-radius: 12px;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 15px;
                     background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
                     color: #ffffff;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-weight: 900;
-                    font-size: 1.1rem;
+                    font-size: 1.4rem;
                     box-shadow: 0 4px 12px rgba(0,105,92,0.25),
                                 inset 0 1px 0 rgba(255,255,255,0.2);
                     transition: transform 0.2s ease;
