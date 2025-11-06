@@ -24,7 +24,7 @@ export default function Navbar() {
   const patientLinks = [
     { label: "Dashboard", href: "/UserDashboard" },
     { label: "My Appointments", href: "/MyAppoinments" },
-    { label: "Profile", href: "/patient/profile" },
+    { label: "Profile", href: "/UserProfile" },
   ];
 
   let navlinks: { label: string; href: string }[] = [];

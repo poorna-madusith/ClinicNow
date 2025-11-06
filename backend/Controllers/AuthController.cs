@@ -227,7 +227,7 @@ public class AuthController : ControllerBase
 
     //get logged in user details
     [HttpGet("getuserdetails")]
-    [Authorize]
+    [Authorize(Roles = "Patient, Doctor, Admin")]
     public async Task<IActionResult> GetLoggedInUserDetails()
     {
         try
