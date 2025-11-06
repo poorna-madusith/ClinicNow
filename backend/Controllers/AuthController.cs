@@ -205,7 +205,7 @@ public class AuthController : ControllerBase
 
     //doctor profile update
     [HttpPut("doctorprofileupdate/{doctorId}")]
-    [Authorize (Roles = "Doctor, Admin")]
+    [Authorize(Roles = "Doctor, Admin")]
     public async Task<IActionResult> DoctorProfileUpdate(string doctorId, [FromBody] DoctorUpdateDto doctorUpdateDto)
     {
         try
@@ -217,6 +217,28 @@ public class AuthController : ControllerBase
 
             await _authService.DoctorprofileUpdate(doctorId, doctorUpdateDto);
             return Ok(new { Message = "Doctor profile updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
+    //get logged in user details
+    [HttpGet("getuserdetails")]
+    [Authorize]
+    public async Task<IActionResult> GetLoggedInUserDetails()
+    {
+        try
+        {
+            var userId = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token");
+            }
+            var user = await _authService.GetLoggedInUserDetails(userId);
+            return Ok(user);
         }
         catch (Exception ex)
         {

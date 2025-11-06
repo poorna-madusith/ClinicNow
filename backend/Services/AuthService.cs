@@ -312,4 +312,32 @@ public class AuthService
     }
 
 
+    //get logged in user details
+    public async Task<UserDetailsDto> GetLoggedInUserDetails(string userId) {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+        
+        return new UserDetailsDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Role = user.Role,
+            Age = user.Age,
+            Gender = user.Gender,
+            Town = user.Town,
+            Address = user.Address,
+            ContactNumbers = user.ContactNumbers,
+            Specialization = user.Specialization,
+            DocDescription = user.DocDescription,
+            ProfileImageUrl = user.ProfileImageUrl,
+            ContactEmail = user.ContactEmail
+        };
+    }
+
+
 }
