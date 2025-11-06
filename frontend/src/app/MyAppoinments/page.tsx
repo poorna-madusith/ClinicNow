@@ -3,11 +3,12 @@
 import { useAuth } from "@/Context/AuthContext";
 import { Booking } from "@/types/Booking";
 import { Session } from "@/types/Session";
-import axios from "axios";
+import axios, { Axios, AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import SessionFullView from "@/components/SessionFullView";
 import { useRouter } from "next/navigation";
+import { error } from "console";
 
 export default function MyAppointmentsPage() {
   const [myBookings, setMyBookings] = useState<Booking[] | null>(null);
@@ -52,6 +53,23 @@ export default function MyAppointmentsPage() {
       setIsLoading(false);
     }
   };
+
+  const handleCancelClick = async (bookingId: number) =>{
+    try{
+      const res = await axios.delete(`${API}/userSession/cancelbooking/${bookingId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      toast.success("Booking cancelled");
+      fetchBookings();
+    }catch(err){
+      const error = err as AxiosError<{message: string}>
+      const errorMessage = error.response?.data?.message || "An unknown error occured"
+      toast.error(errorMessage);
+      console.log(errorMessage);
+    }
+  }
 
   const handleOngoingView = async (id : number) => {
     router.push(`/subpages/UserSessionOngoing/${id}`);
@@ -102,6 +120,7 @@ export default function MyAppointmentsPage() {
               lastName: fullSession.doctorName?.split(" ").slice(1).join(" "),
             },
         canceled: fullSession.canceled,
+        completed: fullSession.completed || false,
         ongoing: fullSession.ongoing || false,
         date: fullSession.date,
         startTime: fullSession.startTime,
@@ -762,23 +781,52 @@ export default function MyAppointmentsPage() {
 
                   {/* Card Footer */}
                   <div className="px-6 pb-6">
-                    <button
-                      onClick={() => booking.session?.ongoing ? handleOngoingView(booking.session.id) : fetchFullSessionDetails(booking)}
-                      disabled={
-                        !booking.session ||
-                        loadingSessionId === booking.sessionId
-                      }
-                      className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95"
-                    >
-                      {loadingSessionId === booking.sessionId ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                          Loading...
-                        </>
-                      ) : (
-                        <>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => booking.session?.ongoing ? handleOngoingView(booking.session.id) : fetchFullSessionDetails(booking)}
+                        disabled={
+                          !booking.session ||
+                          loadingSessionId === booking.sessionId
+                        }
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95"
+                      >
+                        {loadingSessionId === booking.sessionId ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            View Full Session
+                          </>
+                        )}
+                      </button>
+                      {!booking.session?.ongoing && !booking.session?.canceled && !booking.completed ? (
+                        <button
+                          onClick={() => handleCancelClick(booking.id)}
+                          className="px-3 py-2 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95 text-sm"
+                        >
                           <svg
-                            className="w-5 h-5"
+                            className="w-4 h-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -787,19 +835,13 @@ export default function MyAppointmentsPage() {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              d="M6 18L18 6M6 6l12 12"
                             />
                           </svg>
-                          View Full Session
-                        </>
-                      )}
-                    </button>
+                          Cancel
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               ))}
