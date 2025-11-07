@@ -18,7 +18,7 @@ export default function Navbar() {
   const doctorLinks = [
     { label: "Dashboard", href: "/DocotorDashboard" },
     { label: "OnGoing Session", href: "/DocOngoingSessions" },
-    { label: "Patients", href: "/doctor/patients" },
+    { label: "Profile", href: "/DocProfile" },
   ];
 
   const patientLinks = [
