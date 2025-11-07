@@ -107,6 +107,45 @@ export default function UserProfile() {
                 return;
             }
 
+            // Validation
+            if (!formData.firstName.trim() || !formData.lastName.trim()) {
+                toast.error("First name and last name are required");
+                setUpdating(false);
+                return;
+            }
+
+            if (!formData.email.trim()) {
+                toast.error("Email is required");
+                setUpdating(false);
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                toast.error("Please enter a valid email address");
+                setUpdating(false);
+                return;
+            }
+
+            // Age validation
+            if (formData.age && (parseInt(formData.age) < 0 || parseInt(formData.age) > 120)) {
+                toast.error("Age must be between 0 and 120");
+                setUpdating(false);
+                return;
+            }
+
+            // Phone number validation
+            const phoneRegex = /^[0-9+\-() ]{10,}$/;
+            const validContactNumbers = formData.contactNumbers.filter(num => num.trim() !== '');
+            for (const number of validContactNumbers) {
+                if (!phoneRegex.test(number)) {
+                    toast.error("Please enter valid phone numbers (at least 10 digits)");
+                    setUpdating(false);
+                    return;
+                }
+            }
+
             const updateDto = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -115,7 +154,7 @@ export default function UserProfile() {
                 gender: formData.gender || null,
                 town: formData.town || null,
                 address: formData.address || null,
-                contactNumbers: formData.contactNumbers.filter(num => num.trim() !== '')
+                contactNumbers: validContactNumbers
             };
 
             await axios.put(
@@ -369,6 +408,8 @@ export default function UserProfile() {
                                         value={formData.firstName}
                                         onChange={handleInputChange}
                                         required
+                                        minLength={2}
+                                        maxLength={50}
                                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                         placeholder="Enter first name"
                                     />
@@ -383,6 +424,8 @@ export default function UserProfile() {
                                         value={formData.lastName}
                                         onChange={handleInputChange}
                                         required
+                                        minLength={2}
+                                        maxLength={50}
                                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                         placeholder="Enter last name"
                                     />
@@ -400,6 +443,7 @@ export default function UserProfile() {
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     required
+                                    pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                     placeholder="Enter email address"
                                 />
@@ -482,6 +526,8 @@ export default function UserProfile() {
                                                 type="tel"
                                                 value={number}
                                                 onChange={(e) => handleContactNumberChange(index, e.target.value)}
+                                                pattern="[0-9+\-() ]{10,}"
+                                                title="Please enter a valid phone number (at least 10 digits)"
                                                 className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                                 placeholder={`Contact number ${index + 1}`}
                                             />

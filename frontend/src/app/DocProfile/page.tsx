@@ -113,6 +113,77 @@ export default function DocProfile() {
                 return;
             }
 
+            // Validation
+            if (!formData.firstName.trim() || !formData.lastName.trim()) {
+                toast.error("First name and last name are required");
+                setUpdating(false);
+                return;
+            }
+
+            if (!formData.email.trim()) {
+                toast.error("Email is required");
+                setUpdating(false);
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                toast.error("Please enter a valid email address");
+                setUpdating(false);
+                return;
+            }
+
+            // Age validation
+            if (formData.age && (parseInt(formData.age) < 0 || parseInt(formData.age) > 120)) {
+                toast.error("Age must be between 0 and 120");
+                setUpdating(false);
+                return;
+            }
+
+            // Phone number validation
+            const phoneRegex = /^[0-9+\-() ]{10,}$/;
+            const validContactNumbers = formData.contactNumbers.filter(num => num.trim() !== '');
+            
+            if (validContactNumbers.length === 0) {
+                toast.error("At least one contact number is required");
+                setUpdating(false);
+                return;
+            }
+
+            for (const number of validContactNumbers) {
+                if (!phoneRegex.test(number)) {
+                    toast.error("Please enter valid phone numbers (at least 10 digits)");
+                    setUpdating(false);
+                    return;
+                }
+            }
+
+            // Profile Image URL validation
+            if (formData.profileImageUrl && formData.profileImageUrl.trim()) {
+                try {
+                    new URL(formData.profileImageUrl);
+                } catch {
+                    toast.error("Please enter a valid image URL");
+                    setUpdating(false);
+                    return;
+                }
+            }
+
+            // Address validation (required for doctors)
+            if (!formData.address || !formData.address.trim()) {
+                toast.error("Address is required");
+                setUpdating(false);
+                return;
+            }
+
+            // Doctor description validation
+            if (!formData.docDescription || !formData.docDescription.trim()) {
+                toast.error("About section is required");
+                setUpdating(false);
+                return;
+            }
+
             const updateDto = {
                 FirstName: formData.firstName,
                 LastName: formData.lastName,
@@ -123,7 +194,7 @@ export default function DocProfile() {
                 DocDescription: formData.docDescription || null,
                 ProfileImageUrl: formData.profileImageUrl || null,
                 ContactEmail: formData.contactEmail || formData.email,
-                ContactNumbers: formData.contactNumbers.filter(num => num.trim() !== ''),
+                ContactNumbers: validContactNumbers,
                 Address: formData.address || null
             };
 
@@ -388,6 +459,8 @@ export default function DocProfile() {
                                         value={formData.firstName}
                                         onChange={handleInputChange}
                                         required
+                                        minLength={2}
+                                        maxLength={50}
                                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                         placeholder="Enter first name"
                                     />
@@ -402,6 +475,8 @@ export default function DocProfile() {
                                         value={formData.lastName}
                                         onChange={handleInputChange}
                                         required
+                                        minLength={2}
+                                        maxLength={50}
                                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                         placeholder="Enter last name"
                                     />
@@ -419,6 +494,7 @@ export default function DocProfile() {
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     required
+                                    pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                     placeholder="Enter email address"
                                 />
@@ -434,6 +510,8 @@ export default function DocProfile() {
                                     name="profileImageUrl"
                                     value={formData.profileImageUrl}
                                     onChange={handleInputChange}
+                                    pattern="https?://.+"
+                                    title="Please enter a valid URL starting with http:// or https://"
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                     placeholder="Enter image URL"
                                 />
@@ -483,6 +561,9 @@ export default function DocProfile() {
                                     name="address"
                                     value={formData.address}
                                     onChange={handleInputChange}
+                                    required
+                                    minLength={10}
+                                    maxLength={200}
                                     rows={3}
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all resize-none"
                                     placeholder="Enter full address"
@@ -501,6 +582,9 @@ export default function DocProfile() {
                                                 type="tel"
                                                 value={number}
                                                 onChange={(e) => handleContactNumberChange(index, e.target.value)}
+                                                required
+                                                pattern="[0-9+\-() ]{10,}"
+                                                title="Please enter a valid phone number (at least 10 digits)"
                                                 className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                                 placeholder={`Contact number ${index + 1}`}
                                             />
@@ -534,9 +618,12 @@ export default function DocProfile() {
                                     name="docDescription"
                                     value={formData.docDescription}
                                     onChange={handleInputChange}
+                                    required
+                                    minLength={20}
+                                    maxLength={1000}
                                     rows={4}
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all resize-none"
-                                    placeholder="Write a brief description about yourself"
+                                    placeholder="Write a brief description about yourself (minimum 20 characters)"
                                 />
                             </div>
 
