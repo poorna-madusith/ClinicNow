@@ -5,6 +5,7 @@ import { Session } from "@/types/Session";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 
 
@@ -108,8 +109,9 @@ export default function DocOngoingSessions(){
     const pendingBookings = totalBookings - completedBookings;
 
     return (
-        <div className="ongoing-session-container-teal-glass">
-            <h2 className="teal-title-glass">
+        <ProtectedRoute allowedRoles={["Doctor"]}>
+            <div className="ongoing-session-container-teal-glass">
+                <h2 className="teal-title-glass">
                 {ongoingSession ? `Session #${ongoingSession.id}` : "Current Ongoing Session"}
             </h2>
             {ongoingSession && (
@@ -782,7 +784,8 @@ export default function DocOngoingSessions(){
                     border: 2px dashed rgba(0,150,136,0.3);
                 }
             `}</style>
-        </div>
+            </div>
+        </ProtectedRoute>
     );
 }
 

@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 
 interface UserSessionOngoingProps {
@@ -134,11 +135,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
     const pendingBookings = totalBookings - completedBookings;
 
     return (
-        <div className="ongoing-session-container-teal-glass">
-            <button
-                onClick={() => router.push("/MyAppoinments")}
-                className="back-button-teal-glass mb-6"
-            >
+        <ProtectedRoute allowedRoles={["Patient"]}>
+            <div className="ongoing-session-container-teal-glass">
+                <button
+                    onClick={() => router.push("/MyAppoinments")}
+                    className="back-button-teal-glass mb-6"
+                >
                 <ArrowLeft size={20} />
                 Back to Appointments
             </button>
@@ -679,6 +681,7 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     font-weight: 600;
                 }
             `}</style>
-        </div>
+            </div>
+        </ProtectedRoute>
     );
 }

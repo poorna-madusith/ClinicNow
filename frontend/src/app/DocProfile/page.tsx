@@ -6,6 +6,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Briefcase, Edit, X } from "lucide-react";
 import toast from "react-hot-toast";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function DocProfile() {
     const [user, setUser] = useState<UserDetails | null>(null);
@@ -255,8 +256,9 @@ export default function DocProfile() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
+        <ProtectedRoute allowedRoles={["Doctor"]}>
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-6xl mx-auto">
                 {/* Welcome Header Container */}
                 <div className="bg-gradient-to-r from-teal-50 via-cyan-50 to-emerald-50 rounded-3xl shadow-xl p-10 mb-8 border border-gray-100 hover:shadow-2xl transition-all duration-300">
                     
@@ -655,6 +657,7 @@ export default function DocProfile() {
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </ProtectedRoute>
     );
 }

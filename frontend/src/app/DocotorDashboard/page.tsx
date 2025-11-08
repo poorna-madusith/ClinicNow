@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function DoctorDashboard() {
   const [formData, setFormData] = useState({
@@ -350,9 +351,10 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className="doctor-dashboard-container">
-      <div className="dashboard-header">
-        <div className="title-section">
+    <ProtectedRoute allowedRoles={["Doctor"]}>
+      <div className="doctor-dashboard-container">
+        <div className="dashboard-header">
+          <div className="title-section">
           <h1 className="dashboard-title">Doctor Dashboard</h1>
           <p className="dashboard-subtitle">Manage your appointments and sessions</p>
         </div>
@@ -1610,6 +1612,7 @@ export default function DoctorDashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

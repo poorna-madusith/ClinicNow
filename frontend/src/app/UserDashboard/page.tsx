@@ -9,6 +9,7 @@ import Image from "next/image";
 import DoctorFullView from "@/components/DoctorFullView";
 import FeedbackForm from "@/components/FeedbackForm";
 import { useRouter } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function UserDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -106,9 +107,10 @@ export default function UserDashboard() {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6">
-        <div className="max-w-7xl mx-auto">
+    <ProtectedRoute allowedRoles={["Patient"]}>
+      <>
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6">
+          <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -397,6 +399,7 @@ export default function UserDashboard() {
           doctorName={feedbackDoctor.name}
         />
       )}
-    </>
+      </>
+    </ProtectedRoute>
   );
 }

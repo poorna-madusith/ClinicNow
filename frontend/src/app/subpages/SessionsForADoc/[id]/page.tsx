@@ -7,6 +7,7 @@ import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import UserSessionBooking from "@/components/UserSessionBooking";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface sessionPageProps {
   params: Promise<{ id: string }>;
@@ -154,8 +155,9 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <ProtectedRoute allowedRoles={["Patient"]}>
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
           <button
@@ -611,6 +613,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
         session={bookingSession}
         onBookingSuccess={handleBookingSuccess}
       />
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -8,6 +8,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import DeleteButton from "@/components/DeleteButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function AdminDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -347,9 +348,10 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50">
-      {/* Header Section with Gradient */}
-      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 shadow-xl">
+    <ProtectedRoute allowedRoles={["Admin"]}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50">
+        {/* Header Section with Gradient */}
+        <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 shadow-xl">
         <div className="container mx-auto px-6 py-8">
           <div className="flex justify-between items-center">
             <div>
@@ -1221,6 +1223,7 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
