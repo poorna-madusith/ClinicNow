@@ -399,6 +399,17 @@ export default function DocProfile() {
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="mt-1 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Mail className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 font-medium">Contact Email</p>
+                                    <p className="text-gray-900 font-semibold break-all">
+                                        {user.contactEmail || user.ContactEmail || user.email || user.Email || 'Not Provided'}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <div className="mt-1 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                                     <MapPin className="w-5 h-5 text-red-600" />
                                 </div>
@@ -500,6 +511,28 @@ export default function DocProfile() {
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                     placeholder="Enter email address"
                                 />
+                            </div>
+
+                            {/* Contact Email */}
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Contact Email
+                                    <span className="text-gray-500 text-xs font-normal ml-2">
+                                        (Email for patient inquiries)
+                                    </span>
+                                </label>
+                                <input
+                                    type="email"
+                                    name="contactEmail"
+                                    value={formData.contactEmail}
+                                    onChange={handleInputChange}
+                                    pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                    placeholder="Enter contact email (defaults to main email)"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    If not provided, your main email will be used
+                                </p>
                             </div>
 
                             {/* Profile Image URL */}

@@ -194,34 +194,32 @@ export default function DoctorFullView({
               <h3 className="text-2xl font-bold text-gray-800 ml-3">Contact Information</h3>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
-              {doctor.contactEmail && (
-                <div className="flex items-center p-4 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 hover:shadow-sm transition-all duration-200 group">
-                  <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <svg
-                      className="w-5 h-5 text-teal-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-medium mb-0.5">Email</p>
-                    <a
-                      href={`mailto:${doctor.contactEmail}`}
-                      className="text-teal-600 hover:text-teal-700 font-medium hover:underline text-base"
-                    >
-                      {doctor.contactEmail}
-                    </a>
-                  </div>
+              <div className="flex items-center p-4 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 hover:shadow-sm transition-all duration-200 group">
+                <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <svg
+                    className="w-5 h-5 text-teal-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
                 </div>
-              )}
+                <div>
+                  <p className="text-xs text-gray-500 font-medium mb-0.5">Contact Email</p>
+                  <a
+                    href={`mailto:${doctor.contactEmail || doctor.email}`}
+                    className="text-teal-600 hover:text-teal-700 font-medium hover:underline text-base"
+                  >
+                    {doctor.contactEmail || doctor.email}
+                  </a>
+                </div>
+              </div>
               {doctor.contactNumbers && doctor.contactNumbers.length > 0 && (
                 <div className="flex items-start p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 hover:shadow-sm transition-all duration-200 group">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform">
