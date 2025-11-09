@@ -22,4 +22,5 @@ export interface Patient {
   town?: string;
   address?: string;
   phoneNumber?: string;
+  contactNumbers?: string[];
 }

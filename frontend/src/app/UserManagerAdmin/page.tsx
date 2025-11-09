@@ -93,7 +93,7 @@ export default function ManageUsers() {
   return (
     <ProtectedRoute allowedRoles={["Admin"]}>
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1600px] mx-auto">
           {/* Header Section */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-teal-800 mb-2">
@@ -174,6 +174,9 @@ export default function ManageUsers() {
                         <th className="px-6 py-4 text-left text-sm font-semibold">
                           Address
                         </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold">
+                          Contact Number
+                        </th>
                         <th className="px-6 py-4 text-center text-sm font-semibold">
                           Actions
                         </th>
@@ -183,7 +186,7 @@ export default function ManageUsers() {
                       {currentPatients.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={7}
+                            colSpan={8}
                             className="px-6 py-8 text-center text-gray-500"
                           >
                             {search.trim() === ""
@@ -238,6 +241,19 @@ export default function ManageUsers() {
                               <div className="max-w-xs truncate" title={patient.address || "N/A"}>
                                 {patient.address || "N/A"}
                               </div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-700">
+                              {patient.contactNumbers && patient.contactNumbers.length > 0 ? (
+                                <div className="space-y-1">
+                                  {patient.contactNumbers.map((number, idx) => (
+                                    <div key={idx} className="text-sm">
+                                      {number}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                "N/A"
+                              )}
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex justify-center space-x-2">
