@@ -115,5 +115,31 @@ public class AdminDocServices
         }
         return new OkObjectResult("Doctor deleted successfully");
     }
+
+
+    //get all patients
+    public async Task<List<ApplicationUser>> GetAllPatients()
+    {
+        var patients = await _userManager.GetUsersInRoleAsync(RoleEnum.Patient.ToString());
+        return patients.ToList();
+    }
+
+
+    //delete a patient
+    public async Task<IActionResult> DeletePatient(string patientId)
+    {
+        var patient = await _userManager.FindByIdAsync(patientId);
+        if (patient == null || patient.Role != RoleEnum.Patient)
+        {
+            throw new Exception("Patient not found");
+        }
+
+        var result = await _userManager.DeleteAsync(patient);
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+        return new OkObjectResult("Patient deleted successfully");
+    }
     
 }

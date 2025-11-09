@@ -92,5 +92,36 @@ public class AdminDocController : ControllerBase
     }
 
 
+    //get all patients
+    [HttpGet("getallpatients")]
+    public async Task<IActionResult> GetAllPatients()
+    {
+        try
+        {
+            var patients = await _adminDocServices.GetAllPatients();
+            return Ok(patients);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+
+    //delete a patient
+    [HttpDelete("deletepatient/{id}")]
+    public async Task<IActionResult> DeletePatient(string id)
+    {
+        try
+        {
+            await _adminDocServices.DeletePatient(id);
+            return Ok(new { Message = "Patient deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 
 }
