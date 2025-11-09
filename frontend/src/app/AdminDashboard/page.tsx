@@ -3,6 +3,7 @@
 import { useAuth } from "@/Context/AuthContext";
 import { Doctor, DoctorRegister, Gender } from "@/types/Doctor";
 import DoctorFullView from "@/components/DoctorFullView";
+import DoctorSessionsModal from "@/components/DoctorSessionsModal";
 import axios from "axios";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
@@ -14,6 +15,8 @@ export default function AdminDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
+  const [selectedDoctorForSessions, setSelectedDoctorForSessions] = useState<Doctor | null>(null);
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
   const [addeditmodalOpen, setAddeditmodalOpen] = useState(false);
@@ -345,6 +348,16 @@ export default function AdminDashboard() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedDoctor(null);
+  };
+
+  const handleViewSessions = (doctor: Doctor) => {
+    setSelectedDoctorForSessions(doctor);
+    setIsSessionsModalOpen(true);
+  };
+
+  const handleCloseSessionsModal = () => {
+    setIsSessionsModalOpen(false);
+    setSelectedDoctorForSessions(null);
   };
 
   return (
@@ -960,6 +973,15 @@ export default function AdminDashboard() {
         />
       )}
 
+      {isSessionsModalOpen && selectedDoctorForSessions && (
+        <DoctorSessionsModal
+          doctor={selectedDoctorForSessions}
+          isOpen={isSessionsModalOpen}
+          onClose={handleCloseSessionsModal}
+          accessToken={accessToken || ""}
+        />
+      )}
+
       {/* Doctors Grid */}
       <div className="container mx-auto px-6 pb-12">
         {doctors.length === 0 ? (
@@ -1188,6 +1210,25 @@ export default function AdminDashboard() {
                               />
                             </svg>
                             View
+                          </button>
+                          <button
+                            onClick={() => handleViewSessions(doctor)}
+                            className="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                            Sessions
                           </button>
                           <button
                             onClick={() => handleEditClick(doctor)}

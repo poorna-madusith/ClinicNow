@@ -123,5 +123,20 @@ public class AdminDocController : ControllerBase
         }
     }
 
+    //get all sessions for a doctor
+    [HttpGet("getsessionsfordoctor/{doctorId}")]
+    public async Task<IActionResult> GetSessionsForDoctor(string doctorId)
+    {
+        try
+        {
+            var sessions = await _adminDocServices.GetSessionsForDoctor(doctorId);
+            return Ok(sessions);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 
 }

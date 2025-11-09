@@ -141,5 +141,68 @@ public class AdminDocServices
         }
         return new OkObjectResult("Patient deleted successfully");
     }
+
+    //get all sessions for a doctor
+    public async Task<List<SessionDto>> GetSessionsForDoctor(string doctorId)
+    {
+        var doctor = await _userManager.FindByIdAsync(doctorId);
+        if (doctor == null || doctor.Role != RoleEnum.Doctor)
+        {
+            throw new Exception("Invalid doctor ID");
+        }
+
+        var sessions = await _context.Sessions
+            .Where(s => s.DoctorId == doctorId)
+            .Include(s => s.Bookings)
+                .ThenInclude(b => b.Patient)
+            .OrderBy(s => s.Date)
+            .ThenBy(s => s.StartTime)
+            .Select(s => new SessionDto
+            {
+                Id = s.Id,
+                DoctorId = s.DoctorId,
+                DoctorName = s.Doctor.FirstName + " " + s.Doctor.LastName,
+                Doctor = new DoctorDto
+                {
+                    Id = s.Doctor.Id,
+                    FirstName = s.Doctor.FirstName,
+                    LastName = s.Doctor.LastName,
+                    Email = s.Doctor.Email,
+                    ContactNumbers = s.Doctor.ContactNumbers
+                },
+                Date = s.Date,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                SessionFee = s.SessionFee,
+                Description = s.Description,
+                Capacity = s.Capacity,
+                Canceled = s.Canceled,
+                Completed = s.Completed,
+                Ongoing = s.Ongoing,
+                Bookings = s.Bookings.Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    SessionId = b.SessionId,
+                    PatientId = b.PatientId,
+                    PatientName = b.Patient.FirstName + " " + b.Patient.LastName,
+                    Patient = new PatientDto
+                    {
+                        Id = b.Patient.Id,
+                        FirstName = b.Patient.FirstName,
+                        LastName = b.Patient.LastName,
+                        Email = b.Patient.Email,
+                        PhoneNumber = b.Patient.PhoneNumber,
+                        ContactNumbers = b.Patient.ContactNumbers
+                    },
+                    BookedDateandTime = b.BookedDateandTime,
+                    positionInQueue = b.positionInQueue,
+                    Completed = b.Completed,
+                    OnGoing = b.OnGoing
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return sessions;
+    }
     
 }
