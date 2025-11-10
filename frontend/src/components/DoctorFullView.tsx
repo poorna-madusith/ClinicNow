@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/Context/AuthContext";
 import { Doctor } from "@/types/Doctor";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -19,6 +20,8 @@ export default function DoctorFullView({
   doctor,
 }: DoctorFullViewProps) {
   const router = useRouter();
+  const {userRole} = useAuth();
+  const role = userRole;
 
   if (!isModalOpen || !doctor) {
     return null;
@@ -265,14 +268,14 @@ export default function DoctorFullView({
           >
             Close
           </button>
-          <button className="px-6 py-3 text-white font-medium bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl hover:from-teal-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2"
+          {role !== "Admin" && (<button className="px-6 py-3 text-white font-medium bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl hover:from-teal-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2"
             onClick={() => handleBookingClick(doctor.id)}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Book Appointment
-          </button>
+          </button>)}
         </div>
       </div>
       
