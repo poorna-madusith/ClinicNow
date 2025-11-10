@@ -85,10 +85,46 @@ public class UserSessionServices
 
 
     //get ALl doctors
-    public async Task<List<ApplicationUser>> GetAllDoctors()
+    public async Task<List<UserDetailsDto>> GetAllDoctors()
     {
         var doctors = await _userManager.GetUsersInRoleAsync(RoleEnum.Doctor.ToString());
-        return doctors.ToList();
+        
+        var doctorDtos = new List<UserDetailsDto>();
+        
+        foreach (var doctor in doctors)
+        {
+            // Calculate average rating from feedbacks
+            var feedbacks = await _context.Feedbacks
+                .Where(f => f.doctorId == doctor.Id)
+                .ToListAsync();
+            
+            double? averageRating = null;
+            if (feedbacks.Any())
+            {
+                averageRating = Math.Round(feedbacks.Average(f => f.OverallRating), 1);
+            }
+            
+            doctorDtos.Add(new UserDetailsDto
+            {
+                Id = doctor.Id,
+                FirstName = doctor.FirstName,
+                LastName = doctor.LastName,
+                Email = doctor.Email,
+                Role = doctor.Role,
+                Age = doctor.Age,
+                Gender = doctor.Gender,
+                Town = doctor.Town,
+                Address = doctor.Address,
+                ContactNumbers = doctor.ContactNumbers,
+                Specialization = doctor.Specialization,
+                DocDescription = doctor.DocDescription,
+                ProfileImageUrl = doctor.ProfileImageUrl,
+                ContactEmail = doctor.ContactEmail,
+                AverageRating = averageRating
+            });
+        }
+        
+        return doctorDtos;
     }
 
     //get all sessions for a doctor

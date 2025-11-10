@@ -10,6 +10,7 @@ import DoctorFullView from "@/components/DoctorFullView";
 import FeedbackForm from "@/components/FeedbackForm";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import StarRating from "@/components/StarRating";
 
 export default function UserDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -299,6 +300,18 @@ export default function UserDashboard() {
                           <h3 className="text-2xl font-bold text-gray-800 mb-2">
                             Dr. {doctor.firstName} {doctor.lastName}
                           </h3>
+                          
+                          {/* Star Rating */}
+                          {doctor.averageRating !== null && doctor.averageRating !== undefined ? (
+                            <div className="flex justify-center mb-3">
+                              <StarRating rating={doctor.averageRating} size="md" showNumber={true} />
+                            </div>
+                          ) : (
+                            <div className="flex justify-center mb-3">
+                              <span className="text-sm text-gray-500 italic">No ratings yet</span>
+                            </div>
+                          )}
+                          
                           {doctor.specialization && (
                             <div className="inline-block bg-gradient-to-r from-teal-50 to-cyan-50 px-4 py-2 rounded-full border border-teal-200">
                               <p className="text-teal-700 font-semibold text-sm uppercase tracking-wider">

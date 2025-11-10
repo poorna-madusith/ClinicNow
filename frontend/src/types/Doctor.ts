@@ -28,6 +28,7 @@ export interface Doctor {
   profileImageUrl?: string;
   contactEmail?: string;
   contactNumbers?: string[];
+  averageRating?: number;
 }
 
 export interface DoctorRegister {

@@ -20,4 +20,5 @@ public class UserDetailsDto
     public string? DocDescription { get; set; }
     public string? ProfileImageUrl { get; set; }
     public string? ContactEmail { get; set; }
+    public double? AverageRating { get; set; }
 }
