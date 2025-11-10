@@ -10,7 +10,7 @@ export default function Navbar() {
     const { userRole, logout } = useAuth();
 
     const adminLinks = [
-    { label: "Dashboard", href: "/AdminDashboard" },
+    { label: "Manage Doctors", href: "/AdminDashboard" },
     { label: "Manage Users", href: "/UserManagerAdmin" },
     { label: "Reports", href: "/admin/reports" },
   ];

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/Context/AuthContext";
 import { Patient, Gender } from "@/types/Patient";
+import PatientSessionsModal from "@/components/PatientSessionsModal";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -15,6 +16,8 @@ export default function ManageUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
+  const [selectedPatientForSessions, setSelectedPatientForSessions] = useState<Patient | null>(null);
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
 
@@ -88,6 +91,16 @@ export default function ManageUsers() {
         : "Failed to delete patient";
       toast.error(errorMessage);
     }
+  };
+
+  const handleViewSessions = (patient: Patient) => {
+    setSelectedPatientForSessions(patient);
+    setIsSessionsModalOpen(true);
+  };
+
+  const handleCloseSessionsModal = () => {
+    setIsSessionsModalOpen(false);
+    setSelectedPatientForSessions(null);
   };
 
   return (
@@ -257,6 +270,25 @@ export default function ManageUsers() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex justify-center space-x-2">
+                                <button
+                                  onClick={() => handleViewSessions(patient)}
+                                  className="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                  Sessions
+                                </button>
                                 <DeleteButton
                                   onDelete={() => handleDeleteClick(patient.id)}
                                 />
@@ -352,6 +384,16 @@ export default function ManageUsers() {
             </>
           )}
         </div>
+
+        {/* Sessions Modal */}
+        {isSessionsModalOpen && selectedPatientForSessions && (
+          <PatientSessionsModal
+            patient={selectedPatientForSessions}
+            isOpen={isSessionsModalOpen}
+            onClose={handleCloseSessionsModal}
+            accessToken={accessToken || ""}
+          />
+        )}
       </div>
     </ProtectedRoute>
   );

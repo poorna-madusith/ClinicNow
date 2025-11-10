@@ -138,5 +138,20 @@ public class AdminDocController : ControllerBase
         }
     }
 
+    //get all bookings for a patient
+    [HttpGet("getbookingsforpatient/{patientId}")]
+    public async Task<IActionResult> GetBookingsForPatient(string patientId)
+    {
+        try
+        {
+            var bookings = await _adminDocServices.GetBookingsForPatient(patientId);
+            return Ok(bookings);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
 
 }
