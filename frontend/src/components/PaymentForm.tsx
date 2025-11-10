@@ -111,12 +111,12 @@ const CheckoutForm = ({ amount, bookingId, patientId, onSuccess, onError }: Paym
 
   return (
     <form onSubmit={handleSubmit} className="w-full mx-auto">
-      <div className="mb-6">
-        <div className="relative bg-white p-8 rounded-xl border-2 border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="mb-4 sm:mb-6">
+        <div className="relative bg-white p-4 sm:p-6 lg:p-8 rounded-xl border-2 border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
           {/* Card Icon */}
-          <div className="absolute -top-4 left-4 bg-gradient-to-r from-teal-500 to-cyan-500 p-2 rounded-lg shadow-lg">
+          <div className="absolute -top-3 left-3 sm:-top-4 sm:left-4 bg-gradient-to-r from-teal-500 to-cyan-500 p-1.5 sm:p-2 rounded-lg shadow-lg">
             <svg
-              className="w-6 h-6 text-white"
+              className="w-5 h-5 sm:w-6 sm:h-6 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -131,11 +131,11 @@ const CheckoutForm = ({ amount, bookingId, patientId, onSuccess, onError }: Paym
           </div>
           
           {/* Card Details Input */}
-          <div className="mt-2">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+          <div className="mt-1 sm:mt-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
               Enter your card details
             </label>
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 transition-all duration-200 focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500">
+            <div className="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 transition-all duration-200 focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500">
               <CardElement
                 options={{
                   style: {
@@ -208,7 +208,7 @@ const CheckoutForm = ({ amount, bookingId, patientId, onSuccess, onError }: Paym
         <button
           type="submit"
           disabled={!stripe || isProcessing}
-          className={`mt-6 w-full py-4 px-6 rounded-xl font-semibold text-white shadow-lg transition-all duration-200 
+          className={`mt-4 sm:mt-6 w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold text-white shadow-lg transition-all duration-200 text-sm sm:text-base
             ${!stripe || isProcessing
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 transform hover:-translate-y-0.5'

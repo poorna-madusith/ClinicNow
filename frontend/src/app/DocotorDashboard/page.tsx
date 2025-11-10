@@ -808,23 +808,31 @@ export default function DoctorDashboard() {
         }
         
         @media (max-width: 768px) {
+          .doctor-dashboard-container {
+            padding: 20px 12px;
+          }
+          
           .dashboard-header {
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
             align-items: flex-start;
+            margin-bottom: 32px;
+            padding: 0 8px;
           }
           
           .dashboard-title {
-            font-size: 2.2rem;
+            font-size: 1.75rem;
           }
           
           .dashboard-subtitle {
-            font-size: 1rem;
+            font-size: 0.9rem;
           }
           
           .open-modal-btn {
             width: 100%;
             justify-content: center;
+            padding: 12px 24px;
+            font-size: 0.95rem;
           }
         }
         
@@ -1346,12 +1354,59 @@ export default function DoctorDashboard() {
         }
         
         @media (max-width: 768px) {
+          .sessions-container {
+            padding: 0 8px;
+          }
+          
           .sessions-grid {
             grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          
+          .session-card {
+            margin: 0 auto;
+            max-width: 100%;
+          }
+          
+          .session-header {
+            padding: 20px 16px;
+          }
+          
+          .header-content {
+            flex-direction: column;
+            gap: 12px;
+          }
+          
+          .date-section {
+            font-size: 1rem;
+          }
+          
+          .time-section {
+            font-size: 0.875rem;
+          }
+          
+          .canceled-badge,
+          .completed-badge,
+          .scheduled-badge {
+            align-self: flex-start;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+          }
+          
+          .session-body {
+            padding: 16px;
+            gap: 16px;
           }
           
           .session-footer {
+            padding: 0 16px 16px 16px;
             flex-direction: column;
+            gap: 8px;
+          }
+          
+          .action-btn {
+            width: 100%;
+            min-width: auto;
           }
         }
         
@@ -1437,11 +1492,25 @@ export default function DoctorDashboard() {
           .pagination-container {
             flex-wrap: wrap;
             gap: 12px;
+            padding: 16px;
+            margin-top: 24px;
+          }
+          
+          .pagination-btn {
+            padding: 8px 16px;
+            font-size: 0.875rem;
           }
           
           .pagination-numbers {
             flex-wrap: wrap;
             justify-content: center;
+            gap: 6px;
+          }
+          
+          .pagination-number {
+            width: 36px;
+            height: 36px;
+            font-size: 0.875rem;
           }
         }
         
@@ -1536,8 +1605,29 @@ export default function DoctorDashboard() {
             gap: 12px;
           }
           .modal-content {
-            min-width: 300px;
-            padding: 28px 20px 24px 20px;
+            min-width: 280px;
+            max-width: calc(100vw - 32px);
+            padding: 24px 16px 20px 16px;
+            margin: 16px;
+          }
+          .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+          }
+          .session-form {
+            gap: 16px;
+          }
+          .session-form label {
+            font-size: 0.875rem;
+          }
+          .session-form input,
+          .session-form textarea {
+            padding: 8px 12px;
+            font-size: 0.9375rem;
+          }
+          .submit-btn {
+            padding: 10px 0;
+            font-size: 1rem;
           }
         }
         .submit-btn {

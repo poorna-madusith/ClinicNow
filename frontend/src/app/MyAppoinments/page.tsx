@@ -297,8 +297,8 @@ export default function MyAppointmentsPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="border-b-2 border-gray-200 dark:border-gray-700">
-            <div className="flex gap-2">
+          <div className="border-b-2 border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <div className="flex gap-1 sm:gap-2 min-w-max sm:min-w-0">
               {/* Active Sessions Tab */}
               <button
                 onClick={() => {
@@ -309,14 +309,14 @@ export default function MyAppointmentsPage() {
                   setSelectedDate(null);
                   setShowDatePicker(false);
                 }}
-                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 border-b-4 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                   !showCancelledOnly && !showOngoingOnly && !showCompletedOnly
                     ? "border-teal-500 text-teal-600 dark:text-teal-400 bg-teal-50/50 dark:bg-teal-900/20"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
                 }`}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -328,10 +328,11 @@ export default function MyAppointmentsPage() {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                   />
                 </svg>
-                Active Appointments
+                <span className="hidden sm:inline">Active Appointments</span>
+                <span className="sm:hidden">Active</span>
                 {myBookings && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-bold ${
                       !showCancelledOnly && !showOngoingOnly && !showCompletedOnly
                         ? "bg-teal-500 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
@@ -351,14 +352,14 @@ export default function MyAppointmentsPage() {
                   setSelectedDate(null);
                   setShowDatePicker(false);
                 }}
-                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 border-b-4 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                   showOngoingOnly
                     ? "border-teal-500 text-teal-600 dark:text-teal-400 bg-teal-50/50 dark:bg-teal-900/20"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
                 }`}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -370,10 +371,11 @@ export default function MyAppointmentsPage() {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                   />
                 </svg>
-                Ongoing Sessions
+                <span className="hidden sm:inline">Ongoing Sessions</span>
+                <span className="sm:hidden">Ongoing</span>
                 {myBookings && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-bold ${
                       showOngoingOnly
                         ? "bg-teal-500 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
@@ -394,14 +396,14 @@ export default function MyAppointmentsPage() {
                   setSelectedDate(null);
                   setShowDatePicker(false);
                 }}
-                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 border-b-4 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                   showCompletedOnly
                     ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
                 }`}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -413,10 +415,11 @@ export default function MyAppointmentsPage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Completed Sessions
+                <span className="hidden sm:inline">Completed Sessions</span>
+                <span className="sm:hidden">Completed</span>
                 {myBookings && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-bold ${
                       showCompletedOnly
                         ? "bg-emerald-500 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
@@ -437,14 +440,14 @@ export default function MyAppointmentsPage() {
                   setSelectedDate(null);
                   setShowDatePicker(false);
                 }}
-                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-4 flex items-center gap-2 ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 border-b-4 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                   showCancelledOnly
                     ? "border-red-500 text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/20"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
                 }`}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -456,10 +459,11 @@ export default function MyAppointmentsPage() {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-                Cancelled Sessions
+                <span className="hidden sm:inline">Cancelled Sessions</span>
+                <span className="sm:hidden">Cancelled</span>
                 {myBookings && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-bold ${
                       showCancelledOnly
                         ? "bg-red-500 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"

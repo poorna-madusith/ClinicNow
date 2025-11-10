@@ -365,19 +365,19 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50">
         {/* Header Section with Gradient */}
         <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 shadow-xl">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex justify-between items-center">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 drop-shadow-lg">
                 Admin Dashboard
               </h1>
-              <p className="text-teal-100 text-sm">
+              <p className="text-teal-100 text-xs sm:text-sm">
                 Manage your medical professionals
               </p>
             </div>
             <button
               onClick={() => setAddeditmodalOpen(true)}
-              className="group relative px-6 py-3 bg-white text-teal-700 rounded-xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              className="group relative w-full sm:w-auto px-6 py-3 bg-white text-teal-700 rounded-xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
             >
               <svg
                 className="w-5 h-5 transition-transform group-hover:rotate-90"
@@ -399,21 +399,21 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="container mx-auto px-6 -mt-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-teal-500 hover:shadow-xl transition-shadow">
+      <div className="container mx-auto px-4 sm:px-6 -mt-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border-l-4 border-teal-500 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">
+                <p className="text-gray-500 text-xs sm:text-sm font-medium">
                   Total Doctors
                 </p>
-                <h3 className="text-3xl font-bold text-gray-800 mt-1">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1">
                   {doctors.length}
                 </h3>
               </div>
-              <div className="bg-teal-100 p-4 rounded-xl">
+              <div className="bg-teal-100 p-3 sm:p-4 rounded-xl">
                 <svg
-                  className="w-8 h-8 text-teal-600"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-teal-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -429,19 +429,19 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-cyan-500 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border-l-4 border-cyan-500 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">
+                <p className="text-gray-500 text-xs sm:text-sm font-medium">
                   Specializations
                 </p>
-                <h3 className="text-3xl font-bold text-gray-800 mt-1">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1">
                   {new Set(doctors.map((d) => d.specialization)).size}
                 </h3>
               </div>
-              <div className="bg-cyan-100 p-4 rounded-xl">
+              <div className="bg-cyan-100 p-3 sm:p-4 rounded-xl">
                 <svg
-                  className="w-8 h-8 text-cyan-600"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -457,17 +457,17 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-teal-600 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border-l-4 border-teal-600 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Active</p>
-                <h3 className="text-3xl font-bold text-gray-800 mt-1">
+                <p className="text-gray-500 text-xs sm:text-sm font-medium">Active</p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1">
                   {doctors.length}
                 </h3>
               </div>
-              <div className="bg-teal-100 p-4 rounded-xl">
+              <div className="bg-teal-100 p-3 sm:p-4 rounded-xl">
                 <svg
-                  className="w-8 h-8 text-teal-600"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-teal-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -487,10 +487,10 @@ export default function AdminDashboard() {
 
       {/* Add Doctor Modal */}
       {addeditmodalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in zoom-in duration-300">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto h-full w-full flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden animate-in zoom-in duration-300 mx-2">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-6">
+            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 sm:px-8 py-4 sm:py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">

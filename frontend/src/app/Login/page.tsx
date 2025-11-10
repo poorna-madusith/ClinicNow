@@ -1,7 +1,6 @@
 "use client";
 import { useAuth } from "@/Context/AuthContext";
 import axios from "axios";
-import { count } from "console";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
@@ -132,10 +131,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
             Welcome Back
           </h1>
           <p className="text-gray-600 text-sm">Sign in to continue to your account</p>

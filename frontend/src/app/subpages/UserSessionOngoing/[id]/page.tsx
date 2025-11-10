@@ -139,10 +139,10 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
             <div className="ongoing-session-container-teal-glass">
                 <button
                     onClick={() => router.push("/MyAppoinments")}
-                    className="back-button-teal-glass mb-6"
+                    className="back-button-teal-glass mb-4 sm:mb-6"
                 >
-                <ArrowLeft size={20} />
-                Back to Appointments
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base">Back to Appointments</span>
             </button>
             <h2 className="teal-title-glass">
                 Session #{session.id}
@@ -151,12 +151,14 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                 <div className="session-meta-chips">
                     <div className="chip chip-primary">
                         <span className="chip-dot"></span>
-                        <span>Total Bookings</span>
+                        <span className="hidden xs:inline">Total Bookings</span>
+                        <span className="xs:hidden">Total</span>
                         <strong>{totalBookings}</strong>
                     </div>
                     <div className="chip chip-success">
                         <span className="chip-dot"></span>
-                        <span>Completed</span>
+                        <span className="hidden xs:inline">Completed</span>
+                        <span className="xs:hidden">Done</span>
                         <strong>{completedBookings}</strong>
                     </div>
                     <div className="chip chip-warning">
@@ -265,12 +267,27 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     background: linear-gradient(135deg, rgba(224,242,241,1) 0%, rgba(178,223,219,0.85) 100%);
                     border-color: rgba(0,150,136,0.5);
                 }
+                @media (max-width: 640px) {
+                    .back-button-teal-glass {
+                        padding: 10px 16px;
+                        gap: 6px;
+                        font-size: 0.875rem;
+                        border-radius: 10px;
+                    }
+                }
                 .session-grid-4x4 {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
                     grid-auto-rows: minmax(60px, auto);
                     gap: 20px;
                     margin-bottom: 40px;
+                }
+                @media (max-width: 640px) {
+                    .session-grid-4x4 {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                        margin-bottom: 24px;
+                    }
                 }
                 .session-grid-item {
                     background: linear-gradient(135deg, rgba(224,242,241,0.9) 0%, rgba(178,223,219,0.7) 100%);
@@ -286,6 +303,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     border: 2px solid rgba(0,150,136,0.2);
                     position: relative;
                     overflow: hidden;
+                }
+                @media (max-width: 640px) {
+                    .session-grid-item {
+                        padding: 16px 14px;
+                        border-radius: 12px;
+                    }
                 }
                 .session-grid-item::before {
                     content: '';
@@ -320,12 +343,24 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     text-transform: uppercase;
                     opacity: 0.9;
                 }
+                @media (max-width: 640px) {
+                    .session-label-glass {
+                        font-size: 0.75rem;
+                        letter-spacing: 0.5px;
+                        margin-bottom: 6px;
+                    }
+                }
                 .session-value-glass {
                     color: #004d40;
                     font-size: 1.25rem;
                     font-weight: 700;
                     word-break: break-word;
                     line-height: 1.4;
+                }
+                @media (max-width: 640px) {
+                    .session-value-glass {
+                        font-size: 1rem;
+                    }
                 }
                 .ongoing-session-container-teal-glass {
                     max-width: 1280px;
@@ -339,6 +374,13 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     border: 2px solid rgba(0,150,136,0.25);
                     position: relative;
                     overflow: hidden;
+                }
+                @media (max-width: 640px) {
+                    .ongoing-session-container-teal-glass {
+                        margin: 16px;
+                        padding: 24px 16px;
+                        border-radius: 20px;
+                    }
                 }
                 .ongoing-session-container-teal-glass::after {
                     content: "";
@@ -378,6 +420,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
                 }
+                @media (max-width: 640px) {
+                    .teal-title-glass {
+                        font-size: 1.75rem;
+                        margin-bottom: 16px;
+                    }
+                }
                 .session-meta-chips {
                     display: flex;
                     justify-content: center;
@@ -415,6 +463,17 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     color: #00695c; 
                     font-weight: 800;
                     font-size: 1.1rem;
+                }
+                @media (max-width: 640px) {
+                    .chip {
+                        padding: 8px 14px;
+                        gap: 6px;
+                        font-size: 0.8rem;
+                        border-radius: 16px;
+                    }
+                    .chip strong {
+                        font-size: 0.95rem;
+                    }
                 }
                 .chip-primary { 
                     background: linear-gradient(135deg, rgba(178,223,219,0.6) 0%, rgba(224,247,250,0.8) 100%);
@@ -469,6 +528,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     z-index: 1;
                     backdrop-filter: blur(12px);
                 }
+                @media (max-width: 640px) {
+                    .session-card-teal-glass {
+                        padding: 20px 16px;
+                        border-radius: 16px;
+                    }
+                }
                 .session-bookings-section-glass {
                     margin-top: 32px;
                 }
@@ -480,6 +545,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     text-shadow: 0 2px 8px rgba(0,150,136,0.15);
                     letter-spacing: -0.3px;
                 }
+                @media (max-width: 640px) {
+                    .teal-subtitle-glass {
+                        font-size: 1.25rem;
+                        margin-bottom: 16px;
+                    }
+                }
                 .bookings-grid-5 {
                     list-style: none;
                     padding: 0;
@@ -487,6 +558,17 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     display: grid;
                     grid-template-columns: repeat(5, 1fr);
                     gap: 24px;
+                }
+                @media (max-width: 640px) {
+                    .bookings-grid-5 {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 12px;
+                    }
+                }
+                @media (max-width: 400px) {
+                    .bookings-grid-5 {
+                        grid-template-columns: 1fr;
+                    }
                 }
                 .booking-card-square {
                     position: relative;
@@ -504,6 +586,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     overflow: hidden;
                     backdrop-filter: blur(10px);
+                }
+                @media (max-width: 640px) {
+                    .booking-card-square {
+                        padding: 16px 12px;
+                        border-radius: 14px;
+                    }
                 }
                 .booking-card-square::before {
                     content: '';
@@ -567,6 +655,16 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                                 inset 0 1px 0 rgba(255,255,255,0.2);
                     transition: transform 0.2s ease;
                 }
+                @media (max-width: 640px) {
+                    .card-queue-badge {
+                        width: 40px;
+                        height: 40px;
+                        top: 8px;
+                        left: 8px;
+                        font-size: 1.1rem;
+                        border-radius: 12px;
+                    }
+                }
                 .booking-card-square:hover .card-queue-badge {
                     transform: scale(1.1) rotate(-5deg);
                 }
@@ -590,6 +688,11 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     text-overflow: ellipsis;
                     letter-spacing: 0.2px;
                 }
+                @media (max-width: 640px) {
+                    .card-name {
+                        font-size: 0.95rem;
+                    }
+                }
                 .card-email {
                     color: #00897b;
                     font-size: 0.88rem;
@@ -599,6 +702,11 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     overflow: hidden;
                     text-overflow: ellipsis;
                     font-weight: 500;
+                }
+                @media (max-width: 640px) {
+                    .card-email {
+                        font-size: 0.75rem;
+                    }
                 }
                 .card-phone {
                     color: #26a69a;
@@ -613,6 +721,12 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     padding: 4px 10px;
                     border-radius: 12px;
                 }
+                @media (max-width: 640px) {
+                    .card-phone {
+                        font-size: 0.7rem;
+                        padding: 3px 8px;
+                    }
+                }
                 .status-pill {
                     position: absolute;
                     top: 12px;
@@ -626,6 +740,16 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
                     backdrop-filter: blur(8px);
                     transition: all 0.2s ease;
+                }
+                @media (max-width: 640px) {
+                    .status-pill {
+                        top: 8px;
+                        right: 8px;
+                        padding: 4px 8px;
+                        font-size: 0.65rem;
+                        border-radius: 12px;
+                        letter-spacing: 0.3px;
+                    }
                 }
                 .booking-card-square:hover .status-pill {
                     transform: translateY(-2px);
@@ -661,10 +785,6 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                         margin: 24px auto;
                     }
                 }
-                @media (max-width: 480px) {
-                    .bookings-grid-5 { grid-template-columns: 1fr; }
-                    .session-meta-chips { flex-direction: column; }
-                }
                 .no-bookings-teal-glass {
                     color: #00695c;
                     text-align: center;
@@ -674,6 +794,13 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                     background: linear-gradient(135deg, rgba(178,223,219,0.3) 0%, rgba(224,242,241,0.4) 100%);
                     border-radius: 16px;
                     border: 2px dashed rgba(0,150,136,0.3);
+                }
+                @media (max-width: 640px) {
+                    .no-bookings-teal-glass {
+                        font-size: 0.95rem;
+                        padding: 24px 16px;
+                        border-radius: 12px;
+                    }
                 }
                 .loading-spinner {
                     color: #00695c;

@@ -164,10 +164,10 @@ export default function UserSignupPage() {
 
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 py-8">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 py-8 px-4 sm:px-6 lg:px-8">
+            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-4xl">
+                <div className="text-center mb-6 sm:mb-8">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
                         Create Your Account
                     </h1>
                     <p className="text-gray-600 text-sm">Join us today and start your journey</p>
