@@ -148,8 +148,8 @@ export default function PatientSessionsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden animate-in zoom-in duration-300">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto h-full w-full flex items-start justify-center p-4 animate-in fade-in duration-300">
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-6xl my-4 overflow-hidden animate-in zoom-in duration-300">
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-6">
           <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ export default function PatientSessionsModal({
         </div>
 
         {/* Bookings List */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-300px)]">
+        <div className="p-6 overflow-y-auto max-h-[60vh]">
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-teal-600"></div>
