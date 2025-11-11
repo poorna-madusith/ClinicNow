@@ -58,4 +58,54 @@ public class ReportServices
             TotalPatients = patients.Count
         };
     }
+
+    public async Task<WeeklyBookingStatsDto> GetWeeklyBookingStatistics()
+    {
+        // Get all bookings with their related feedback
+        var bookings = await _context.Bookings
+            .Include(b => b.Session)
+            .ToListAsync();
+
+        var feedbacks = await _context.Feedbacks.ToListAsync();
+
+        // Group bookings by day of week
+        var dailyStats = new List<DayBookingStatItem>();
+        var daysOfWeek = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+
+        foreach (var dayName in daysOfWeek)
+        {
+            var dayBookings = bookings.Where(b => b.BookedDateandTime.DayOfWeek.ToString() == dayName).ToList();
+            var bookingCount = dayBookings.Count;
+
+            // Calculate average rating for bookings on this day
+            double averageRating = 0;
+            if (bookingCount > 0)
+            {
+                var patientIds = dayBookings.Select(b => b.PatientId).Distinct().ToList();
+                var dayFeedbacks = feedbacks.Where(f => patientIds.Contains(f.patientId)).ToList();
+                
+                if (dayFeedbacks.Any())
+                {
+                    averageRating = dayFeedbacks.Average(f => f.OverallRating);
+                }
+            }
+
+            dailyStats.Add(new DayBookingStatItem
+            {
+                DayOfWeek = dayName,
+                BookingCount = bookingCount,
+                AverageRating = Math.Round(averageRating, 2)
+            });
+        }
+
+        var totalBookings = bookings.Count;
+        var overallAverage = feedbacks.Any() ? Math.Round(feedbacks.Average(f => f.OverallRating), 2) : 0;
+
+        return new WeeklyBookingStatsDto
+        {
+            DailyStats = dailyStats,
+            TotalBookings = totalBookings,
+            OverallAverageRating = overallAverage
+        };
+    }
 }

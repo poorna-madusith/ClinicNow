@@ -45,4 +45,19 @@ public class ReportController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpGet("weekly-booking-statistics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetWeeklyBookingStatistics()
+    {
+        try
+        {
+            var stats = await _reportServices.GetWeeklyBookingStatistics();
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }

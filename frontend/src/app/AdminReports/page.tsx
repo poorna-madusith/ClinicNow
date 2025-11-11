@@ -23,9 +23,22 @@ interface TownStats {
   totalPatients: number;
 }
 
+interface DayBookingStat {
+  dayOfWeek: string;
+  bookingCount: number;
+  averageRating: number;
+}
+
+interface WeeklyBookingStats {
+  dailyStats: DayBookingStat[];
+  totalBookings: number;
+  overallAverageRating: number;
+}
+
 export default function AdminReports() {
   const [genderStats, setGenderStats] = useState<GenderStats | null>(null);
   const [townStats, setTownStats] = useState<TownStats | null>(null);
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyBookingStats | null>(null);
   const [loading, setLoading] = useState(true);
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
@@ -62,13 +75,29 @@ export default function AdminReports() {
     }
   }, [accessToken, API]);
 
+  const fetchWeeklyBookingStats = useCallback(async () => {
+    if (!accessToken) return;
+    
+    try {
+      const res = await axios.get(`${API}/report/weekly-booking-statistics`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setWeeklyStats(res.data);
+    } catch (err) {
+      console.error("Failed to fetch weekly booking statistics", err);
+      toast.error("Failed to fetch weekly booking statistics");
+    }
+  }, [accessToken, API]);
+
   useEffect(() => {
     const fetchData = async () => {
-      await Promise.all([fetchGenderStats(), fetchTownStats()]);
+      await Promise.all([fetchGenderStats(), fetchTownStats(), fetchWeeklyBookingStats()]);
       setLoading(false);
     };
     fetchData();
-  }, [fetchGenderStats, fetchTownStats]);
+  }, [fetchGenderStats, fetchTownStats, fetchWeeklyBookingStats]);
 
   // Calculate percentages
   const getMalePercentage = () => {
@@ -295,11 +324,108 @@ export default function AdminReports() {
                 </div>
               </div>
               </div>
+
+              {/* Weekly Booking Statistics Bar Chart */}
+              <div className="col-span-full mt-8">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full"></div>
+                    <h2 className="text-2xl font-bold text-gray-800">
+                      Weekly Booking Trends
+                    </h2>
+                  </div>
+                  <WeeklyBookingBarChart weeklyStats={weeklyStats} />
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+// Weekly Booking Bar Chart Component
+function WeeklyBookingBarChart({ weeklyStats }: { weeklyStats: WeeklyBookingStats | null }) {
+  if (!weeklyStats || weeklyStats.dailyStats.length === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center text-gray-400">
+        No booking data available
+      </div>
+    );
+  }
+
+  const totalBookings = weeklyStats.totalBookings || 1; // Avoid division by zero
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-5 border-l-4 border-amber-500 max-w-md">
+          <p className="text-sm font-semibold text-amber-600 uppercase tracking-wide">Total Bookings</p>
+          <p className="text-3xl font-bold text-amber-900 mt-1">{weeklyStats.totalBookings}</p>
+        </div>
+      </div>
+
+      {/* Bar Chart */}
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+        <h3 className="text-lg font-bold text-gray-800 mb-6">Booking Distribution by Day</h3>
+        <div className="space-y-5">
+          {weeklyStats.dailyStats.map((day) => {
+            const bookingPercentage = ((day.bookingCount / totalBookings) * 100).toFixed(1);
+            const barWidth = (day.bookingCount / totalBookings) * 100;
+            
+            return (
+              <div key={day.dayOfWeek} className="space-y-2">
+                {/* Day Label and Stats */}
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-bold text-gray-700 w-28">{day.dayOfWeek}</span>
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="text-gray-600">
+                      <span className="font-semibold text-blue-600">{day.bookingCount}</span> bookings
+                    </span>
+                    <span className="text-gray-600">
+                      <span className="font-semibold text-amber-600">{bookingPercentage}%</span> of total
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bar */}
+                <div className="flex-1">
+                  <div className="relative h-10 bg-gray-100 rounded-xl overflow-hidden group shadow-inner">
+                    <div
+                      className="absolute h-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-xl transition-all duration-500 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 group-hover:shadow-lg"
+                      style={{ width: `${barWidth}%` }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-bold text-white drop-shadow-md">
+                          {bookingPercentage}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legend */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Legend</h3>
+          <div className="flex gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-4 bg-gradient-to-r from-blue-400 to-blue-600 rounded"></div>
+              <span className="text-sm text-gray-600">Booking Count</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-4 bg-gradient-to-r from-amber-400 to-orange-500 rounded"></div>
+              <span className="text-sm text-gray-600">Average Rating</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
