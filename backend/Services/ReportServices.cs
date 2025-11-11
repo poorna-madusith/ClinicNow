@@ -108,4 +108,49 @@ public class ReportServices
             OverallAverageRating = overallAverage
         };
     }
+
+    public async Task<DoctorGenderStatsDto> GetDoctorGenderStatistics()
+    {
+        // Get all doctors (users with Doctor role)
+        var doctors = await _context.Users
+            .Where(u => u.Role == RoleEnum.Doctor)
+            .ToListAsync();
+
+        var maleCount = doctors.Count(d => d.Gender == GenderEnum.Male);
+        var femaleCount = doctors.Count(d => d.Gender == GenderEnum.Female);
+        var otherCount = doctors.Count(d => d.Gender == GenderEnum.Other || d.Gender == null);
+
+        return new DoctorGenderStatsDto
+        {
+            MaleCount = maleCount,
+            FemaleCount = femaleCount,
+            OtherCount = otherCount,
+            TotalDoctors = doctors.Count
+        };
+    }
+
+    public async Task<DoctorSpecializationStatsDto> GetDoctorSpecializationStatistics()
+    {
+        // Get all doctors (users with Doctor role)
+        var doctors = await _context.Users
+            .Where(u => u.Role == RoleEnum.Doctor)
+            .ToListAsync();
+
+        // Group by specialization and count
+        var specializationGroups = doctors
+            .GroupBy(d => string.IsNullOrWhiteSpace(d.Specialization) ? "Not Specified" : d.Specialization)
+            .Select(g => new SpecializationStatItem
+            {
+                Specialization = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+
+        return new DoctorSpecializationStatsDto
+        {
+            SpecializationStats = specializationGroups,
+            TotalDoctors = doctors.Count
+        };
+    }
 }

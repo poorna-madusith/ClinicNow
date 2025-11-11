@@ -60,4 +60,34 @@ public class ReportController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpGet("doctor-gender-statistics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetDoctorGenderStatistics()
+    {
+        try
+        {
+            var stats = await _reportServices.GetDoctorGenderStatistics();
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("doctor-specialization-statistics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetDoctorSpecializationStatistics()
+    {
+        try
+        {
+            var stats = await _reportServices.GetDoctorSpecializationStatistics();
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }
