@@ -14,7 +14,7 @@ export default function Navbar() {
     const adminLinks = [
     { label: "Manage Doctors", href: "/AdminDashboard" },
     { label: "Manage Users", href: "/UserManagerAdmin" },
-    { label: "Reports", href: "/admin/reports" },
+    { label: "Reports", href: "/AdminReports" },
   ];
 
   const doctorLinks = [
