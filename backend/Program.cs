@@ -129,6 +129,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseHttpsRedirection();
 app.MapHub<SessionHub>("/hubs/session");
+app.MapHub<ChatHub>("/hubs/chat");
 
 
 app.Run();

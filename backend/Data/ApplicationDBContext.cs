@@ -21,6 +21,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Feedback> Feedbacks { get; set; }
 
+
+    public DbSet<Message> Messages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
