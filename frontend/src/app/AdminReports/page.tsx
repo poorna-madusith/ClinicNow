@@ -52,12 +52,50 @@ interface DoctorSpecializationStats {
   totalDoctors: number;
 }
 
+interface DoctorRatingItem {
+  doctorId: string;
+  doctorName: string;
+  specialization: string;
+  averageRating: number;
+  totalFeedbacks: number;
+}
+
+interface DoctorFeedbackStats {
+  topRatedDoctors: DoctorRatingItem[];
+  totalFeedbacks: number;
+}
+
+interface RatingCategoryStats {
+  averageCommunicationRating: number;
+  averageProfessionalismRating: number;
+  averagePunctualityRating: number;
+  averageTreatmentRating: number;
+  averageOverallRating: number;
+  totalFeedbacks: number;
+}
+
+interface DoctorBookingRatingItem {
+  doctorId: string;
+  doctorName: string;
+  specialization: string;
+  totalBookings: number;
+  averageRating: number;
+}
+
+interface DoctorBookingRatingStats {
+  doctorStats: DoctorBookingRatingItem[];
+  totalBookings: number;
+}
+
 export default function AdminReports() {
   const [genderStats, setGenderStats] = useState<GenderStats | null>(null);
   const [townStats, setTownStats] = useState<TownStats | null>(null);
   const [weeklyStats, setWeeklyStats] = useState<WeeklyBookingStats | null>(null);
   const [doctorGenderStats, setDoctorGenderStats] = useState<DoctorGenderStats | null>(null);
   const [doctorSpecializationStats, setDoctorSpecializationStats] = useState<DoctorSpecializationStats | null>(null);
+  const [doctorFeedbackStats, setDoctorFeedbackStats] = useState<DoctorFeedbackStats | null>(null);
+  const [ratingCategoryStats, setRatingCategoryStats] = useState<RatingCategoryStats | null>(null);
+  const [doctorBookingRatingStats, setDoctorBookingRatingStats] = useState<DoctorBookingRatingStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"patient" | "doctor">("patient");
   const API = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -143,6 +181,54 @@ export default function AdminReports() {
     }
   }, [accessToken, API]);
 
+  const fetchDoctorFeedbackStats = useCallback(async () => {
+    if (!accessToken) return;
+    
+    try {
+      const res = await axios.get(`${API}/report/doctor-feedback-statistics`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setDoctorFeedbackStats(res.data);
+    } catch (err) {
+      console.error("Failed to fetch doctor feedback statistics", err);
+      toast.error("Failed to fetch doctor feedback statistics");
+    }
+  }, [accessToken, API]);
+
+  const fetchRatingCategoryStats = useCallback(async () => {
+    if (!accessToken) return;
+    
+    try {
+      const res = await axios.get(`${API}/report/rating-category-statistics`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setRatingCategoryStats(res.data);
+    } catch (err) {
+      console.error("Failed to fetch rating category statistics", err);
+      toast.error("Failed to fetch rating category statistics");
+    }
+  }, [accessToken, API]);
+
+  const fetchDoctorBookingRatingStats = useCallback(async () => {
+    if (!accessToken) return;
+    
+    try {
+      const res = await axios.get(`${API}/report/doctor-booking-rating-statistics`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setDoctorBookingRatingStats(res.data);
+    } catch (err) {
+      console.error("Failed to fetch doctor booking rating statistics", err);
+      toast.error("Failed to fetch doctor booking rating statistics");
+    }
+  }, [accessToken, API]);
+
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([
@@ -150,12 +236,15 @@ export default function AdminReports() {
         fetchTownStats(), 
         fetchWeeklyBookingStats(),
         fetchDoctorGenderStats(),
-        fetchDoctorSpecializationStats()
+        fetchDoctorSpecializationStats(),
+        fetchDoctorFeedbackStats(),
+        fetchRatingCategoryStats(),
+        fetchDoctorBookingRatingStats()
       ]);
       setLoading(false);
     };
     fetchData();
-  }, [fetchGenderStats, fetchTownStats, fetchWeeklyBookingStats, fetchDoctorGenderStats, fetchDoctorSpecializationStats]);
+  }, [fetchGenderStats, fetchTownStats, fetchWeeklyBookingStats, fetchDoctorGenderStats, fetchDoctorSpecializationStats, fetchDoctorFeedbackStats, fetchRatingCategoryStats, fetchDoctorBookingRatingStats]);
 
   // Calculate percentages
   const getMalePercentage = () => {
@@ -200,18 +289,18 @@ export default function AdminReports() {
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+          background: linear-gradient(to bottom, #14b8a6, #06b6d4);
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, #2563eb, #7c3aed);
+          background: linear-gradient(to bottom, #0d9488, #0891b2);
         }
       `}</style>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-teal-50 to-cyan-50 p-8">
         <div className="w-full px-4">
           {/* Header Section */}
           <div className="mb-10">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-2">
               Admin Reports
             </h1>
             <p className="text-gray-600 text-lg">Comprehensive analytics and insights</p>
@@ -224,7 +313,7 @@ export default function AdminReports() {
                 onClick={() => setActiveTab("patient")}
                 className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   activeTab === "patient"
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-105"
+                    ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg scale-105"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -234,7 +323,7 @@ export default function AdminReports() {
                 onClick={() => setActiveTab("doctor")}
                 className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   activeTab === "doctor"
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-105"
+                    ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg scale-105"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -245,7 +334,7 @@ export default function AdminReports() {
 
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-teal-500 border-t-transparent"></div>
             </div>
           ) : (
             <>
@@ -255,7 +344,7 @@ export default function AdminReports() {
               {/* Gender Distribution Card */}
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                  <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-gray-800">
                     Patient Gender Distribution
                   </h2>
@@ -351,7 +440,7 @@ export default function AdminReports() {
               {/* Town Distribution Card */}
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-cyan-500 rounded-full"></div>
+                  <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-emerald-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-gray-800">
                     Patient Distribution by Town
                   </h2>
@@ -432,7 +521,7 @@ export default function AdminReports() {
               <div className="col-span-full mt-8">
                 <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full"></div>
+                    <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-full"></div>
                     <h2 className="text-2xl font-bold text-gray-800">
                       Weekly Booking Trends
                     </h2>
@@ -449,7 +538,7 @@ export default function AdminReports() {
                   {/* Doctor Gender Distribution Card */}
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                      <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-full"></div>
                       <h2 className="text-2xl font-bold text-gray-800">
                         Doctor Gender Distribution
                       </h2>
@@ -550,7 +639,7 @@ export default function AdminReports() {
                   {/* Doctor Specialization Distribution Card */}
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-cyan-500 rounded-full"></div>
+                      <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-emerald-500 rounded-full"></div>
                       <h2 className="text-2xl font-bold text-gray-800">
                         Doctor Distribution by Specialization
                       </h2>
@@ -626,6 +715,45 @@ export default function AdminReports() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Doctor Feedback Statistics */}
+                  <div className="col-span-full mt-8">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-full"></div>
+                        <h2 className="text-2xl font-bold text-gray-800">
+                          Top Rated Doctors
+                        </h2>
+                      </div>
+                      <TopRatedDoctorsChart feedbackStats={doctorFeedbackStats} />
+                    </div>
+                  </div>
+
+                  {/* Rating Categories Chart */}
+                  <div className="col-span-full mt-8">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-emerald-500 rounded-full"></div>
+                        <h2 className="text-2xl font-bold text-gray-800">
+                          Average Ratings by Category
+                        </h2>
+                      </div>
+                      <RatingCategoriesChart categoryStats={ratingCategoryStats} />
+                    </div>
+                  </div>
+
+                  {/* Doctor Bookings & Ratings Chart */}
+                  <div className="col-span-full mt-8">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-2 h-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-full"></div>
+                        <h2 className="text-2xl font-bold text-gray-800">
+                          Doctor Bookings
+                        </h2>
+                      </div>
+                      <DoctorBookingRatingChart bookingRatingStats={doctorBookingRatingStats} />
+                    </div>
+                  </div>
                 </div>
               )}
             </>
@@ -652,9 +780,9 @@ function WeeklyBookingBarChart({ weeklyStats }: { weeklyStats: WeeklyBookingStat
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="mb-6">
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-5 border-l-4 border-amber-500 max-w-md">
-          <p className="text-sm font-semibold text-amber-600 uppercase tracking-wide">Total Bookings</p>
-          <p className="text-3xl font-bold text-amber-900 mt-1">{weeklyStats.totalBookings}</p>
+        <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-5 border-l-4 border-teal-500 max-w-md">
+          <p className="text-sm font-semibold text-teal-600 uppercase tracking-wide">Total Bookings</p>
+          <p className="text-3xl font-bold text-teal-900 mt-1">{weeklyStats.totalBookings}</p>
         </div>
       </div>
 
@@ -673,10 +801,10 @@ function WeeklyBookingBarChart({ weeklyStats }: { weeklyStats: WeeklyBookingStat
                   <span className="text-sm font-bold text-gray-700 w-28">{day.dayOfWeek}</span>
                   <div className="flex items-center gap-4 text-xs">
                     <span className="text-gray-600">
-                      <span className="font-semibold text-blue-600">{day.bookingCount}</span> bookings
+                      <span className="font-semibold text-teal-600">{day.bookingCount}</span> bookings
                     </span>
                     <span className="text-gray-600">
-                      <span className="font-semibold text-amber-600">{bookingPercentage}%</span> of total
+                      <span className="font-semibold text-cyan-600">{bookingPercentage}%</span> of total
                     </span>
                   </div>
                 </div>
@@ -685,7 +813,7 @@ function WeeklyBookingBarChart({ weeklyStats }: { weeklyStats: WeeklyBookingStat
                 <div className="flex-1">
                   <div className="relative h-10 bg-gray-100 rounded-xl overflow-hidden group shadow-inner">
                     <div
-                      className="absolute h-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-xl transition-all duration-500 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 group-hover:shadow-lg"
+                      className="absolute h-full bg-gradient-to-r from-teal-400 via-teal-500 to-cyan-500 rounded-xl transition-all duration-500 hover:from-teal-500 hover:via-teal-600 hover:to-cyan-600 group-hover:shadow-lg"
                       style={{ width: `${barWidth}%` }}
                     >
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -817,7 +945,7 @@ function GenderPieChart({ genderStats, getMalePercentage, getFemalePercentage, g
       </svg>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center bg-white rounded-full w-28 h-28 flex flex-col items-center justify-center shadow-xl border-4 border-gray-50">
-          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <p className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
             {genderStats.totalPatients}
           </p>
           <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">Total</p>
@@ -926,7 +1054,7 @@ function TownPieChart({ townStats }: { townStats: TownStats | null }) {
       </svg>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center bg-white rounded-full w-28 h-28 flex flex-col items-center justify-center shadow-xl border-4 border-gray-50">
-          <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-cyan-600 bg-clip-text text-transparent">
+          <p className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
             {townStats.totalPatients}
           </p>
           <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Total</p>
@@ -1051,7 +1179,7 @@ function DoctorGenderPieChart({ doctorGenderStats, getDoctorMalePercentage, getD
       </svg>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center bg-white rounded-full w-28 h-28 flex flex-col items-center justify-center shadow-xl border-4 border-gray-50">
-          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <p className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
             {doctorGenderStats.totalDoctors}
           </p>
           <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">Total</p>
@@ -1143,13 +1271,279 @@ function SpecializationPieChart({ specializationStats }: { specializationStats: 
       </svg>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center bg-white rounded-full w-28 h-28 flex flex-col items-center justify-center shadow-xl border-4 border-gray-50">
-          <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-cyan-600 bg-clip-text text-transparent">
+          <p className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
             {specializationStats.totalDoctors}
           </p>
           <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Total</p>
           <p className="text-xs text-gray-400 font-medium">
             {specializationStats.specializationStats.length} Specs
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Top Rated Doctors Chart Component
+function TopRatedDoctorsChart({ feedbackStats }: { feedbackStats: DoctorFeedbackStats | null }) {
+  if (!feedbackStats || feedbackStats.topRatedDoctors.length === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center text-gray-400">
+        No feedback data available
+      </div>
+    );
+  }
+
+  const maxRating = 5;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-5 border-l-4 border-teal-500 max-w-md">
+          <p className="text-sm font-semibold text-teal-600 uppercase tracking-wide">Total Feedbacks</p>
+          <p className="text-3xl font-bold text-teal-900 mt-1">{feedbackStats.totalFeedbacks}</p>
+        </div>
+      </div>
+
+      {/* Bar Chart */}
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+        <h3 className="text-lg font-bold text-gray-800 mb-6">Doctor Rankings by Average Rating</h3>
+        <div className="space-y-5">
+          {feedbackStats.topRatedDoctors.map((doctor, index) => {
+            const percentage = (doctor.averageRating / maxRating) * 100;
+            
+            return (
+              <div key={doctor.doctorId} className="space-y-2">
+                {/* Doctor Info and Stats */}
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-gray-800">{doctor.doctorName}</span>
+                      <p className="text-xs text-gray-500">{doctor.specialization}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="text-gray-600">
+                      <span className="font-semibold text-teal-600">{doctor.averageRating.toFixed(1)}</span> ⭐
+                    </span>
+                    <span className="text-gray-600">
+                      <span className="font-semibold text-cyan-600">{doctor.totalFeedbacks}</span> reviews
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bar */}
+                <div className="flex-1">
+                  <div className="relative h-10 bg-gray-100 rounded-xl overflow-hidden group shadow-inner">
+                    <div
+                      className="absolute h-full bg-gradient-to-r from-teal-400 via-teal-500 to-cyan-500 rounded-xl transition-all duration-500 hover:from-teal-500 hover:via-teal-600 hover:to-cyan-600 group-hover:shadow-lg"
+                      style={{ width: `${percentage}%` }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-bold text-white drop-shadow-md">
+                          {doctor.averageRating.toFixed(1)} / 5.0
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Rating Categories Chart Component
+function RatingCategoriesChart({ categoryStats }: { categoryStats: RatingCategoryStats | null }) {
+  if (!categoryStats || categoryStats.totalFeedbacks === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center text-gray-400">
+        No rating data available
+      </div>
+    );
+  }
+
+  const categories = [
+    { 
+      name: "Communication", 
+      rating: categoryStats.averageCommunicationRating,
+      color: "from-teal-400 to-teal-600",
+      bgColor: "from-teal-50 to-teal-100/50",
+      borderColor: "border-teal-500",
+      textColor: "text-teal-600"
+    },
+    { 
+      name: "Professionalism", 
+      rating: categoryStats.averageProfessionalismRating,
+      color: "from-cyan-400 to-cyan-600",
+      bgColor: "from-cyan-50 to-cyan-100/50",
+      borderColor: "border-cyan-500",
+      textColor: "text-cyan-600"
+    },
+    { 
+      name: "Punctuality", 
+      rating: categoryStats.averagePunctualityRating,
+      color: "from-emerald-400 to-emerald-600",
+      bgColor: "from-emerald-50 to-emerald-100/50",
+      borderColor: "border-emerald-500",
+      textColor: "text-emerald-600"
+    },
+    { 
+      name: "Treatment", 
+      rating: categoryStats.averageTreatmentRating,
+      color: "from-teal-500 to-cyan-600",
+      bgColor: "from-teal-50 to-cyan-100/50",
+      borderColor: "border-teal-500",
+      textColor: "text-teal-700"
+    },
+    { 
+      name: "Overall", 
+      rating: categoryStats.averageOverallRating,
+      color: "from-cyan-500 to-teal-600",
+      bgColor: "from-cyan-50 to-teal-100/50",
+      borderColor: "border-cyan-500",
+      textColor: "text-cyan-700"
+    }
+  ];
+
+  const maxRating = 5;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-5 border-l-4 border-teal-500 max-w-md">
+          <p className="text-sm font-semibold text-teal-600 uppercase tracking-wide">Total Feedbacks Analyzed</p>
+          <p className="text-3xl font-bold text-teal-900 mt-1">{categoryStats.totalFeedbacks}</p>
+        </div>
+      </div>
+
+      {/* Category Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {categories.map((category) => {
+          const percentage = (category.rating / maxRating) * 100;
+          
+          return (
+            <div
+              key={category.name}
+              className={`group bg-gradient-to-r ${category.bgColor} rounded-xl p-6 border-l-4 ${category.borderColor} hover:shadow-xl transition-all duration-300 hover:scale-[1.02]`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className={`text-sm font-semibold ${category.textColor} uppercase tracking-wide`}>
+                    {category.name}
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
+                    {category.rating.toFixed(2)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className={`bg-gradient-to-r ${category.color} text-white px-4 py-2 rounded-lg shadow-md`}>
+                    <p className="text-xl font-bold">
+                      ⭐ {category.rating.toFixed(1)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`absolute h-full bg-gradient-to-r ${category.color} rounded-full transition-all duration-500`}
+                  style={{ width: `${percentage}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-right">{percentage.toFixed(1)}% of max rating</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Doctor Booking & Rating Chart Component
+function DoctorBookingRatingChart({ bookingRatingStats }: { bookingRatingStats: DoctorBookingRatingStats | null }) {
+  if (!bookingRatingStats || bookingRatingStats.doctorStats.length === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center text-gray-400">
+        No booking data available
+      </div>
+    );
+  }
+
+  const totalBookingsAllDoctors = bookingRatingStats.totalBookings;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-5 border-l-4 border-teal-500 max-w-md">
+          <p className="text-sm font-semibold text-teal-600 uppercase tracking-wide">Total Bookings</p>
+          <p className="text-3xl font-bold text-teal-900 mt-1">{bookingRatingStats.totalBookings}</p>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+        <h3 className="text-lg font-bold text-gray-800 mb-6">Bookings per Doctor</h3>
+        <div className="space-y-6">
+          {bookingRatingStats.doctorStats.map((doctor) => {
+            const bookingPercentage = totalBookingsAllDoctors > 0 
+              ? (doctor.totalBookings / totalBookingsAllDoctors) * 100 
+              : 0;
+            
+            return (
+              <div key={doctor.doctorId} className="space-y-3">
+                {/* Doctor Info Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-base font-bold text-gray-800">{doctor.doctorName}</h4>
+                    <p className="text-xs text-gray-500">{doctor.specialization}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">Bookings</p>
+                      <p className="text-lg font-bold text-teal-600">{doctor.totalBookings}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">Percentage</p>
+                      <p className="text-lg font-bold text-cyan-600">
+                        {bookingPercentage.toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bookings Percentage Bar */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 font-medium">Booking Percentage</span>
+                    <span className="text-teal-600 font-semibold">{bookingPercentage.toFixed(1)}% ({doctor.totalBookings} bookings)</span>
+                  </div>
+                  <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden group shadow-inner">
+                    <div
+                      className="absolute h-full bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 rounded-lg transition-all duration-500 hover:from-teal-500 hover:via-teal-600 hover:to-teal-700"
+                      style={{ width: `${bookingPercentage}%` }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-end pr-2">
+                        <span className="text-xs font-bold text-white drop-shadow-md">
+                          {bookingPercentage.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

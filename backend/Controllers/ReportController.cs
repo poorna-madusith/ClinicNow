@@ -90,4 +90,49 @@ public class ReportController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpGet("doctor-feedback-statistics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetDoctorFeedbackStatistics()
+    {
+        try
+        {
+            var stats = await _reportServices.GetDoctorFeedbackStatistics();
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("rating-category-statistics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetRatingCategoryStatistics()
+    {
+        try
+        {
+            var stats = await _reportServices.GetRatingCategoryStatistics();
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("doctor-booking-rating-statistics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetDoctorBookingRatingStatistics()
+    {
+        try
+        {
+            var stats = await _reportServices.GetDoctorBookingRatingStatistics();
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }

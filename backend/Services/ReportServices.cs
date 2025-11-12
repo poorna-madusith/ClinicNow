@@ -153,4 +153,121 @@ public class ReportServices
             TotalDoctors = doctors.Count
         };
     }
+
+    public async Task<DoctorFeedbackStatsDto> GetDoctorFeedbackStatistics()
+    {
+        // Get all feedbacks with doctor information
+        var feedbacks = await _context.Feedbacks
+            .Include(f => f.Doctor)
+            .ToListAsync();
+
+        if (!feedbacks.Any())
+        {
+            return new DoctorFeedbackStatsDto
+            {
+                TopRatedDoctors = new List<DoctorRatingItem>(),
+                TotalFeedbacks = 0
+            };
+        }
+
+        // Group by doctor and calculate average ratings
+        var doctorRatings = feedbacks
+            .GroupBy(f => f.doctorId)
+            .Select(g => new DoctorRatingItem
+            {
+                DoctorId = g.Key,
+                DoctorName = $"{g.First().Doctor.FirstName} {g.First().Doctor.LastName}",
+                Specialization = g.First().Doctor.Specialization ?? "Not Specified",
+                AverageRating = Math.Round(g.Average(f => f.OverallRating), 2),
+                TotalFeedbacks = g.Count()
+            })
+            .OrderByDescending(d => d.AverageRating)
+            .ThenByDescending(d => d.TotalFeedbacks)
+            .Take(10) // Top 10 doctors
+            .ToList();
+
+        return new DoctorFeedbackStatsDto
+        {
+            TopRatedDoctors = doctorRatings,
+            TotalFeedbacks = feedbacks.Count
+        };
+    }
+
+    public async Task<RatingCategoryStatsDto> GetRatingCategoryStatistics()
+    {
+        var feedbacks = await _context.Feedbacks.ToListAsync();
+
+        if (!feedbacks.Any())
+        {
+            return new RatingCategoryStatsDto
+            {
+                AverageCommunicationRating = 0,
+                AverageProfessionalismRating = 0,
+                AveragePunctualityRating = 0,
+                AverageTreatmentRating = 0,
+                AverageOverallRating = 0,
+                TotalFeedbacks = 0
+            };
+        }
+
+        return new RatingCategoryStatsDto
+        {
+            AverageCommunicationRating = Math.Round(feedbacks.Average(f => f.CommunicationRating), 2),
+            AverageProfessionalismRating = Math.Round(feedbacks.Average(f => f.ProfessionalismRating), 2),
+            AveragePunctualityRating = Math.Round(feedbacks.Average(f => f.PunctualityRating), 2),
+            AverageTreatmentRating = Math.Round(feedbacks.Average(f => f.TreatmentRating), 2),
+            AverageOverallRating = Math.Round(feedbacks.Average(f => f.OverallRating), 2),
+            TotalFeedbacks = feedbacks.Count
+        };
+    }
+
+    public async Task<DoctorBookingRatingStatsDto> GetDoctorBookingRatingStatistics()
+    {
+        // Get all bookings with session and doctor information
+        var bookings = await _context.Bookings
+            .Include(b => b.Session)
+            .ThenInclude(s => s.Doctor)
+            .ToListAsync();
+
+        // Get all feedbacks
+        var feedbacks = await _context.Feedbacks.ToListAsync();
+
+        if (!bookings.Any())
+        {
+            return new DoctorBookingRatingStatsDto
+            {
+                DoctorStats = new List<DoctorBookingRatingItem>(),
+                TotalBookings = 0
+            };
+        }
+
+        // Group bookings by doctor (through session)
+        var doctorStats = bookings
+            .Where(b => b.Session != null && b.Session.Doctor != null)
+            .GroupBy(b => b.Session.DoctorId)
+            .Select(g => {
+                var doctorFeedbacks = feedbacks.Where(f => f.doctorId == g.Key).ToList();
+                var averageRating = doctorFeedbacks.Any() 
+                    ? Math.Round(doctorFeedbacks.Average(f => f.OverallRating), 2) 
+                    : 0;
+
+                var firstBooking = g.First();
+                return new DoctorBookingRatingItem
+                {
+                    DoctorId = g.Key,
+                    DoctorName = $"{firstBooking.Session.Doctor.FirstName} {firstBooking.Session.Doctor.LastName}",
+                    Specialization = firstBooking.Session.Doctor.Specialization ?? "Not Specified",
+                    TotalBookings = g.Count(),
+                    AverageRating = averageRating
+                };
+            })
+            .OrderByDescending(d => d.TotalBookings)
+            .ToList();
+
+        return new DoctorBookingRatingStatsDto
+        {
+            DoctorStats = doctorStats,
+            TotalBookings = bookings.Count
+        };
+    }
 }
