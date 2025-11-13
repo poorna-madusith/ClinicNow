@@ -21,8 +21,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Feedback> Feedbacks { get; set; }
 
-
     public DbSet<Message> Messages { get; set; }
+
+    public DbSet<Conversation> Conversations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -76,6 +77,22 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(f => f.patientId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Entity<Conversation>()
+            .HasOne(c => c.Patient)
+            .WithMany()
+            .HasForeignKey(c => c.PatientId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Conversation>()
+            .HasOne(c => c.Doctor)
+            .WithMany()
+            .HasForeignKey(c => c.DoctorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Message>()
+            .HasOne<Conversation>()
+            .WithMany(c => c.Messages)
+            .HasForeignKey(m => m.ConversationId);
     }
 
- }
+}
