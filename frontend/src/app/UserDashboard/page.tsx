@@ -109,17 +109,46 @@ export default function UserDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["Patient"]}>
-      <>
-        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-4 sm:p-6">
-          <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
-              Welcome to ClinicNow
-            </h1>
-            <p className="text-gray-600 text-base sm:text-lg">
-              Find and connect with our experienced healthcare professionals
-            </p>
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-800">Our Doctors</h1>
+          </div>
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-4">
+              <h2 className="text-2xl font-semibold text-gray-700">
+                Available Doctors
+              </h2>
+              <span className="text-sm text-gray-500">
+                ({filteredDoctors.length}{" "}
+                {filteredDoctors.length === 1 ? "doctor" : "doctors"}{" "}
+                {search || selectSpecialization !== "All" ? "found" : "available"})
+              </span>
+            </div>
+            <div className="flex-shrink-0">
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setSelectSpecialization("All");
+                }}
+                className="text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+                Clear filters
+              </button>
+            </div>
           </div>
 
           {/* Search and Filter Section */}
@@ -186,55 +215,10 @@ export default function UserDashboard() {
                 </select>
               </div>
             </div>
-
-            {/* Results Summary */}
-            {(search || selectSpecialization !== "All") && (
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <p className="text-gray-600">
-                  Showing {filteredDoctors.length} of {doctors.length} doctors
-                  {search && ` matching "${search}"`}
-                  {selectSpecialization !== "All" && ` in ${selectSpecialization}`}
-                </p>
-                {(search || selectSpecialization !== "All") && (
-                  <button
-                    onClick={() => {
-                      setSearch("");
-                      setSelectSpecialization("All");
-                    }}
-                    className="text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                    Clear filters
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Doctors Section */}
           <div className="mb-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center gap-2">
-              <div className="flex items-center">
-                <span className="bg-teal-500 w-1.5 h-6 sm:h-8 rounded-full mr-2 sm:mr-3"></span>
-                <span>Available Doctors</span>
-              </div>
-              <span className="text-xs sm:text-sm font-normal text-gray-500 sm:ml-3">
-                ({filteredDoctors.length} {filteredDoctors.length === 1 ? 'doctor' : 'doctors'} {search || selectSpecialization !== "All" ? 'found' : 'available'})
-              </span>
-            </h2>
-
             {loading ? (
               <div className="flex items-center justify-center py-12 sm:py-20">
                 <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-teal-500"></div>
@@ -414,7 +398,6 @@ export default function UserDashboard() {
           doctorName={feedbackDoctor.name}
         />
       )}
-      </>
     </ProtectedRoute>
   );
 }

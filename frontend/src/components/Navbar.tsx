@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import UserNavbar from "./UserNavbar";
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,29 +21,27 @@ export default function Navbar() {
   const doctorLinks = [
     { label: "Dashboard", href: "/DocotorDashboard" },
     { label: "OnGoing Session", href: "/DocOngoingSessions" },
+    { label: "Chat", href: "/DoctorChat" },
     { label: "Profile", href: "/DocProfile" },
   ];
 
-  const patientLinks = [
-    { label: "Dashboard", href: "/UserDashboard" },
-    { label: "My Appointments", href: "/MyAppoinments" },
-    { label: "Profile", href: "/UserProfile" },
-  ];
+  if(pathname === "/Login" || pathname === "/UserSignup"){
+    return null;
+  }
+
+  if (userRole === "Patient") {
+    return <UserNavbar />;
+  }
 
   let navlinks: { label: string; href: string }[] = [];
 
   if(userRole === "Admin") navlinks = adminLinks;
   else if(userRole === "Doctor") navlinks = doctorLinks;
-  else if(userRole === "Patient") navlinks = patientLinks;
 
   const handleLogout = () => {
     logout();
     router.push("/Login");
   };
-
-  if(pathname === "/Login" || pathname === "/UserSignup"){
-    return null;
-  }
 
   return (
     <nav className="bg-gradient-to-r from-white via-teal-50 to-white backdrop-blur-lg shadow-lg border-b border-gray-100/50 sticky top-0 z-50">
