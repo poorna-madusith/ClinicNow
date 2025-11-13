@@ -84,6 +84,7 @@ builder.Services.AddScoped<SessionServices>();
 builder.Services.AddScoped<UserSessionServices>();
 builder.Services.AddScoped<SessionRealtimeNotifier>();
 builder.Services.AddScoped<ReportServices>();
+builder.Services.AddScoped<SessionNotificationService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

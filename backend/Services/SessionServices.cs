@@ -12,12 +12,14 @@ public class SessionServices
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDBContext _context;
     private readonly SessionRealtimeNotifier _notifier;
+    private readonly SessionNotificationService _notificationService;
 
-    public SessionServices(ApplicationDBContext context, UserManager<ApplicationUser> userManager, SessionRealtimeNotifier notifier)
+    public SessionServices(ApplicationDBContext context, UserManager<ApplicationUser> userManager, SessionRealtimeNotifier notifier, SessionNotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
         _notifier = notifier;
+        _notificationService = notificationService;
     }
 
     public async Task<IActionResult> AddSession(SessionDto sessionDto)
@@ -202,6 +204,10 @@ public class SessionServices
         if (result > 0)
         {
             await _notifier.BroadcastSession(existingSession.Id);
+            
+            // Send notifications to all patients who booked this session
+            await _notificationService.NotifyPatientsAboutSessionStatus(sessionId, "cancelled");
+            
             return existingSession;
         }
         else
@@ -246,6 +252,10 @@ public class SessionServices
         if (result > 0)
         {
             await _notifier.BroadcastSession(existingSession.Id);
+            
+            // Send notifications to all patients who booked this session
+            await _notificationService.NotifyPatientsAboutSessionStatus(sessionId, "started");
+            
             return existingSession;
         }
         else
