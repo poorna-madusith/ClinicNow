@@ -8,6 +8,7 @@ import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '@/Context/AuthContext';
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 
 
 
@@ -165,13 +166,15 @@ export default function UserSignupPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-4xl">
-                <div className="text-center mb-6 sm:mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
-                        Create Your Account
-                    </h1>
-                    <p className="text-gray-600 text-sm">Join us today and start your journey</p>
-                </div>
+            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                {/* Form Section */}
+                <div>
+                    <div className="text-center mb-6 sm:mb-8">
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
+                            Create Your Account
+                        </h1>
+                        <p className="text-gray-600 text-sm">Join us today and start your journey</p>
+                    </div>
                 <form onSubmit={handleSubmit} noValidate className="space-y-4">
                     {/* Row 1: First Name and Last Name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -396,6 +399,18 @@ export default function UserSignupPage() {
                 )}
                 <div className="mt-4 text-center text-gray-600">
                     Already have an account? <a href="/Login" className="text-teal-600 hover:underline">Login here</a>
+                </div>
+                </div>
+                
+                {/* Image Section */}
+                <div className="hidden lg:flex items-center justify-center">
+                    <Image
+                        src="/Green Grey Simple Medical Health Center Logo.png"
+                        alt="Medical Center"
+                        width={400}
+                        height={400}
+                        className="w-full h-auto max-w-md rounded-lg"
+                    />
                 </div>
             </div>
         </div>                

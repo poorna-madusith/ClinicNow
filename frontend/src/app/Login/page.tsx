@@ -7,6 +7,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -132,13 +133,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-md">
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-gray-600 text-sm">Sign in to continue to your account</p>
-        </div>
+      <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* Form Section */}
+        <div>
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-800 mb-2">
+              Welcome Back
+            </h1>
+            <p className="text-gray-600 text-sm">Sign in to continue to your account</p>
+          </div>
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label
@@ -214,6 +217,18 @@ export default function LoginPage() {
             </p>
           </div>
         </form>
+        </div>
+        
+        {/* Image Section */}
+        <div className="hidden lg:flex items-center justify-center">
+          <Image
+            src="/Green Grey Simple Medical Health Center Logo.png"
+            alt="Medical Center"
+            width={400}
+            height={400}
+            className="w-full h-auto max-w-md rounded-lg"
+          />
+        </div>
       </div>
     </div>
   );
