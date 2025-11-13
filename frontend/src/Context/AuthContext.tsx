@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useContext, useState, useEffect, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { setupApiClient } from "@/Lib/api";
 
 interface DecodedToken {
   sub: string;
@@ -61,6 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setAccessToken = useCallback((token: string | null) => {
     setAccessTokenState(token);
+    
+    // Sync token with API client
+    setupApiClient(token, setAccessTokenState);
     
     if (token) {
       parseToken(token);
