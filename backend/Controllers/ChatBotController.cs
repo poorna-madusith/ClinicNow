@@ -26,7 +26,7 @@ public class ChatBotController : ControllerBase
             // Get Gemini API key from configuration
             var apiKey = _config["Gemini:ApiKey"];
             
-            if (string.IsNullOrEmpty(apiKey))
+            if (string.IsNullOrEmpty(apiKey) || apiKey == "YOUR_GEMINI_API_KEY_HERE")
             {
                 return BadRequest(new { Error = "Gemini API key is not configured. Please add your API key to appsettings.Development.json" });
             }

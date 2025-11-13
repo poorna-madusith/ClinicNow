@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { useAuth } from '@/Context/AuthContext';
+import ChatBot from './ChatBot';
 
 interface User {
     id: string;
@@ -41,6 +42,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [showSidebar, setShowSidebar] = useState(true);
+    const [showChatBot, setShowChatBot] = useState(false);
     const latestMessagesRef = useRef<Message[]>(messages);
     const previousConversationRef = useRef<number | null>(null);
     const { accessToken, userId } = useAuth();
@@ -236,6 +238,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
         if (previousConversationRef.current && connection) {
             await connection.invoke('LeaveChat', previousConversationRef.current).catch(() => {});
         }
+        setShowChatBot(false); // Close chatbot when selecting a conversation
         setSelectedConversation(conversation);
         setMessages([]);
         setShowSidebar(false); // Hide sidebar on mobile when conversation is selected
@@ -259,6 +262,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
 
     const handleUserSelect = async (user: User) => {
         if (!API || !accessToken) return;
+        setShowChatBot(false); // Close chatbot when selecting a user
         try {
             const response = await fetch(`${API}/chat/conversations/${user.id}`, {
                  method: 'POST',
@@ -336,6 +340,41 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
 
                 {/* Conversations/Users List */}
                 <div className="flex-1 overflow-y-auto">
+                    {/* AI Assistant Option - Always visible at top */}
+                    <div 
+                        onClick={() => {
+                            setShowChatBot(true);
+                            setSelectedConversation(null);
+                            setShowSidebar(false);
+                        }}
+                        className={`p-3 sm:p-4 cursor-pointer transition-all duration-200 flex items-center space-x-3 border-b-2 border-purple-100 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 active:from-purple-200 active:to-blue-200 ${
+                            showChatBot ? 'ring-2 ring-purple-500' : ''
+                        }`}
+                    >
+                        <div className="relative flex-shrink-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-md">
+                                <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                                <span className="text-xs font-bold text-white">AI</span>
+                            </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-gray-900 text-sm sm:text-base">ClinicNow Bot</span>
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    New
+                                </span>
+                            </div>
+                            <p className="text-xs sm:text-sm text-gray-600">Ask me about health & medical questions</p>
+                        </div>
+                        <svg className="h-5 w-5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+
                     {searchTerm ? (
                         <div className="divide-y divide-gray-100">
                             {filteredUsers.length > 0 ? (
@@ -431,7 +470,12 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
 
             {/* Main Chat Area */}
             <div className="flex-1 flex flex-col bg-white">
-                {selectedConversation ? (
+                {showChatBot ? (
+                    <ChatBot onClose={() => {
+                        setShowChatBot(false);
+                        setShowSidebar(true);
+                    }} />
+                ) : selectedConversation ? (
                     <>
                         {/* Chat Header */}
                         <div className="p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-white to-teal-50 shadow-sm">
