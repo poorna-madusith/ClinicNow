@@ -40,6 +40,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
     const [newMessage, setNewMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [connection, setConnection] = useState<HubConnection | null>(null);
+    const [showSidebar, setShowSidebar] = useState(true);
     const latestMessagesRef = useRef<Message[]>(messages);
     const previousConversationRef = useRef<number | null>(null);
     const { accessToken, userId } = useAuth();
@@ -237,6 +238,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
         }
         setSelectedConversation(conversation);
         setMessages([]);
+        setShowSidebar(false); // Hide sidebar on mobile when conversation is selected
         await fetchChatHistory(conversation.id);
         
         // Mark messages as read and update conversation unread count
@@ -282,6 +284,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                     return bTime - aTime;
                 });
             });
+            setShowSidebar(false); // Hide sidebar on mobile when user is selected
             await handleConversationSelect(conversation);
             await fetchConversations();
         } catch (error) {
@@ -309,22 +312,25 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
     }, [users, searchTerm]);
 
     return (
-        <div className="flex h-[calc(100vh-5rem)] bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="flex h-[calc(100vh-5rem)] bg-gradient-to-br from-gray-50 to-gray-100 relative">
             {/* Sidebar - Conversations List */}
-            <div className="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col shadow-lg">
+            <div className={`${showSidebar ? 'flex' : 'hidden'} md:flex w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex-col shadow-lg absolute md:relative h-full z-10 md:z-0`}>
                 {/* Search Header */}
-                <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-teal-50 to-white">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder={`Search ${userType === 'patient' ? 'doctors' : 'patients'}...`}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300 shadow-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <svg className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                <div className="p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-teal-50 to-white">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold text-gray-800 md:hidden">Messages</h2>
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                placeholder={`Search ${userType === 'patient' ? 'doctors' : 'patients'}...`}
+                                className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300 shadow-sm text-sm"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <svg className="absolute left-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
@@ -337,14 +343,14 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                     <div
                                         key={user.id}
                                         onClick={() => handleUserSelect(user)}
-                                        className="p-4 hover:bg-gradient-to-r hover:from-teal-50 hover:to-white cursor-pointer transition-all duration-200 flex items-center space-x-3 group"
+                                        className="p-3 sm:p-4 hover:bg-gradient-to-r hover:from-teal-50 hover:to-white cursor-pointer transition-all duration-200 flex items-center space-x-3 group active:bg-teal-50"
                                     >
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-lg shadow-md group-hover:scale-110 transition-transform duration-200">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-base sm:text-lg shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
                                             {user.firstName[0]}{user.lastName[0]}
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="font-semibold text-gray-800">{user.firstName} {user.lastName}</p>
-                                            <p className="text-xs text-gray-500">{user.role || (userType === 'patient' ? 'Doctor' : 'Patient')}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{user.firstName} {user.lastName}</p>
+                                            <p className="text-xs text-gray-500 truncate">{user.role || (userType === 'patient' ? 'Doctor' : 'Patient')}</p>
                                         </div>
                                     </div>
                                 ))
@@ -370,27 +376,27 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                         <div
                                             key={convo.id}
                                             onClick={() => void handleConversationSelect(convo)}
-                                            className={`p-4 cursor-pointer transition-all duration-200 flex items-start space-x-3 relative ${
+                                            className={`p-3 sm:p-4 cursor-pointer transition-all duration-200 flex items-start space-x-3 relative active:bg-teal-50 ${
                                                 isSelected 
                                                     ? 'bg-gradient-to-r from-teal-100 to-teal-50 border-l-4 border-teal-500' 
                                                     : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-white'
                                             }`}
                                         >
-                                            <div className="relative">
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-md ${
+                                            <div className="relative flex-shrink-0">
+                                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold text-base sm:text-lg shadow-md ${
                                                     isSelected ? 'bg-gradient-to-br from-teal-500 to-teal-700' : 'bg-gradient-to-br from-gray-400 to-gray-600'
                                                 }`}>
                                                     {convo.participant.firstName[0]}{convo.participant.lastName[0]}
                                                 </div>
                                                 {hasUnread && (
-                                                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse">
+                                                    <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse">
                                                         {convo.unreadCount}
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-baseline mb-1">
-                                                    <span className={`truncate ${hasUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
+                                                    <span className={`truncate text-sm sm:text-base ${hasUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
                                                         {convo.participant.firstName} {convo.participant.lastName}
                                                     </span>
                                                     {lastMessageTime && (
@@ -400,7 +406,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                                     )}
                                                 </div>
                                                 {convo.lastMessage && (
-                                                    <p className={`text-sm truncate ${hasUnread ? 'text-gray-800 font-medium' : 'text-gray-600'}`}>
+                                                    <p className={`text-xs sm:text-sm truncate ${hasUnread ? 'text-gray-800 font-medium' : 'text-gray-600'}`}>
                                                         {convo.lastMessage.senderId === userId && <span className="font-medium">You: </span>}
                                                         {convo.lastMessage.content}
                                                     </p>
@@ -428,16 +434,25 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                 {selectedConversation ? (
                     <>
                         {/* Chat Header */}
-                        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-white to-teal-50 shadow-sm">
+                        <div className="p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-white to-teal-50 shadow-sm">
                             <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-semibold shadow-md">
+                                {/* Back button for mobile */}
+                                <button
+                                    onClick={() => setShowSidebar(true)}
+                                    className="md:hidden p-2 hover:bg-teal-100 rounded-lg transition-colors active:bg-teal-200"
+                                >
+                                    <svg className="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-semibold shadow-md flex-shrink-0">
                                     {selectedConversation.participant.firstName[0]}{selectedConversation.participant.lastName[0]}
                                 </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-800">
+                                <div className="flex-1 min-w-0">
+                                    <h2 className="text-base sm:text-lg font-bold text-gray-800 truncate">
                                         {selectedConversation.participant.firstName} {selectedConversation.participant.lastName}
                                     </h2>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-gray-500 truncate">
                                         {selectedConversation.participant.role || (userType === 'patient' ? 'Doctor' : 'Patient')}
                                     </p>
                                 </div>
@@ -445,21 +460,21 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                         </div>
 
                         {/* Messages Area */}
-                        <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-gray-50 to-white">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto bg-gradient-to-br from-gray-50 to-white">
                             {messages.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-3 sm:space-y-4">
                                     {messages.map(msg => {
                                         const isSender = msg.senderId === userId;
                                         const messageTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                         return (
                                             <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`flex flex-col max-w-xs lg:max-w-md xl:max-w-lg ${isSender ? 'items-end' : 'items-start'}`}>
-                                                    <div className={`px-4 py-3 rounded-2xl shadow-md ${
+                                                <div className={`flex flex-col max-w-[75%] sm:max-w-xs lg:max-w-md xl:max-w-lg ${isSender ? 'items-end' : 'items-start'}`}>
+                                                    <div className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl shadow-md ${
                                                         isSender 
                                                             ? 'bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-br-sm' 
                                                             : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm'
                                                     }`}>
-                                                        <p className="break-words">{msg.content}</p>
+                                                        <p className="break-words text-sm sm:text-base">{msg.content}</p>
                                                     </div>
                                                     <span className="text-xs text-gray-500 mt-1 px-2">{messageTime}</span>
                                                 </div>
@@ -468,12 +483,12 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                     })}
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-center h-full text-gray-400">
+                                <div className="flex items-center justify-center h-full text-gray-400 px-4">
                                     <div className="text-center">
-                                        <svg className="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                         </svg>
-                                        <p className="text-lg font-medium">No messages yet</p>
+                                        <p className="text-base sm:text-lg font-medium">No messages yet</p>
                                         <p className="text-sm">Start the conversation!</p>
                                     </div>
                                 </div>
@@ -481,12 +496,12 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                         </div>
 
                         {/* Message Input */}
-                        <div className="p-4 border-t border-gray-200 bg-white">
-                            <div className="flex items-end space-x-3">
+                        <div className="p-3 sm:p-4 border-t border-gray-200 bg-white safe-area-bottom">
+                            <div className="flex items-end space-x-2 sm:space-x-3">
                                 <div className="flex-1 relative">
                                     <textarea
                                         rows={1}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all duration-300 shadow-sm"
+                                        className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all duration-300 shadow-sm text-sm sm:text-base max-h-32"
                                         placeholder="Type your message..."
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
@@ -501,9 +516,9 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                 <button
                                     onClick={handleSendMessage}
                                     disabled={!newMessage.trim()}
-                                    className="px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                    className="p-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                                 >
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="h-5 w-5 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                     </svg>
                                 </button>
@@ -511,15 +526,29 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                         </div>
                     </>
                 ) : (
-                    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+                    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white px-4">
                         <div className="text-center">
-                            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
-                                <svg className="h-12 w-12 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {/* Show menu button on mobile when no conversation is selected */}
+                            <button
+                                onClick={() => setShowSidebar(true)}
+                                className="md:hidden mb-6 mx-auto px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 flex items-center gap-2"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                                View Conversations
+                            </button>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
+                                <svg className="h-10 w-10 sm:h-12 sm:w-12 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Welcome to Chat</h3>
-                            <p className="text-gray-500">Select a conversation from the sidebar to start messaging</p>
+                            <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">Welcome to Chat</h3>
+                            <p className="text-sm sm:text-base text-gray-500 max-w-md mx-auto">
+                                {window.innerWidth < 768 
+                                    ? 'Tap the button above to view your conversations'
+                                    : 'Select a conversation from the sidebar to start messaging'}
+                            </p>
                         </div>
                     </div>
                 )}
