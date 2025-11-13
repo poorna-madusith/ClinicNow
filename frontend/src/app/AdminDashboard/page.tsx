@@ -57,10 +57,10 @@ export default function AdminDashboard() {
       gender: doctor.gender,
       specialization: doctor.specialization || "",
       profileImageUrl: doctor.profileImageUrl || "",
-      contactEmail: doctor.contactEmail,
-      docDescription: doctor.docDescription,
-      contactNumbers: doctor.contactNumbers,
-      address: doctor.address,
+      contactEmail: doctor.contactEmail || "",
+      docDescription: doctor.docDescription || "",
+      contactNumbers: doctor.contactNumbers || [],
+      address: doctor.address || "",
     });
   };
 
