@@ -26,14 +26,15 @@ const CheckoutForm = ({ amount, bookingId, patientId, onSuccess, onError }: Paym
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const getErrorMessage = (error: any): string => {
+  const getErrorMessage = (error: unknown): string => {
     if (typeof error === 'string') return error;
 
     // Handle Stripe error types
-    switch (error?.type) {
+    const err = error as { type?: string; message?: string };
+    switch (err?.type) {
       case 'card_error':
       case 'validation_error':
-        return error.message;
+        return err.message || 'Invalid payment details.';
       case 'invalid_request_error':
         return 'Invalid payment details provided.';
       case 'authentication_error':
@@ -45,7 +46,7 @@ const CheckoutForm = ({ amount, bookingId, patientId, onSuccess, onError }: Paym
       case 'idempotency_error':
         return 'A duplicate payment was detected. Please check your payment status.';
       default:
-        if (error.message) return error.message;
+        if (err.message) return err.message;
         return 'An unexpected error occurred during payment. Please try again.';
     }
   };

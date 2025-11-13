@@ -5,7 +5,7 @@ import { Doctor, DoctorRegister, Gender } from "@/types/Doctor";
 import DoctorFullView from "@/components/DoctorFullView";
 import DoctorSessionsModal from "@/components/DoctorSessionsModal";
 import axios from "axios";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import DeleteButton from "@/components/DeleteButton";
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
       password: "", // Passwords are usually not pre-filled for security reasons
       age: doctor.age,
       gender: doctor.gender,
-      specialization: doctor.specialization,
+      specialization: doctor.specialization || "",
       profileImageUrl: doctor.profileImageUrl,
       contactEmail: doctor.contactEmail,
       docDescription: doctor.docDescription,
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
       });
       toast.success("Doctor deleted successfully");
       fetchDoctors();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete doctor", err);
       toast.error("Failed to delete doctor");
     }
@@ -261,9 +261,9 @@ export default function AdminDashboard() {
       toast.success("Doctor added successfully");
       fetchDoctors();
       resetForm();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log("Error adding doctor:", err);
-      if (err.response && err.response.data) {
+      if (axios.isAxiosError(err) && err.response && err.response.data) {
         // If the server sends back validation errors, they will be logged here.
         console.error("Server validation errors:", err.response.data);
       }
