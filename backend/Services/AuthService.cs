@@ -29,7 +29,7 @@ public class AuthService
 
 
     public async Task AddAdmin()
-    { 
+    {
         var admin = new ApplicationUser
         {
             FirstName = "ClinicNow",
@@ -315,13 +315,14 @@ public class AuthService
 
 
     //get logged in user details
-    public async Task<UserDetailsDto> GetLoggedInUserDetails(string userId) {
+    public async Task<UserDetailsDto> GetLoggedInUserDetails(string userId)
+    {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
             throw new Exception("User not found");
         }
-        
+
         return new UserDetailsDto
         {
             Id = user.Id,

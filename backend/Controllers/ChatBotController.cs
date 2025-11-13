@@ -25,7 +25,7 @@ public class ChatBotController : ControllerBase
         {
             // Get Gemini API key from configuration
             var apiKey = _config["Gemini:ApiKey"];
-            
+
             if (string.IsNullOrEmpty(apiKey) || apiKey == "YOUR_GEMINI_API_KEY_HERE")
             {
                 return BadRequest(new { Error = "Gemini API key is not configured. Please add your API key to appsettings.Development.json" });
@@ -36,7 +36,7 @@ public class ChatBotController : ControllerBase
             var model = googleAI.GenerativeModel(model: Model.GeminiPro);
 
             // Create the system prompt as part of the message
-            var fullPrompt = 
+            var fullPrompt =
                 "You are a professional medical AI assistant for ClinicNow, a healthcare management platform. " +
                 "Your role is to provide accurate, evidence-based medical information and support to patients and healthcare providers. " +
                 "Always maintain medical ethics and confidentiality. " +

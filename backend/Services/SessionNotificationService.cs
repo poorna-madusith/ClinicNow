@@ -88,7 +88,7 @@ public class SessionNotificationService
     {
         // Check if conversation exists between doctor and patient
         var conversation = await _context.Conversations
-            .FirstOrDefaultAsync(c => 
+            .FirstOrDefaultAsync(c =>
                 (c.DoctorId == doctorId && c.PatientId == patientId));
 
         // If conversation doesn't exist, create it

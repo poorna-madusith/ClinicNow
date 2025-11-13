@@ -83,7 +83,7 @@ public class ReportServices
             {
                 var patientIds = dayBookings.Select(b => b.PatientId).Distinct().ToList();
                 var dayFeedbacks = feedbacks.Where(f => patientIds.Contains(f.patientId)).ToList();
-                
+
                 if (dayFeedbacks.Any())
                 {
                     averageRating = dayFeedbacks.Average(f => f.OverallRating);
@@ -245,10 +245,11 @@ public class ReportServices
         var doctorStats = bookings
             .Where(b => b.Session != null && b.Session.Doctor != null)
             .GroupBy(b => b.Session.DoctorId)
-            .Select(g => {
+            .Select(g =>
+            {
                 var doctorFeedbacks = feedbacks.Where(f => f.doctorId == g.Key).ToList();
-                var averageRating = doctorFeedbacks.Any() 
-                    ? Math.Round(doctorFeedbacks.Average(f => f.OverallRating), 2) 
+                var averageRating = doctorFeedbacks.Any()
+                    ? Math.Round(doctorFeedbacks.Average(f => f.OverallRating), 2)
                     : 0;
 
                 var firstBooking = g.First();

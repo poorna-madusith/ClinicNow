@@ -28,7 +28,7 @@ public class ChatHub : Hub
 
         if (conversation == null) return;
 
-        var receiverId = conversation.PatientId == senderId? conversation.DoctorId   : conversation.DoctorId == senderId ? conversation.PatientId : null;
+        var receiverId = conversation.PatientId == senderId ? conversation.DoctorId : conversation.DoctorId == senderId ? conversation.PatientId : null;
 
         if (string.IsNullOrEmpty(receiverId)) return;
 
@@ -68,5 +68,5 @@ public class ChatHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"chat-{conversationId}");
     }
-    
+
 }

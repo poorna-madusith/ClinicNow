@@ -88,22 +88,22 @@ public class UserSessionServices
     public async Task<List<UserDetailsDto>> GetAllDoctors()
     {
         var doctors = await _userManager.GetUsersInRoleAsync(RoleEnum.Doctor.ToString());
-        
+
         var doctorDtos = new List<UserDetailsDto>();
-        
+
         foreach (var doctor in doctors)
         {
             // Calculate average rating from feedbacks
             var feedbacks = await _context.Feedbacks
                 .Where(f => f.doctorId == doctor.Id)
                 .ToListAsync();
-            
+
             double? averageRating = null;
             if (feedbacks.Any())
             {
                 averageRating = Math.Round(feedbacks.Average(f => f.OverallRating), 1);
             }
-            
+
             doctorDtos.Add(new UserDetailsDto
             {
                 Id = doctor.Id,
@@ -123,7 +123,7 @@ public class UserSessionServices
                 AverageRating = averageRating
             });
         }
-        
+
         return doctorDtos;
     }
 
@@ -337,7 +337,7 @@ public class UserSessionServices
 
 
     //add a feedback to the doctor
-    public async Task<IActionResult> AddFeedbackToDoc(string doctorId, string patientId,FeedbackDto feedbackDto)
+    public async Task<IActionResult> AddFeedbackToDoc(string doctorId, string patientId, FeedbackDto feedbackDto)
     {
         var doctor = await _userManager.FindByIdAsync(doctorId);
         if (doctor == null || doctor.Role != RoleEnum.Doctor)
@@ -365,11 +365,11 @@ public class UserSessionServices
 
         _context.Feedbacks.Add(feedback);
         await _context.SaveChangesAsync();
-        
+
 
         return new OkResult();
 
     }
-    
-    
+
+
 }

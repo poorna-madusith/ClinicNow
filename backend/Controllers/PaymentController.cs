@@ -70,9 +70,10 @@ public class PaymentController : ControllerBase
 
     [HttpPost("webhook")]
     [AllowAnonymous]
-    public async Task<IActionResult> StripeWebHook() {
+    public async Task<IActionResult> StripeWebHook()
+    {
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-        
+
         try
         {
             var StripeEvent = EventUtility.ConstructEvent(
@@ -88,19 +89,19 @@ public class PaymentController : ControllerBase
                 {
                     var payment = await _context.Payments
                         .FirstOrDefaultAsync(p => p.PaymentIntentId == paymentIntent.Id);
-                    
+
                     if (payment != null)
                     {
                         payment.Status = "succeeded";
                         payment.UpdatedAt = DateTime.UtcNow;
                         await _context.SaveChangesAsync();
-                        
-                        _logger.LogInformation("Payment {PaymentIntentId} succeeded for booking {BookingId}", 
+
+                        _logger.LogInformation("Payment {PaymentIntentId} succeeded for booking {BookingId}",
                             paymentIntent.Id, payment.BookingId);
                     }
                     else
                     {
-                        _logger.LogWarning("Payment intent {PaymentIntentId} succeeded but no matching payment record found", 
+                        _logger.LogWarning("Payment intent {PaymentIntentId} succeeded but no matching payment record found",
                             paymentIntent.Id);
                     }
                 }
@@ -112,14 +113,14 @@ public class PaymentController : ControllerBase
                 {
                     var payment = await _context.Payments
                         .FirstOrDefaultAsync(p => p.PaymentIntentId == paymentIntent.Id);
-                    
+
                     if (payment != null)
                     {
                         payment.Status = "failed";
                         payment.UpdatedAt = DateTime.UtcNow;
                         await _context.SaveChangesAsync();
-                        
-                        _logger.LogWarning("Payment {PaymentIntentId} failed for booking {BookingId}", 
+
+                        _logger.LogWarning("Payment {PaymentIntentId} failed for booking {BookingId}",
                             paymentIntent.Id, payment.BookingId);
                     }
                 }
@@ -133,8 +134,8 @@ public class PaymentController : ControllerBase
             return BadRequest();
         }
     }
-    
-    
+
+
     [HttpGet("latest/{patientId}")]
     public async Task<IActionResult> GetLatestPayment(string patientId)
     {
@@ -215,6 +216,6 @@ public class PaymentController : ControllerBase
             return File(pdfBytes, "application/pdf", $"receipt_{payment.Id}.pdf");
         }
     }
-    
-    
+
+
 }

@@ -85,7 +85,8 @@ public class AdminDocController : ControllerBase
         {
             await _adminDocServices.DeleteDoctor(id);
             return Ok(new { Message = "Doctor deleted successfully" });
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             return BadRequest(new { Message = ex.Message });
         }

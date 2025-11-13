@@ -33,7 +33,7 @@ public class ChatController : ControllerBase
         var participant = conversation.PatientId == currentUserId ? conversation.Doctor : conversation.Patient;
         var unreadCount = conversation.Messages
             .Count(m => m.ReceiverId == currentUserId && !m.IsRead);
-        
+
         return new ConversationDto
         {
             Id = conversation.Id,
@@ -81,7 +81,7 @@ public class ChatController : ControllerBase
             // Doctors can only chat with patients
             usersQuery = usersQuery.Where(u => u.Role == RoleEnum.Patient);
         }
-        
+
 
         var users = await usersQuery
             .OrderBy(u => u.FirstName)
@@ -202,7 +202,7 @@ public class ChatController : ControllerBase
             .Where(m => m.ConversationId == conversationId)
             .OrderBy(m => m.Timestamp)
             .ToListAsync();
-        
+
         // Mark messages as read
         var unreadMessages = messages.Where(m => m.ReceiverId == userId && !m.IsRead).ToList();
         foreach (var msg in unreadMessages)
@@ -213,7 +213,7 @@ public class ChatController : ControllerBase
         {
             await _context.SaveChangesAsync();
         }
-        
+
         return Ok(messages);
     }
 
@@ -266,5 +266,5 @@ public class ChatController : ControllerBase
             .ToListAsync();
         return Ok(messages);
     }
-    
+
 }

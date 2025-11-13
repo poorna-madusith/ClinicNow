@@ -32,5 +32,5 @@ public class UserRegisterDto
     public string? Address { get; set; }
 
     public string[]? ContactNumbers { get; set; }
-    
+
 }

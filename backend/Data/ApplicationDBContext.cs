@@ -46,13 +46,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
             .WithMany(s => s.Bookings)
             .HasForeignKey(b => b.SessionId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         builder.Entity<Booking>()
             .HasOne(b => b.Patient)
             .WithMany()
             .HasForeignKey(b => b.PatientId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         builder.Entity<Payment>()
             .HasOne(p => p.Booking)
             .WithMany()

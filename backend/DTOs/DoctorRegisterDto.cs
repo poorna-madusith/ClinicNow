@@ -45,5 +45,5 @@ public class DoctorRegisterDto
 
     [Required(ErrorMessage = "Address is required")]
     public string? Address { get; set; }
-    
+
 }

@@ -37,14 +37,14 @@ public class SessionServices
             throw new Exception("End time must be after start time");
         }
 
-        
+
 
         var session = new Session
         {
             DoctorId = sessionDto.DoctorId,
             Doctor = Doc,
-            Date = sessionDto.Date.Kind == DateTimeKind.Unspecified 
-                ? DateTime.SpecifyKind(sessionDto.Date, DateTimeKind.Utc) 
+            Date = sessionDto.Date.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(sessionDto.Date, DateTimeKind.Utc)
                 : sessionDto.Date.ToUniversalTime(),
             StartTime = sessionDto.StartTime,
             EndTime = sessionDto.EndTime,
@@ -72,17 +72,17 @@ public class SessionServices
     public async Task<List<SessionDto>> GetAllSessionsForDoctor(string doctorId)
     {
         Console.WriteLine($"SessionServices: Looking for doctor with ID: {doctorId}");
-        
+
         var doctorexsisting = await _userManager.FindByIdAsync(doctorId);
-        
+
         if (doctorexsisting == null)
         {
             Console.WriteLine($"SessionServices: Doctor not found with ID: {doctorId}");
             throw new Exception($"Doctor not found with ID: {doctorId}");
         }
-        
+
         Console.WriteLine($"SessionServices: Found user - Email: {doctorexsisting.Email}, Role: {doctorexsisting.Role}");
-        
+
         if (doctorexsisting.Role != RoleEnum.Doctor)
         {
             throw new Exception($"User is not a doctor. Current role: {doctorexsisting.Role}");
@@ -204,10 +204,10 @@ public class SessionServices
         if (result > 0)
         {
             await _notifier.BroadcastSession(existingSession.Id);
-            
+
             // Send notifications to all patients who booked this session
             await _notificationService.NotifyPatientsAboutSessionStatus(sessionId, "cancelled");
-            
+
             return existingSession;
         }
         else
@@ -252,10 +252,10 @@ public class SessionServices
         if (result > 0)
         {
             await _notifier.BroadcastSession(existingSession.Id);
-            
+
             // Send notifications to all patients who booked this session
             await _notificationService.NotifyPatientsAboutSessionStatus(sessionId, "started");
-            
+
             return existingSession;
         }
         else
@@ -389,7 +389,8 @@ public class SessionServices
 
 
     // //mark session as completed
-    public async Task<IActionResult> MarkSessionAsCompleted(int sessionId, string doctorId) {
+    public async Task<IActionResult> MarkSessionAsCompleted(int sessionId, string doctorId)
+    {
 
         var session = await _context.Sessions.Include(s => s.Doctor).FirstOrDefaultAsync(s => s.Id == sessionId);
         if (session == null)
@@ -415,6 +416,6 @@ public class SessionServices
         {
             throw new Exception("Failed to complete session");
         }
-        
+
     }
 }

@@ -74,7 +74,7 @@ public class SessionRealtimeNotifier
         {
             await _hubContext.Clients.Group(SessionHub.GroupName(sessionId))
                 .SendAsync("SessionUpdated", session);
-        }   
+        }
     }
 
 }
