@@ -56,7 +56,7 @@ export default function AdminDashboard() {
       age: doctor.age,
       gender: doctor.gender,
       specialization: doctor.specialization || "",
-      profileImageUrl: doctor.profileImageUrl,
+      profileImageUrl: doctor.profileImageUrl || "",
       contactEmail: doctor.contactEmail,
       docDescription: doctor.docDescription,
       contactNumbers: doctor.contactNumbers,

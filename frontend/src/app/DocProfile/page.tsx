@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Briefcase, Edit, X } from "lucide-react";
 import toast from "react-hot-toast";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Image from "next/image";
 
 export default function DocProfile() {
     const [user, setUser] = useState<UserDetails | null>(null);
@@ -267,9 +268,11 @@ export default function DocProfile() {
                         <div className="mb-6 flex justify-center">
                             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-600 flex items-center justify-center shadow-lg overflow-hidden">
                                 {(user.profileImageUrl || user.ProfileImageUrl) ? (
-                                    <img 
+                                    <Image 
                                         src={user.profileImageUrl || user.ProfileImageUrl} 
                                         alt="Profile" 
+                                        width={96}
+                                        height={96}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
