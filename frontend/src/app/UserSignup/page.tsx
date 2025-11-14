@@ -155,9 +155,31 @@ export default function UserSignupPage() {
             }, {
                 withCredentials: true
             });
-            setAccessToken(res.data.AccessToken);
-            router.push('/');  // Redirect to home or dashboard after successful signup/login
+            
+            const data = res.data;
+            
+            // Set the access token first (backend returns camelCase: accessToken)
+            setAccessToken(data.accessToken);
+            
+            toast.success("Google signup/login successful!");
+            console.log("Google login successful");
+            console.log("Role:", data.role);
+            
+            // Use requestAnimationFrame to ensure state has been flushed before navigation
+            requestAnimationFrame(() => {
+                // Navigate based on role
+                if (data.role === "Patient") {
+                    router.push("/UserDashboard");
+                } else if (data.role === "Doctor") {
+                    router.push("/DoctorDashboard");
+                } else if (data.role === "Admin") {
+                    router.push("/AdminDashboard");
+                } else {
+                    router.push('/');
+                }
+            });
         } catch (err) {
+            toast.error("Google login failed. Please try again.");
             console.error("Google login failed", err);
         }
     };

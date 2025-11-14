@@ -12,7 +12,7 @@ import Image from "next/image";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAccessToken  } = useAuth();
+  const { setAccessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -116,15 +116,27 @@ export default function LoginPage() {
       }, {
         withCredentials: true
       });
-      setAccessToken(res.data.AccessToken);
+      
+      const data = res.data;
+      
+      // Set the access token first (backend returns camelCase: accessToken)
+      setAccessToken(data.accessToken);
+      
       toast.success("Google login successful!");
       console.log("Google login successful");
-      console.log(res.data.role === "Patient");
-      if (res.data.role === "Patient") {
-        router.push("/UserDashboard"); // Redirect to home or dashboard after successful signup/login
-      }else if(res.data.role === "Doctor"){
-        router.push("/DoctorDashboard");
-      }
+      console.log("Role:", data.role);
+      
+      // Use requestAnimationFrame to ensure state has been flushed before navigation
+      requestAnimationFrame(() => {
+        // Navigate based on role (same as normal login)
+        if (data.role === "Patient") {
+          router.push("/UserDashboard");
+        } else if (data.role === "Doctor") {
+          router.push("/DoctorDashboard");
+        } else if (data.role === "Admin") {
+          router.push("/AdminDashboard");
+        }
+      });
     } catch (err) {
       toast.error("Google login failed. Please try again.");
       console.error("Google login failed", err);
