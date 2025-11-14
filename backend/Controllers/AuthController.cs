@@ -13,7 +13,7 @@ public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
     private readonly IConfiguration _configuration;
-    
+
     public AuthController(AuthService authService, IConfiguration configuration)
     {
         _authService = authService;
@@ -265,7 +265,7 @@ public class AuthController : ControllerBase
             var resetUrl = $"{frontendUrl}/reset-password";
 
             await _authService.ForgotPassword(forgotPasswordDto.Email, resetUrl);
-            
+
             // Always return success to prevent email enumeration
             return Ok(new { Message = "If your email is registered, you will receive a password reset link shortly." });
         }

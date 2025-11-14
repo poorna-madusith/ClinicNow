@@ -24,7 +24,7 @@ public class EmailService : IEmailService
     {
         Console.WriteLine($"\n=== SENDING PASSWORD RESET EMAIL ===");
         Console.WriteLine($"To: {toEmail}");
-        
+
         var smtpHost = _configuration["Email:SmtpHost"];
         var smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
         var smtpUsername = _configuration["Email:SmtpUsername"];
@@ -53,7 +53,7 @@ public class EmailService : IEmailService
         try
         {
             Console.WriteLine("Attempting to send email using MailKit...");
-            
+
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromEmail ?? smtpUsername));
             message.To.Add(new MailboxAddress("", toEmail));
@@ -66,7 +66,7 @@ public class EmailService : IEmailService
             message.Body = bodyBuilder.ToMessageBody();
 
             using var client = new SmtpClient();
-            
+
             // Try port 465 with SSL if port is 587, otherwise use StartTLS
             if (smtpPort == 465)
             {
@@ -76,22 +76,22 @@ public class EmailService : IEmailService
             {
                 await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
             }
-            
+
             await client.AuthenticateAsync(smtpUsername, smtpPassword);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
-            
+
             Console.WriteLine($"✅ Email sent successfully!");
             Console.WriteLine($"Reset Link: {resetLink}");
             Console.WriteLine($"=====================================\n");
-            
+
             _logger.LogInformation("Password reset email sent successfully to {Email}", toEmail);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Email sending failed: {ex.Message}");
             _logger.LogError(ex, "Failed to send password reset email to {Email}", toEmail);
-            
+
             // In development, log the link even if email fails
             Console.WriteLine($"\n=== PASSWORD RESET LINK (Email Failed) ===");
             Console.WriteLine($"Email: {toEmail}");
