@@ -40,8 +40,7 @@ export default function PatientSessionsModal({
         }
       );
       setBookings(response.data || []);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
+    } catch {
       toast.error("Failed to fetch bookings");
       setBookings([]);
     } finally {

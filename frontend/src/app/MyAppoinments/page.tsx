@@ -56,9 +56,7 @@ export default function MyAppointmentsPage() {
         }
       );
       setMyBookings(res.data);
-      console.log("Fetched bookings:", res.data);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
+    } catch {
       toast.error("Failed to fetch bookings. Please try again later.");
     } finally {
       setIsLoading(false);
@@ -79,7 +77,6 @@ export default function MyAppointmentsPage() {
       const error = err as AxiosError<{message: string}>
       const errorMessage = error.response?.data?.message || "An unknown error occured"
       toast.error(errorMessage);
-      console.log(errorMessage);
     }
   }
 
@@ -154,11 +151,9 @@ export default function MyAppointmentsPage() {
         })),
       };
 
-      console.log("Full session data:", sessionData);
       setSelectedSession(sessionData);
       setIsSessionModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching full session details:", error);
+    } catch {
       toast.error("Failed to load session details. Please try again.");
     } finally {
       setLoadingSessionId(null);

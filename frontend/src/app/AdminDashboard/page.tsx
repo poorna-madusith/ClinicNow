@@ -74,8 +74,7 @@ export default function AdminDashboard() {
       });
       toast.success("Doctor deleted successfully");
       fetchDoctors();
-    } catch (err: unknown) {
-      console.error("Failed to delete doctor", err);
+    } catch {
       toast.error("Failed to delete doctor");
     }
   };
@@ -112,8 +111,7 @@ export default function AdminDashboard() {
         contactNumbers: [],
         address: "",
       });
-    } catch (err) {
-      console.error("Failed to update doctor", err);
+    } catch {
       toast.error("Failed to update doctor");
     }
   };
@@ -261,12 +259,7 @@ export default function AdminDashboard() {
       toast.success("Doctor added successfully");
       fetchDoctors();
       resetForm();
-    } catch (err: unknown) {
-      console.log("Error adding doctor:", err);
-      if (axios.isAxiosError(err) && err.response && err.response.data) {
-        // If the server sends back validation errors, they will be logged here.
-        console.error("Server validation errors:", err.response.data);
-      }
+    } catch {
       toast.error("Error adding doctor");
     } finally {
       setAddeditmodalOpen(false);
@@ -307,8 +300,7 @@ export default function AdminDashboard() {
       });
       setDoctors(res.data || []);
       setFilteredDoctors(res.data || []);
-    } catch (err) {
-      console.log("Error fetching doctors:", err);
+    } catch {
       setDoctors([]);
     }
   }, [API, accessToken]);

@@ -87,9 +87,7 @@ export default function SessionsForADoc({ params }: sessionPageProps) {
         );
       }
 
-      console.log("Fetched sessions for doctor:", res.data);
-    } catch (err) {
-      console.log("Error fetching sessions for doctor:", err);
+    } catch {
       toast.error("Failed to fetch sessions for the doctor.");
     } finally {
       setLoading(false);

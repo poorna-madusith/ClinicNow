@@ -36,7 +36,6 @@ export default function UserProfile() {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            console.log("Raw API response:", res.data);
             setUser(res.data);
             
             // Populate form data with safe checks for contactNumbers
@@ -55,8 +54,7 @@ export default function UserProfile() {
                 address: res.data.address || res.data.Address || '',
                 contactNumbers: safeContactNumbers
             });
-        } catch (error) {
-            console.error("Error fetching user data:", error);
+        } catch {
             toast.error("Failed to load profile");
         } finally {
             setLoading(false);
@@ -175,7 +173,6 @@ export default function UserProfile() {
             // Refresh user data
             await fetchuser();
         } catch (error) {
-            console.error("Error updating profile:", error);
             const errorMessage = error instanceof Error && 'response' in error 
                 ? (error as { response?: { data?: { Message?: string } } }).response?.data?.Message 
                 : "Failed to update profile";

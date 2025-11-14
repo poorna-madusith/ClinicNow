@@ -89,7 +89,6 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
             if (!response.ok) {
                 // If response is not OK, don't try to parse JSON
                 // and keep users as an empty array.
-                console.error('Error fetching users:', response.statusText);
                 setUsers([]);
                 return;
             }
@@ -99,8 +98,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
             } else {
                 setUsers([]);
             }
-        } catch (error) {
-            console.error('Error fetching users:', error);
+        } catch {
             setUsers([]);
         }
     }, [API, accessToken]);
@@ -115,7 +113,6 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                 credentials: 'include'
             });
             if (!response.ok) {
-                console.error('Error fetching conversations:', response.statusText);
                 setConversations([]);
                 return;
             }
@@ -130,8 +127,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
             } else {
                 setConversations([]);
             }
-        } catch (error) {
-            console.error('Error fetching conversations:', error);
+        } catch {
             setConversations([]);
         }
     }, [API, accessToken]);
@@ -146,7 +142,6 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                 credentials: 'include'
             });
             if (!response.ok) {
-                console.error('Error fetching chat history:', response.statusText);
                 setMessages([]);
                 return;
             }
@@ -156,8 +151,7 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
             } else {
                 setMessages([]);
             }
-        } catch (error) {
-            console.error('Error fetching chat history:', error);
+        } catch {
             setMessages([]);
         }
     }, [API, accessToken]);
@@ -214,8 +208,8 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                         setMessages(updatedMessages);
                     }
                 });
-            } catch (error) {
-                console.error('Connection failed: ', error);
+            } catch {
+                // Connection failed
             }
         };
 
@@ -253,9 +247,9 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
         
         if (connection) {
             if (connection.state === HubConnectionState.Disconnected) {
-                await connection.start().catch(err => console.error('Reconnection failed:', err));
+                await connection.start().catch(() => {/* Reconnection failed */});
             }
-            await connection.invoke('JoinChat', conversation.id).catch(err => console.error('Join chat failed:', err));
+            await connection.invoke('JoinChat', conversation.id).catch(() => {/* Join chat failed */});
         }
         previousConversationRef.current = conversation.id;
     };
@@ -272,7 +266,6 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                 credentials: 'include'
             });
             if (!response.ok) {
-                console.error('Error creating conversation:', response.statusText);
                 return;
             }
             const conversation: Conversation = await response.json();
@@ -291,8 +284,8 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
             setShowSidebar(false); // Hide sidebar on mobile when user is selected
             await handleConversationSelect(conversation);
             await fetchConversations();
-        } catch (error) {
-            console.error('Error creating conversation:', error);
+        } catch {
+            // Error creating conversation
         }
     };
 
@@ -302,8 +295,8 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
         try {
             await connection.invoke('SendMessage', selectedConversation.id, newMessage.trim());
             setNewMessage('');
-        } catch (e) {
-            console.error(e);
+        } catch {
+            // Error sending message
         }
     };
 

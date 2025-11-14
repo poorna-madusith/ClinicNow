@@ -119,12 +119,11 @@ export default function UserSignupPage() {
         if(!validateForm()) return;
         setLoading(true);
         try{
-            const res = await axios.post(`${API}/auth/userregister`, formData, {
+            await axios.post(`${API}/auth/userregister`, formData, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            console.log("User registered successfully", res.data);
             toast.success("Registration successful! Please login.");
             router.push('/Login');
             
@@ -132,15 +131,9 @@ export default function UserSignupPage() {
             if(axios.isAxiosError(err)){
                 if(err.response?.status === 400){
                     toast.error("Email already in use");
-                    console.log("Email already in use", err.response?.data);
                 }else if(err.response?.status === 500){
                     toast.error("Server error. Please try again later.");
-                    console.log("Server error", err.response?.data);
-                }else{
-                    console.error("User registration failed", err.response?.data);
                 }
-            }else{
-                console.error("User registration failed", err);
             }
         } finally {
             setLoading(false);
@@ -162,8 +155,6 @@ export default function UserSignupPage() {
             setAccessToken(data.accessToken);
             
             toast.success("Google signup/login successful!");
-            console.log("Google login successful");
-            console.log("Role:", data.role);
             
             // Use requestAnimationFrame to ensure state has been flushed before navigation
             requestAnimationFrame(() => {
@@ -178,9 +169,8 @@ export default function UserSignupPage() {
                     router.push('/');
                 }
             });
-        } catch (err) {
+        } catch {
             toast.error("Google login failed. Please try again.");
-            console.error("Google login failed", err);
         }
     };
 
@@ -413,7 +403,7 @@ export default function UserSignupPage() {
                             <div className="[&_button]:!gap-2 [&_button]:!px-3">
                                 <GoogleLogin
                                     onSuccess={handleGoogleSuccess}
-                                    onError={() => console.log('Google Login Failed')}
+                                    onError={() => {/* Google Login Failed */}}
                                 />
                             </div>
                         </div>

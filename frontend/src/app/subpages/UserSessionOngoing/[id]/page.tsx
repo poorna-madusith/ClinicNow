@@ -41,10 +41,7 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
                 }
             });
             setSession(res.data);
-            console.log(sessionId);
-            console.log("Fetched session:", res.data);
         }catch(error){
-            console.error("Error fetching session:", error);
             const axiosError = error as AxiosError;
             if (axiosError.response?.status === 404) {
                 setError("Session not found");
@@ -65,7 +62,6 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
         }
 
         fetchSession(); 
-        console.log(`id: ${sessionId}`);
     },[fetchSession, accessToken, sessionId]);
 
     useEffect(() => {
@@ -88,20 +84,18 @@ export default function UserSessionOngoing({ params }: UserSessionOngoingProps) 
             })
             .catch((err) => {
                 if (err instanceof Error && err.message.includes("stopped during negotiation")) {
-                    console.debug("SignalR connection canceled during navigation:", err.message);
                     return;
                 }
-                console.error("SignalR connection error:", err);
             });
 
         return () => {
             const stopConnection = () =>
-                connection.stop().catch((stopErr) => console.error("SignalR stop error:", stopErr));
+                connection.stop().catch(() => {/* SignalR stop error */});
 
             if (didStart && connection.state === HubConnectionState.Connected) {
                 connection
                     .invoke("LeaveSession", sessionId)
-                    .catch((err) => console.error("SignalR leave error:", err))
+                    .catch(() => {/* SignalR leave error */})
                     .finally(stopConnection);
             } else {
                 stopConnection();

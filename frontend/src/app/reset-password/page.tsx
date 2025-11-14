@@ -81,9 +81,8 @@ function ResetPasswordForm() {
       } else {
         setError(data.Message || "Failed to reset password. The link may have expired.");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again later.");
-      console.log("Reset password error:", err);
     } finally {
       setLoading(false);
     }

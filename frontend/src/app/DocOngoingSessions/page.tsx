@@ -24,19 +24,8 @@ export default function DocOngoingSessions(){
                 }
             });
             setOnGoingSession(res.data);
-        }catch(err){
-            console.log('Fetch ongoing session error', { err, userId, url: `${API}/session/getcurrentOngoingSession/${userId}` });
-            // If axios error has response with message, prefer that
-            const axiosErr = err as { response?: { data?: Record<string, unknown> }; message?: string };
-            const data = axiosErr.response?.data as Record<string, unknown> | undefined;
-            let serverMessage = "Failed to fetch ongoing session";
-            if (data) {
-                const m = data['message'] ?? data['Message'];
-                if (typeof m === 'string') serverMessage = m;
-            } else if (axiosErr?.message && typeof axiosErr.message === 'string') {
-                serverMessage = axiosErr.message;
-            }
-            console.log(serverMessage);
+        }catch{
+            // Failed to fetch ongoing session
         }
     }, [API, userId, accessToken]);
 
@@ -50,11 +39,8 @@ export default function DocOngoingSessions(){
             toast.success("Booking marked as completed");
             fetchOnGoingSession(); // refresh the data
         } catch (error: unknown) {
-            // Log full axios error for debugging (includes response body from backend)
-            console.log('Complete booking error', { error });
             // Narrow the unknown to a shape we can inspect safely
             const axiosErr = error as { response?: { data?: Record<string, unknown> }; message?: string };
-            console.log('Complete booking error response', axiosErr.response);
             // Prefer backend message when available
             const data = axiosErr.response?.data as Record<string, unknown> | undefined;
             let serverMessage = "Failed to complete booking";
@@ -78,8 +64,7 @@ export default function DocOngoingSessions(){
             toast.success("Session marked as completed");
             fetchOnGoingSession(); // refresh the data
             setOnGoingSession(null);
-        }catch(err){
-            console.log({err});
+        }catch{
             toast.error("Failed to mark session as completed");
         }
     }
@@ -93,15 +78,13 @@ export default function DocOngoingSessions(){
             });
             toast.success("Booking marked as ongoing");
             fetchOnGoingSession(); // refresh the data
-        } catch (err) {
-            console.log({err});
+        } catch {
             toast.error("Failed to make booking ongoing");
         }
     }
 
     useEffect(()=>{
         fetchOnGoingSession();
-        // console.log(ongoingSession);
     },[fetchOnGoingSession]);
 
     const totalBookings = ongoingSession?.bookings?.length ?? 0;

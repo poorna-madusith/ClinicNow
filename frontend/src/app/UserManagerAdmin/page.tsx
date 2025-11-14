@@ -34,8 +34,7 @@ export default function ManageUsers() {
       });
       setPatients(res.data);
       setFilteredPatients(res.data);
-    } catch (err) {
-      console.error("Failed to fetch patients", err);
+    } catch {
       toast.error("Failed to fetch patients");
     } finally {
       setIsLoading(false);
@@ -85,7 +84,6 @@ export default function ManageUsers() {
       toast.success("Patient deleted successfully");
       fetchPatients();
     } catch (err) {
-      console.error("Failed to delete patient", err);
       const errorMessage = axios.isAxiosError(err) && err.response?.data?.message 
         ? err.response.data.message 
         : "Failed to delete patient";

@@ -102,8 +102,6 @@ export default function FeedbackForm({
 
     setIsSubmitting(true);
     try {
-      console.log("Submitting feedback ratings:", ratings);
-      
       await axios.post(
         `${API}/usersession/givefeedback/${doctorId}`,
         ratings,
@@ -117,12 +115,10 @@ export default function FeedbackForm({
       toast.success("Feedback submitted successfully! Thank you for your input.");
       handleClose();
     } catch (error) {
-      console.error("Error submitting feedback:", error);
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || 
                            error.response?.data?.Message ||
                            "Failed to submit feedback. Please try again.";
-        console.error("Backend error:", error.response?.data);
         toast.error(errorMessage);
       } else {
         toast.error("An unexpected error occurred");

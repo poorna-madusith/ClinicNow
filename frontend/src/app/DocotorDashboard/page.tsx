@@ -99,7 +99,6 @@ export default function DoctorDashboard() {
       toast.success("Session set to ongoing successfully");
       fetchSessions();
     } catch (error) {
-      console.log("Error setting session to ongoing:", error);
       const backendMessage = (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));
@@ -123,7 +122,6 @@ export default function DoctorDashboard() {
       setSessionToCancel(null);
       fetchSessions();
     } catch (error) {
-      console.error("Error canceling session:", error);
       const backendMessage = (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));
@@ -146,11 +144,9 @@ export default function DoctorDashboard() {
           },
         }
       )
-      console.log("Sessions fetched:", res.data);
       // Get all sessions - filtering is now done by the toggle button
       setSessions(res.data);
     } catch (error) {
-      console.error("Error fetching sessions:", error);
       const backendMessage = (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (error as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));
@@ -194,7 +190,7 @@ export default function DoctorDashboard() {
     }
 
     try{
-      const res = await axios.put(`${API}/session/editsession/${editSession?.id}`, {
+      await axios.put(`${API}/session/editsession/${editSession?.id}`, {
         ...formData,
         DoctorId: userId,
       }, {
@@ -204,11 +200,9 @@ export default function DoctorDashboard() {
         },
       });
 
-      console.log("Session edited:", res.data);
       toast.success("Session updated successfully");
       fetchSessions();
     } catch (err) {
-      console.error("Error editing session:", err);
       const backendMessage = (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));
@@ -232,8 +226,6 @@ export default function DoctorDashboard() {
 
 
   useEffect(()=>{
-    console.log("token" + accessToken);
-    console.log(userId);
     fetchSessions();
   },[accessToken, decodedToken, userId, fetchSessions]);
 
@@ -295,7 +287,7 @@ export default function DoctorDashboard() {
     }
 
     try {
-      const res = await axios.post(
+      await axios.post(
         `${API}/session/addsession`,
         {
           ...formData,
@@ -309,11 +301,9 @@ export default function DoctorDashboard() {
         }
       );
 
-      console.log("Session created:", res.data);
       toast.success("Session created successfully");
       fetchSessions();
     } catch (err) {
-      console.error("Error creating session:", err);
       const backendMessage = (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.Message || (err as { response?: { data?: { Message?: string; message?: string } } })?.response?.data?.message;
       if (backendMessage) {
         toast.error(String(backendMessage));

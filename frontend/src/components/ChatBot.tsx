@@ -75,8 +75,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onClose }) => {
             };
 
             setMessages(prev => [...prev, botMessage]);
-        } catch (error) {
-            console.error('Error sending message:', error);
+        } catch {
             const errorMessage: Message = {
                 id: Date.now() + 1,
                 content: 'Sorry, I\'m having trouble connecting right now. Please try again later.',

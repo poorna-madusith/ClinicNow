@@ -76,11 +76,8 @@ export default function LoginPage() {
 
       const data = res.data;
       setAccessToken(data.accessToken);
-      console.log(data.accessToken);
-      console.log(data.role);      
       toast.success("Login successful!");
       
-      console.log("Login successful");
       if (data.role === "Patient") {
         router.push("/UserDashboard"); // Redirect to home or dashboard after successful login
       }else if(data.role === "Doctor"){
@@ -93,14 +90,11 @@ export default function LoginPage() {
       if (axios.isAxiosError(err)) {
         if(err.response?.status === 400) {
           toast.error("Invalid email or password");
-          console.log("Invalid email or password");
         }else if(err.response?.status === 500) {
           toast.error("Server error. Please try again later.");
-          console.log("Server error", err);
         }
       } else {
         toast.error("Login failed. Please try again.");
-        console.log("Login failed", err);
       }
     } finally {
       setLoading(false);
@@ -123,8 +117,6 @@ export default function LoginPage() {
       setAccessToken(data.accessToken);
       
       toast.success("Google login successful!");
-      console.log("Google login successful");
-      console.log("Role:", data.role);
       
       // Use requestAnimationFrame to ensure state has been flushed before navigation
       requestAnimationFrame(() => {
@@ -137,9 +129,8 @@ export default function LoginPage() {
           router.push("/AdminDashboard");
         }
       });
-    } catch (err) {
+    } catch {
       toast.error("Google login failed. Please try again.");
-      console.error("Google login failed", err);
     }
   };
 
@@ -222,7 +213,7 @@ export default function LoginPage() {
                 <div className="[&_button]:!gap-2 [&_button]:!px-3">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
-                    onError={() => console.log("Google Login Failed")}
+                    onError={() => {/* Google Login Failed */}}
                   />
                 </div>
               </div>

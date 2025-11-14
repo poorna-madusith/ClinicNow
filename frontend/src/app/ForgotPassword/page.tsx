@@ -33,9 +33,8 @@ export default function ForgotPasswordPage() {
       } else {
         setError(data.Message || "Failed to send reset email. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again later.");
-      console.log("Forgot password error:", err);
     } finally {
       setLoading(false);
     }

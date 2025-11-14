@@ -111,8 +111,7 @@ export default function AdminReports() {
         },
       });
       setGenderStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch gender statistics", err);
+    } catch {
       toast.error("Failed to fetch gender statistics");
     }
   }, [accessToken, API]);
@@ -127,8 +126,7 @@ export default function AdminReports() {
         },
       });
       setTownStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch town statistics", err);
+    } catch {
       toast.error("Failed to fetch town statistics");
     }
   }, [accessToken, API]);
@@ -143,8 +141,7 @@ export default function AdminReports() {
         },
       });
       setWeeklyStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch weekly booking statistics", err);
+    } catch {
       toast.error("Failed to fetch weekly booking statistics");
     }
   }, [accessToken, API]);
@@ -159,8 +156,7 @@ export default function AdminReports() {
         },
       });
       setDoctorGenderStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch doctor gender statistics", err);
+    } catch {
       toast.error("Failed to fetch doctor gender statistics");
     }
   }, [accessToken, API]);
@@ -175,8 +171,7 @@ export default function AdminReports() {
         },
       });
       setDoctorSpecializationStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch doctor specialization statistics", err);
+    } catch {
       toast.error("Failed to fetch doctor specialization statistics");
     }
   }, [accessToken, API]);
@@ -191,8 +186,7 @@ export default function AdminReports() {
         },
       });
       setDoctorFeedbackStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch doctor feedback statistics", err);
+    } catch {
       toast.error("Failed to fetch doctor feedback statistics");
     }
   }, [accessToken, API]);
@@ -207,8 +201,7 @@ export default function AdminReports() {
         },
       });
       setRatingCategoryStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch rating category statistics", err);
+    } catch {
       toast.error("Failed to fetch rating category statistics");
     }
   }, [accessToken, API]);
@@ -223,8 +216,7 @@ export default function AdminReports() {
         },
       });
       setDoctorBookingRatingStats(res.data);
-    } catch (err) {
-      console.error("Failed to fetch doctor booking rating statistics", err);
+    } catch {
       toast.error("Failed to fetch doctor booking rating statistics");
     }
   }, [accessToken, API]);

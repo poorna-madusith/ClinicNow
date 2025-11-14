@@ -22,11 +22,6 @@ export default function SessionFullView({
   // Check if the current user is the doctor of this session
   const isCurrentUserDoctor = currentUserId === session.doctorId;
 
-  // Debug logging
-  console.log("Session data:", session);
-  console.log("Session bookings:", session.bookings);
-  console.log("Current user is doctor:", isCurrentUserDoctor);
-
   // Get patients from bookings if available, otherwise use patients array for backward compatibility
   const patients =
     session.bookings
@@ -37,9 +32,6 @@ export default function SessionFullView({
   const bookedCount = patients.length;
   const availableSlots = session.capacity - bookedCount;
   const fillPercentage = (bookedCount / session.capacity) * 100;
-
-  console.log("Extracted patients:", patients);
-  console.log("Booked count:", bookedCount);
 
   return (
     <>

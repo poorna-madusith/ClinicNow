@@ -43,8 +43,7 @@ export default function UserDashboard() {
       });
       setDoctors(res.data || []);
       setFilteredDoctors(res.data || []);
-    } catch (err) {
-      console.log("Error fetching doctors:", err);
+    } catch {
       toast.error("Failed to fetch doctors");
       setDoctors([]);
     } finally {

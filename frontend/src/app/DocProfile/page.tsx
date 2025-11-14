@@ -40,7 +40,6 @@ export default function DocProfile() {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            console.log("Raw API response:", res.data);
             setUser(res.data);
             
             // Populate form data with safe checks for contactNumbers
@@ -62,8 +61,7 @@ export default function DocProfile() {
                 profileImageUrl: res.data.profileImageUrl || res.data.ProfileImageUrl || '',
                 contactEmail: res.data.contactEmail || res.data.ContactEmail || res.data.email || res.data.Email || ''
             });
-        } catch (error) {
-            console.error("Error fetching user data:", error);
+        } catch {
             toast.error("Failed to load profile");
         } finally {
             setLoading(false);
@@ -217,7 +215,6 @@ export default function DocProfile() {
             // Refresh user data
             await fetchuser();
         } catch (error) {
-            console.error("Error updating profile:", error);
             const errorMessage = error instanceof Error && 'response' in error 
                 ? (error as { response?: { data?: { Message?: string } } }).response?.data?.Message 
                 : "Failed to update profile";

@@ -41,8 +41,7 @@ export default function DoctorSessionsModal({
         }
       );
       setSessions(response.data || []);
-    } catch (error) {
-      console.error("Error fetching sessions:", error);
+    } catch {
       toast.error("Failed to fetch sessions");
       setSessions([]);
     } finally {

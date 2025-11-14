@@ -22,10 +22,6 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
     const [showPayment, setShowPayment] = useState(false);
     const sessionPrice = session?.sessionFee || 0; // Set your session price here
 
-    // Debug: Log userId and bookings
-    console.log('Current userId:', userId);
-    console.log('Session bookings:', session?.bookings);
-
     const handleBookingClick = async (): Promise<{ positionInQueue: number; bookingId: number } | null> => {
 
         try{
@@ -34,7 +30,6 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                 Authorization: `Bearer ${accessToken}`
             }
         })
-        console.log("Booking successful:", res.data);
         toast.success("Session booked successfully!");
         onClose();
         // Call the callback to refetch sessions
@@ -493,8 +488,8 @@ export default function UserSessionBooking({isOpen, onClose, session, onBookingS
                                                         'Content-Type': 'application/json'
                                                     }
                                                 });
-                                            } catch (updateError) {
-                                                console.error("Failed to update payment:", updateError);
+                                            } catch {
+                                                // Payment update failed
                                             }
 
                                             // Download the receipt
