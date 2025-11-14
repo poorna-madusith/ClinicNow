@@ -1,0 +1,40 @@
+# Ignore build output
+bin/
+obj/
+out/
+publish/
+
+# Ignore user-specific files
+*.user
+*.suo
+*.cache
+
+# Ignore Visual Studio files
+.vs/
+.vscode/
+
+# Ignore NuGet packages
+*.nupkg
+packages/
+
+# Ignore logs
+*.log
+
+# Ignore database files
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore sensitive files
+appsettings.Development.json
+*.pfx
+*.p12
+
+# Ignore documentation
+README.md
+*.md
+
+# Ignore git files
+.git/
+.gitignore
+.gitattributes
