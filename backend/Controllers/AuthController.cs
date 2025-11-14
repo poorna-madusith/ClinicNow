@@ -12,9 +12,12 @@ namespace backend.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
-    public AuthController(AuthService authService)
+    private readonly IConfiguration _configuration;
+    
+    public AuthController(AuthService authService, IConfiguration configuration)
     {
         _authService = authService;
+        _configuration = configuration;
     }
 
 
@@ -239,6 +242,52 @@ public class AuthController : ControllerBase
             }
             var user = await _authService.GetLoggedInUserDetails(userId);
             return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    //forgot password - send reset email
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Get the frontend URL from configuration or use a default
+            var frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:3000";
+            var resetUrl = $"{frontendUrl}/reset-password";
+
+            await _authService.ForgotPassword(forgotPasswordDto.Email, resetUrl);
+            
+            // Always return success to prevent email enumeration
+            return Ok(new { Message = "If your email is registered, you will receive a password reset link shortly." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    //reset password
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _authService.ResetPassword(resetPasswordDto.Email, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+            return Ok(new { Message = "Password has been reset successfully. You can now login with your new password." });
         }
         catch (Exception ex)
         {

@@ -19,12 +19,14 @@ public class AuthService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDBContext _context;
     private readonly IConfiguration _config;
+    private readonly IEmailService _emailService;
 
-    public AuthService(UserManager<ApplicationUser> userManager, ApplicationDBContext context, IConfiguration config)
+    public AuthService(UserManager<ApplicationUser> userManager, ApplicationDBContext context, IConfiguration config, IEmailService emailService)
     {
         _userManager = userManager;
         _context = context;
         _config = config;
+        _emailService = emailService;
     }
 
 
@@ -340,6 +342,42 @@ public class AuthService
             ProfileImageUrl = user.ProfileImageUrl,
             ContactEmail = user.ContactEmail
         };
+    }
+
+    // Forgot Password - Generate reset token and send email
+    public async Task<bool> ForgotPassword(string email, string resetUrl)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            // Don't reveal that the user does not exist
+            return true;
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var resetLink = $"{resetUrl}?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+
+        await _emailService.SendPasswordResetEmailAsync(email, resetLink);
+        return true;
+    }
+
+    // Reset Password - Validate token and update password
+    public async Task<bool> ResetPassword(string email, string token, string newPassword)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new Exception("Invalid password reset request");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Password reset failed: {errors}");
+        }
+
+        return true;
     }
 
 

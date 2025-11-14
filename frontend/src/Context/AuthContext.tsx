@@ -89,8 +89,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setAccessToken(null);
       }
-    } catch (error) {
-      console.error("Auth check failed:", error);
+    } catch {
+      // Silently handle auth check failures (401 is expected when not logged in)
       setAccessToken(null);
     }
   }, [API, parseToken, setAccessToken]);

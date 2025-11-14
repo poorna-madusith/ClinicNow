@@ -27,6 +27,11 @@ services:
       # Gemini API
       - Gemini__ApiKey=${GEMINI_API_KEY}
       
+      # Email Configuration
+      - Email__SmtpUsername=${EMAIL_SMTP_USERNAME}
+      - Email__SmtpPassword=${EMAIL_SMTP_PASSWORD}
+      - Email__FromEmail=${EMAIL_FROM_EMAIL}
+      
       # ASP.NET Core Configuration
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
