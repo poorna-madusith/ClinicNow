@@ -91,7 +91,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Redirect to login if token verification fails
         if (typeof window !== 'undefined') {
           const currentPath = window.location.pathname;
-          if (!currentPath.includes('/Login') && !currentPath.includes('/UserSignup')) {
+          const publicPaths = ['/Login', '/UserSignup', '/ForgotPassword', '/reset-password'];
+          if (!publicPaths.some(path => currentPath.includes(path))) {
             window.location.href = '/Login';
           }
         }
@@ -102,7 +103,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAccessToken(null);
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
-        if (!currentPath.includes('/Login') && !currentPath.includes('/UserSignup')) {
+        const publicPaths = ['/Login', '/UserSignup', '/ForgotPassword', '/reset-password'];
+        if (!publicPaths.some(path => currentPath.includes(path))) {
           window.location.href = '/Login';
         }
       }
@@ -128,10 +130,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Initialize authentication check: skip for public pages (Login, UserSignup)
+  // Initialize authentication check: skip for public pages (Login, UserSignup, ForgotPassword, reset-password)
   useEffect(() => {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-    const publicPaths = ['/Login', '/UserSignup'];
+    const publicPaths = ['/Login', '/UserSignup', '/ForgotPassword', '/reset-password'];
 
     if (publicPaths.includes(pathname)) {
       setIsInitialized(true);
