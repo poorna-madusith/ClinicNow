@@ -74,8 +74,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = false, // Dev over HTTP
-                SameSite = SameSiteMode.Lax // Lax plays nicer on localhost without HTTPS
+                Secure = true, // Required for production HTTPS
+                SameSite = SameSiteMode.None // Required for cross-origin cookies
             });
 
             return Ok(new { AccessToken = access, Role = role });// return access token and role
@@ -107,8 +107,8 @@ public class AuthController : ControllerBase
         {
             HttpOnly = true,
             Expires = DateTimeOffset.UtcNow.AddDays(7),
-            Secure = false,
-            SameSite = SameSiteMode.Lax
+            Secure = true,
+            SameSite = SameSiteMode.None
         });
 
         return Ok(new { AccessToken = rotated.Value.accessToken });
@@ -127,8 +127,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = false, // Dev over HTTP
-                SameSite = SameSiteMode.Lax
+                Secure = true, // Required for production HTTPS
+                SameSite = SameSiteMode.None // Required for cross-origin cookies
             });
 
             return Ok(new { AccessToken = access, Role = role });
@@ -172,8 +172,8 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Secure = false,
-                SameSite = SameSiteMode.Lax
+                Secure = true,
+                SameSite = SameSiteMode.None
             });
 
             return Ok(new { success = true, token = rotated.Value.accessToken });
