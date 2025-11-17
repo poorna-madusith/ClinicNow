@@ -3,12 +3,14 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { useAuth } from '@/Context/AuthContext';
 import ChatBot from './ChatBot';
+import Image from 'next/image';
 
 interface User {
     id: string;
     firstName: string;
     lastName: string;
     profileImageUrl?: string;
+    ProfileImageUrl?: string;  // Backend might send with capital P
     role?: string;
 }
 
@@ -377,8 +379,20 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                         onClick={() => handleUserSelect(user)}
                                         className="p-3 sm:p-4 hover:bg-gradient-to-r hover:from-teal-50 hover:to-white cursor-pointer transition-all duration-200 flex items-center space-x-3 group active:bg-teal-50"
                                     >
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-base sm:text-lg shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
-                                            {user.firstName[0]}{user.lastName[0]}
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
+                                            {(user.profileImageUrl || user.ProfileImageUrl) ? (
+                                                <Image
+                                                    src={user.profileImageUrl || user.ProfileImageUrl || ''}
+                                                    alt={`${user.firstName} ${user.lastName}`}
+                                                    width={48}
+                                                    height={48}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-base sm:text-lg">
+                                                    {user.firstName[0]}{user.lastName[0]}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{user.firstName} {user.lastName}</p>
@@ -415,10 +429,24 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                             }`}
                                         >
                                             <div className="relative flex-shrink-0">
-                                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold text-base sm:text-lg shadow-md ${
-                                                    isSelected ? 'bg-gradient-to-br from-teal-500 to-teal-700' : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shadow-md ${
+                                                    isSelected ? 'ring-2 ring-teal-500' : ''
                                                 }`}>
-                                                    {convo.participant.firstName[0]}{convo.participant.lastName[0]}
+                                                    {(convo.participant.profileImageUrl || convo.participant.ProfileImageUrl) ? (
+                                                        <Image
+                                                            src={convo.participant.profileImageUrl || convo.participant.ProfileImageUrl || ''}
+                                                            alt={`${convo.participant.firstName} ${convo.participant.lastName}`}
+                                                            width={48}
+                                                            height={48}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className={`w-full h-full flex items-center justify-center text-white font-semibold text-base sm:text-lg ${
+                                                            isSelected ? 'bg-gradient-to-br from-teal-500 to-teal-700' : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                                                        }`}>
+                                                            {convo.participant.firstName[0]}{convo.participant.lastName[0]}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 {hasUnread && (
                                                     <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse">
@@ -482,8 +510,20 @@ const Chat: React.FC<ChatProps> = ({ userType }) => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                     </svg>
                                 </button>
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-semibold shadow-md flex-shrink-0">
-                                    {selectedConversation.participant.firstName[0]}{selectedConversation.participant.lastName[0]}
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shadow-md flex-shrink-0">
+                                    {(selectedConversation.participant.profileImageUrl || selectedConversation.participant.ProfileImageUrl) ? (
+                                        <Image
+                                            src={selectedConversation.participant.profileImageUrl || selectedConversation.participant.ProfileImageUrl || ''}
+                                            alt={`${selectedConversation.participant.firstName} ${selectedConversation.participant.lastName}`}
+                                            width={48}
+                                            height={48}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-semibold">
+                                            {selectedConversation.participant.firstName[0]}{selectedConversation.participant.lastName[0]}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h2 className="text-base sm:text-lg font-bold text-gray-800 truncate">

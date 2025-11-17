@@ -39,7 +39,7 @@ export default function Navbar() {
     { label: "Chat", href: "/DoctorChat" },
   ];
 
-  if(pathname === "/Login" || pathname === "/UserSignup"){
+  if(pathname === "/Login" || pathname === "/UserSignup" || pathname === "/ForgotPassword" || pathname === "/reset-password"){
     return null;
   }
 

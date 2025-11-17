@@ -32,7 +32,7 @@ const UserNavbar = () => {
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    if (pathname === "/Login" || pathname === "/UserSignup") {
+    if (pathname === "/Login" || pathname === "/UserSignup" || pathname === "/ForgotPassword" || pathname === "/reset-password") {
         return null;
     }
 
