@@ -60,17 +60,36 @@ apiClient.interceptors.response.use(
                 
             } catch (refreshError) {
                 // Refresh failed, clear token and redirect to login
+                console.log('Token refresh failed, redirecting to login');
                 accessTokenStore = null;
                 if (setAccessTokenCallback) {
                     setAccessTokenCallback(null);
                 }
                 
                 // Redirect to login if not already there
-                if (typeof window !== 'undefined' && !window.location.pathname.includes('/Login')) {
-                    window.location.href = '/Login';
+                if (typeof window !== 'undefined') {
+                    const currentPath = window.location.pathname;
+                    if (!currentPath.includes('/Login') && !currentPath.includes('/UserSignup')) {
+                        // Clear any local storage or session storage if needed
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        window.location.href = '/Login';
+                    }
                 }
                 
                 return Promise.reject(refreshError);
+            }
+        }
+        
+        // Handle other 401 errors (already retried or no retry needed)
+        if (error.response?.status === 401) {
+            if (typeof window !== 'undefined') {
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('/Login') && !currentPath.includes('/UserSignup')) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = '/Login';
+                }
             }
         }
         

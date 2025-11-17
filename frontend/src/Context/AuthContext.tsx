@@ -88,10 +88,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         parseToken(response.data.token);
       } else {
         setAccessToken(null);
+        // Redirect to login if token verification fails
+        if (typeof window !== 'undefined') {
+          const currentPath = window.location.pathname;
+          if (!currentPath.includes('/Login') && !currentPath.includes('/UserSignup')) {
+            window.location.href = '/Login';
+          }
+        }
       }
-    } catch {
-      // Silently handle auth check failures (401 is expected when not logged in)
+    } catch (error) {
+      // Auth check failed - redirect to login
+      console.log('Auth verification failed');
       setAccessToken(null);
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('/Login') && !currentPath.includes('/UserSignup')) {
+          window.location.href = '/Login';
+        }
+      }
     }
   }, [API, parseToken, setAccessToken]);
 
@@ -104,6 +118,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Logout error:", error);
     } finally {
       setAccessToken(null);
+      // Clear any stored data
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirect to login
+        window.location.href = '/Login';
+      }
     }
   };
 
