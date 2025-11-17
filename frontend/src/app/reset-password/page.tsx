@@ -17,6 +17,7 @@ function ResetPasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
@@ -58,7 +59,7 @@ function ResetPasswordForm() {
     }
 
     try {
-      const response = await fetch("http://localhost:5091/api/auth/reset-password", {
+      const response = await fetch(`${API}/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
