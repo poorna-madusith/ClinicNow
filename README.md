@@ -18,7 +18,7 @@ ClinicNow is a full-stack medical center management platform that streamlines ho
 - **Backend**: ASP.NET Core 8 Web API with Identity, JWT & Google OAuth, PostgreSQL (managed on Aiven) via Entity Framework Core 9, SignalR hubs, mail delivery, Gemini-powered chatbot, Stripe billing, and PDF receipt generation (iText7).
 - **Frontend**: Next.js 15 (App Router) with React 19, Tailwind CSS 4, Radix UI primitives, SignalR JS client, Stripe Elements, and Netlify-ready deployment.
 - **Realtime & Messaging**: SignalR hubs for live session status, queue updates, and doctor-patient chat, backed by persistent EF models.
-- **DevOps**: Docker Compose for local orchestration, Fly.io/Railway/Netlify configs for cloud deployment, environment-driven settings.
+- **DevOps**: Docker Compose for local orchestration, Fly.io (backend) and Netlify (frontend) for cloud deployment, environment-driven settings.
 
 ## Feature Highlights
 ### Patient Experience
@@ -52,7 +52,7 @@ ClinicNow is a full-stack medical center management platform that streamlines ho
 | --- | --- |
 | Frontend | Next.js 15, React 19, TypeScript, Tailwind 4, Radix UI, Stripe.js, SignalR JS |
 | Backend | ASP.NET Core 8, EF Core 9, PostgreSQL, Identity, JWT + Google OAuth, Stripe .NET, SignalR, MailKit, iText7, Gemini SDK |
-| Tooling | Docker Compose, Netlify, Fly.io, Railway, ESLint, TypeScript, Swagger/OpenAPI |
+| Tooling | Docker Compose, Netlify, Fly.io, ESLint, TypeScript, Swagger/OpenAPI |
 
 ## Getting Started
 ### Prerequisites
@@ -70,19 +70,41 @@ cd ClinicNow
 ```
 
 ### 2. Configure Environment
-Update `backend/appsettings.Development.json` (or user secrets) with the following keys:
 
-| Key | Description |
-| --- | --- |
-| `ConnectionStrings:DBConnection` | PostgreSQL connection string |
-| `Jwt:{Issuer,Audience,Key}` | JWT signing details |
-| `Authentication:Google:{ClientId,ClientSecret}` | OAuth 2.0 credentials |
-| `Stripe:{SecretKey,WebhookSecret}` | Payment processing keys |
-| `Gemini:ApiKey` | Google AI Studio / Vertex Gemini key |
-| `FrontendUrl` | Base URL of the Next.js app (used in email links, CORS) |
-| `MailSettings:{From,Host,Port,UserName,Password}` | SMTP settings for password resets |
+#### Backend Configuration
+Update `backend/appsettings.Development.json` (or use .NET user secrets for sensitive values):
 
-Frontend environment variables (e.g., `.env.local`) should include API URLs, SignalR endpoints, and Stripe publishable keys.
+| Key | Description | Example |
+| --- | --- | --- |
+| `ConnectionStrings:DBConnection` | PostgreSQL connection string (Aiven or local) | `Host=your-aiven-host.aivencloud.com;Port=12345;Database=clinicnow;Username=avnadmin;Password=xxx;SslMode=Require` |
+| `Jwt:Key` | Secret key for JWT token signing (min 32 chars) | `your-super-secret-jwt-signing-key-here` |
+| `Jwt:Issuer` | JWT issuer name | `ClinicNow` |
+| `Jwt:Audience` | JWT audience name | `ClinicNow` |
+| `Jwt:DurationInMinutes` | Access token lifespan | `60` |
+| `Authentication:Google:ClientId` | Google OAuth 2.0 Client ID | `123456789.apps.googleusercontent.com` |
+| `Authentication:Google:ClientSecret` | Google OAuth 2.0 Client Secret | `GOCSPX-xxxxx` |
+| `Stripe:SecretKey` | Stripe secret key for payment processing | `sk_test_xxxxx` or `sk_live_xxxxx` |
+| `Stripe:WebhookSecret` | Stripe webhook signing secret | `whsec_xxxxx` |
+| `Gemini:ApiKey` | Google AI Gemini API key for chatbot | `AIzaSyXXXXXXXXXXXXXXXXXXXXXX` |
+| `FrontendUrl` | Base URL of Next.js frontend (for CORS & email links) | `http://localhost:3000` or `https://clinicnow.netlify.app` |
+| `Email:SmtpHost` | SMTP server hostname | `smtp.gmail.com` |
+| `Email:SmtpPort` | SMTP port (587 for TLS, 465 for SSL) | `587` |
+| `Email:SmtpUsername` | SMTP account username | `your-email@gmail.com` |
+| `Email:SmtpPassword` | SMTP account password or app password | `your-app-password` |
+| `Email:FromEmail` | Sender email address | `noreply@clinicnow.com` |
+| `Email:FromName` | Sender display name | `ClinicNow` |
+| `Email:EnableSending` | Enable/disable email sending (use `false` for dev) | `true` or `false` |
+
+**Note**: For Gmail SMTP, generate an App Password from your Google Account security settings.
+
+#### Frontend Configuration
+Create `frontend/.env.local` with the following variables:
+
+| Variable | Description | Example |
+| --- | --- | --- |
+| `NEXT_PUBLIC_BACKEND_URL` | Backend API base URL | `http://localhost:5001` or `https://your-backend.fly.dev` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | `pk_test_xxxxx` or `pk_live_xxxxx` |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth Client ID (same as backend) | `123456789.apps.googleusercontent.com` |
 
 ### 3. Database Setup
 ```bash
@@ -122,7 +144,7 @@ The root `docker-compose.yml` wires up the backend, frontend, and dependencies f
 - **Insights**: `ReportController` supplies admin dashboards with demographics, specialization mixes, weekly booking trends, and quality metrics.
 
 ## Deployment Notes
-- **Backend**: `fly.toml`, `railway.json`, and Dockerfile showcase cloud targets; ensure secrets are stored in the provider’s secret store.
-- **Frontend**: `netlify.toml` enables one-command deployment to Netlify (Next.js SSR). Adjust env vars per environment.
+- **Backend**: Deployed to Fly.io using `fly.toml` and Dockerfile; ensure secrets are stored in Fly.io's secret store.
+- **Frontend**: Deployed to Netlify using `netlify.toml` for one-command deployment (Next.js SSR). Adjust env vars per environment.
 - **Monitoring**: Leverage Stripe dashboard, Postgres logs, and Application Insights-compatible hooks in ASP.NET for observability.
 - **Data Layer**: Production PostgreSQL runs on an Aiven-managed cluster, so provision secrets through Aiven’s console and allowlisted IPs inside `appsettings.*` or the hosting platform.
