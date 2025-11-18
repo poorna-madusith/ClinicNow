@@ -40,7 +40,7 @@ export default function DoctorFullView({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Gradient Background */}
-        <div className="relative p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500 overflow-hidden">
+        <div className="relative p-4 sm:p-6 lg:p-8 pb-16 sm:pb-20 lg:pb-24 bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500 overflow-visible">
           {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-2xl"></div>
@@ -48,9 +48,9 @@ export default function DoctorFullView({
           <div className="relative flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 w-full sm:w-auto">
               {/* Profile Image */}
-              <div className="relative">
+              <div className="relative -mb-12 sm:-mb-16 lg:-mb-20">
                 <div className="absolute inset-0 bg-white/30 rounded-full blur-xl"></div>
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-white/20">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-white/20">
                   {doctor.profileImageUrl ? (
                     <Image
                       src={doctor.profileImageUrl}
@@ -108,7 +108,7 @@ export default function DoctorFullView({
         </div>
 
         {/* Body */}
-        <div className="p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-white">
+        <div className="p-4 sm:p-6 lg:p-8 pt-16 sm:pt-20 lg:pt-24 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-white">
           {/* About Section */}
           {doctor.docDescription && (
             <div className="mb-6 sm:mb-8 group">

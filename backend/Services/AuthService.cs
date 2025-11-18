@@ -29,45 +29,6 @@ public class AuthService
         _emailService = emailService;
     }
 
-
-    public async Task AddAdmin()
-    {
-        var admin = new ApplicationUser
-        {
-            FirstName = "ClinicNow",
-            LastName = "Admin",
-            Email = "admin@gmail.com", // Changed to lowercase
-            UserName = "admin@gmail.com", // Changed to lowercase
-            Role = RoleEnum.Admin,
-            Age = null,
-            Gender = null,
-            Town = null,
-            Address = null
-        };
-
-        var existingAdmin = await _userManager.FindByEmailAsync(admin.Email);
-        if (existingAdmin != null)
-        {
-            throw new Exception("Admin user already exists");
-        }
-
-        // Create admin user with a default password
-        var result = await _userManager.CreateAsync(admin, "Admin123@"); // You should use a more secure password
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new Exception($"User creation failed: {errors}");
-        }
-
-        // Add admin to the Admin role
-        var roleResult = await _userManager.AddToRoleAsync(admin, admin.Role.ToString());
-        if (!roleResult.Succeeded)
-        {
-            var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-            throw new Exception($"Role assignment failed: {roleErrors}");
-        }
-    }
-
     public async Task<string> UserRegister(UserRegisterDto userRegisterDto)
     {
         var user = new ApplicationUser
